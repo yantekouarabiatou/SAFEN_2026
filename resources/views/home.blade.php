@@ -35,7 +35,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, rgba(0, 150, 57, 0.8) 0%, rgba(44, 44, 44, 0.9) 100%);
+        background: linear-gradient(135deg, rgba(0, 150, 57, 0.651) 0%, rgba(94, 16, 16, 0.9) 100%);
         z-index: 1;
     }
 
@@ -271,13 +271,13 @@
     <div class="hero-slider swiper">
         <div class="swiper-wrapper">
             <div class="swiper-slide">
-                <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2070" alt="Artisan béninois">
+                <img src="{{ asset('artisans/artisan3.jpg') }}" alt="Artisan béninois">
             </div>
             <div class="swiper-slide">
-                <img src="https://images.unsplash.com/photo-1578946956088-940c3b502864?q=80&w=2070" alt="Artisanat traditionnel">
+                <img src="{{ asset('dishes/ebaSauegombo.jpg') }}" alt="Artisanat traditionnel">
             </div>
             <div class="swiper-slide">
-                <img src="https://images.unsplash.com/photo-1610992015732-2449b76344bc?q=80&w=2070" alt="Culture béninoise">
+                <img src="{{ asset('products/tissu.jpg') }}" alt="Culture béninoise">
             </div>
         </div>
     </div>
@@ -682,7 +682,7 @@
                 <div class="swiper-slide">
                     <div class="testimonial-card">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Marie+Koko&background=009639&color=fff&size=60"
+                            <img src="{{ asset('artisans/artisan1.jpg') }}"
                                  alt="Marie Koko"
                                  class="rounded-circle me-3"
                                  style="width: 60px; height: 60px;">
@@ -709,7 +709,7 @@
                 <div class="swiper-slide">
                     <div class="testimonial-card">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Jean+Soglo&background=E8112D&color=fff&size=60"
+                            <img src="{{ asset('artisans/artisan2.jpg') }}"
                                  alt="Jean Soglo"
                                  class="rounded-circle me-3"
                                  style="width: 60px; height: 60px;">
@@ -736,7 +736,7 @@
                 <div class="swiper-slide">
                     <div class="testimonial-card">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Sophie+Djossou&background=FCD116&color=2C2C2C&size=60"
+                            <img src="{{ asset('artisans/artisan4.jpg') }}"
                                  alt="Sophie Djossou"
                                  class="rounded-circle me-3"
                                  style="width: 60px; height: 60px;">
@@ -763,7 +763,7 @@
                 <div class="swiper-slide">
                     <div class="testimonial-card">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Marc+Azonhiho&background=009639&color=fff&size=60"
+                            <img src="{{ asset('artisans/artisan5.jpg') }}"
                                  alt="Marc Azonhiho"
                                  class="rounded-circle me-3"
                                  style="width: 60px; height: 60px;">
@@ -795,7 +795,7 @@
 
 <!-- Culture Section avec Bento Grid -->
 <section class="py-5 parallax-section"
-         style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071');">
+         style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('{{ asset('products/tissu.jpg') }}');">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-5 text-white mb-4 mb-lg-0" data-aos="fade-right">

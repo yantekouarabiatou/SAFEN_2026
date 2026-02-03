@@ -27,7 +27,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('artisans.*') ? 'active' : '' }}" href="{{ route('artisans.index') }}">
+                    <a class="nav-link {{ request()->routeIs('artisans.index') ? 'active' : '' }}" href="{{ route('artisans.index') }}">
                         <i class="bi bi-tools me-1"></i> Artisans & Services
                     </a>
                 </li>

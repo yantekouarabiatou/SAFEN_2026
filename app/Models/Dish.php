@@ -39,7 +39,7 @@ class Dish extends Model
     public function vendors()
     {
         return $this->belongsToMany(Vendor::class, 'dish_vendor')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     public function favorites()
@@ -58,5 +58,15 @@ class Dish extends Model
         ];
 
         return $categories[$this->category] ?? $this->category;
+    }
+
+    public function getPreviewIngredientsAttribute()
+    {
+        return collect($this->ingredients)->take(3);
+    }
+
+    public function getMoreIngredientsCountAttribute()
+    {
+        return max(0, count($this->ingredients) - 3);
     }
 }

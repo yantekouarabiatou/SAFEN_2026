@@ -88,4 +88,53 @@ class User extends Authenticatable
         return $this->avatar ? asset('storage/' . $this->avatar) : asset('images/default-avatar.png');
     }
 
+
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function hasRole($role)
+    {
+        if ($this->role === $role) {
+            return true;
+        }
+
+        if ($role === 'artisan' && $this->artisan) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
 }

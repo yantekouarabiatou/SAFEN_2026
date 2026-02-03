@@ -48,10 +48,10 @@
             <div class="col-6 col-lg-2">
                 <h6 class="text-benin-yellow fw-bold mb-3">Services</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ route('register') }}?role=artisan">Devenir artisan</a></li>
+                    <li class="mb-2"><a href="{{ route('register') }}">Devenir artisan</a></li>
                     <li class="mb-2"><a href="{{ route('faq') }}">FAQ</a></li>
                     <li class="mb-2"><a href="{{ route('help') }}">Aide</a></li>
-                    <li class="mb-2"><a href="{{ route('contact') }}">Contact</a></li>
+                    <li class="mb-2"><a href="{{ route('contact.create') }}">Contact</a></li>
                 </ul>
             </div>
 

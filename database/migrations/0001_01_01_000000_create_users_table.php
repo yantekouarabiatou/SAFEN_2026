@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
-            $table->string('language', 2)->default('fr');
+            $table->enum('language', ['fr', 'en', 'fon'])->default('fr');
             $table->rememberToken();
             $table->timestamps();
         });

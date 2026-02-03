@@ -77,6 +77,7 @@
     </template>
 
     <!-- Toggle Button -->
+    <div x-data="{ isOpen: false, toggleChat() { this.isOpen = !this.isOpen } }">
     <button class="chatbot-btn" @click="toggleChat" aria-label="Open chat">
         <template x-if="!isOpen">
             <i class="bi bi-chat-dots-fill fs-4"></i>
@@ -85,6 +86,8 @@
             <i class="bi bi-x-lg fs-4"></i>
         </template>
     </button>
+    </div>
+
 </div>
 
 <script>

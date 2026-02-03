@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Artisan;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,22 +30,49 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'phone' => ['required', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'in:client,artisan'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'language' => ['nullable', 'in:fr,en,fon'],
+            'terms' => ['accepted'],
         ]);
 
+        // Créer l'utilisateur
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'city' => $validated['city'] ?? null,
+            'language' => $validated['language'] ?? 'fr',
         ]);
+
+        // Si c'est un artisan, créer automatiquement le profil artisan
+        if ($user->role === 'artisan') {
+            Artisan::create([
+                'user_id' => $user->id,
+                'business_name' => $user->name, // Par défaut, même nom
+                'city' => $user->city ?? 'Cotonou',
+                'verified' => false, // À vérifier par admin
+            ]);
+        }
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirection selon le rôle
+        if ($user->role === 'artisan') {
+            return redirect()->route('artisan.dashboard')
+                ->with('success', 'Bienvenue ! Complétez votre profil pour commencer.');
+        }
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Bienvenue sur AFRI-HERITAGE !');
     }
 }

@@ -96,4 +96,17 @@ class Artisan extends Model
         }
         return $this->city;
     }
+
+    public function scopeNearby($query, $latitude, $longitude, $radius = 10)
+    {
+        return $query->selectRaw(
+            "id, user_id, business_name, craft, city, neighborhood, latitude, longitude,
+        ( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance",
+            [$latitude, $longitude, $latitude]
+        )
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->having('distance', '<', $radius)
+            ->orderBy('distance');
+    }
 }
