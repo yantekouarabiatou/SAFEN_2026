@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artisan;
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ArtisanController extends Controller
 {
@@ -14,80 +12,80 @@ class ArtisanController extends Controller
         $query = Artisan::with(['user', 'photos'])
             ->where('visible', true);
 
-        // Filtres
-        if ($request->has('craft') && $request->craft) {
+        // Recherche texte
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('business_name', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filtre par métier
+        if ($request->filled('craft')) {
             $query->where('craft', $request->craft);
         }
 
-        if ($request->has('city') && $request->city) {
+        // Filtre par ville
+        if ($request->filled('city')) {
             $query->where('city', $request->city);
         }
 
-        if ($request->has('rating') && $request->rating) {
-            $query->where('rating_avg', '>=', $request->rating);
-        }
+        // Option : tri par proximité si coordonnées fournies
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            $lat = $request->latitude;
+            $lng = $request->longitude;
+            $radius = $request->input('radius', 50); // km, défaut 50
 
-        // Géolocalisation
-        if ($request->has('lat') && $request->has('lng')) {
-            $lat = $request->lat;
-            $lng = $request->lng;
-            $radius = $request->radius ?? 10;
-
-            $query->select('*')
-                ->selectRaw(
-                    "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
-                    [$lat, $lng, $lat]
-                )
-                ->having('distance', '<', $radius)
-                ->orderBy('distance');
+            $query->nearby($lat, $lng, $radius);
         } else {
-            // Tri par défaut
-            $sort = $request->sort ?? 'rating';
-            switch ($sort) {
-                case 'newest':
-                    $query->orderBy('created_at', 'desc');
-                    break;
-                case 'name':
-                    $query->orderBy('business_name');
-                    break;
-                case 'rating':
-                default:
-                    $query->orderBy('rating_avg', 'desc');
-                    break;
-            }
+            // Tri par défaut si pas de géoloc : les plus vus ou aléatoire
+            $query->orderBy('views', 'desc');
         }
 
-        // Vue (grille, liste, carte)
-        $view = $request->view ?? 'grid';
+        $artisans = $query->paginate(12)->withQueryString(); // conserve les filtres dans la pagination
 
-        $artisans = $query->paginate(20);
+        // Pour les filtres du formulaire
+        $crafts = Artisan::where('visible', true)
+            ->select('craft')
+            ->distinct()
+            ->pluck('craft', 'craft')
+            ->all();
 
-        // Données pour les filtres
-        $crafts = Artisan::distinct('craft')->pluck('craft');
-        $cities = Artisan::distinct('city')->pluck('city');
+        $cities = Artisan::where('visible', true)
+            ->select('city')
+            ->distinct()
+            ->pluck('city', 'city')
+            ->all();
 
-        return view('artisans.index', compact('artisans', 'crafts', 'cities', 'view'));
+        return view('artisans.vue', compact('artisans', 'crafts', 'cities'));
     }
-
     public function show(Artisan $artisan)
     {
-        if (!$artisan->visible && !auth()->check()) {
-            abort(404);
-        }
-
-        $artisan->load(['user', 'photos', 'products' => function($query) {
-            $query->where('stock_status', '!=', 'out_of_stock');
-        }]);
-
-        // Incrémenter les vues
+        // Incrémente les vues
         $artisan->increment('views');
 
-        // Artisans similaires
-        $similarArtisans = Artisan::where('craft', $artisan->craft)
-            ->where('id', '!=', $artisan->id)
+        // Charge les relations nécessaires
+        $artisan->load([
+            'user',
+            'photos',
+            'products.images',      // charge les images des produits
+            'reviews.user'          // charge les avis + auteur
+        ]);
+
+        // Récupère des artisans similaires (même métier, même ville ou département proche)
+        $similarArtisans = Artisan::where('id', '!=', $artisan->id)
+            ->where(function ($query) use ($artisan) {
+                $query->where('craft', $artisan->craft)
+                    ->orWhere('city', $artisan->city);
+            })
             ->where('visible', true)
-            ->orderBy('rating_avg', 'desc')
-            ->limit(4)
+            ->where('verified', true)           // optionnel : privilégier les vérifiés
+            ->with('user', 'photos')            // pour afficher nom + photo
+            ->take(4)                           // limite à 4 suggestions
+            ->orderByRaw('RAND()')              // aléatoire pour variété
             ->get();
 
         return view('artisans.show', compact('artisan', 'similarArtisans'));

@@ -316,7 +316,7 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold mb-0">Maîtres Artisans</h2>
-                    <a href="{{ route('artisans.index') }}" class="btn btn-outline-benin-green rounded-pill">
+                    <a href="{{ route('artisans.vue') }}" class="btn btn-outline-benin-green rounded-pill">
                         Voir tous
                     </a>
                 </div>

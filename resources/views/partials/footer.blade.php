@@ -9,7 +9,7 @@
                         <i class="bi bi-flower1 text-white fs-4"></i>
                     </div>
                     <div>
-                        <span class="fw-bold text-white fs-5">AFRI-HERITAGE</span>
+                        <span class="fw-bold text-white fs-5">TOTCHEMEGNON</span>
                         <span class="d-block text-benin-yellow" style="font-size: 0.8rem;">Bénin</span>
                     </div>
                 </div>
@@ -23,9 +23,7 @@
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="Instagram">
                         <i class="bi bi-instagram"></i>
                     </a>
-                    <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="Twitter">
-                        <i class="bi bi-twitter-x"></i>
-                    </a>
+                    
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                     </a>
@@ -37,7 +35,7 @@
                 <h6 class="text-benin-yellow fw-bold mb-3">Navigation</h6>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="{{ route('home') }}">Accueil</a></li>
-                    <li class="mb-2"><a href="{{ route('artisans.index') }}">Artisans</a></li>
+                    <li class="mb-2"><a href="{{ route('artisans.vue') }}">Artisans</a></li>
                     <li class="mb-2"><a href="{{ route('gastronomie.index') }}">Gastronomie</a></li>
                     <li class="mb-2"><a href="{{ route('products.index') }}">Marketplace</a></li>
                     <li class="mb-2"><a href="{{ route('culture.index') }}">Culture</a></li>
@@ -87,7 +85,7 @@
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
                 <p class="text-white-50 small mb-0">
-                    &copy; 2026 AFRI-HERITAGE Bénin. Tous droits réservés.
+                    &copy; 2026 TOTCHEMEGNON Bénin. Tous droits réservés.
                 </p>
             </div>
             <div class="col-md-6 text-center text-md-end">

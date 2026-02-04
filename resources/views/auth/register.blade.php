@@ -12,7 +12,7 @@
                         <!-- Left Side - Branding -->
                         <div class="col-lg-5 d-none d-lg-block position-relative">
                             <div class="h-100 d-flex flex-column justify-content-between text-white p-5"
-                                 style="background: linear-gradient(135deg, rgba(3, 122, 49, 0.85) 0%, rgba(94, 16, 16, 0.9) 100%);">
+                                 style="background: linear-gradient(135deg,#009639 0%, rgba(163, 18, 18, 0.9) 100%);">
 
                                 <!-- Logo -->
                                 <div>

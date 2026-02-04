@@ -343,7 +343,7 @@
                     <div class="card-body text-center p-5">
                         <div class="rounded-circle bg-gradient d-inline-flex align-items-center justify-content-center mb-4"
                              style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--benin-green), var(--navy));">
-                            <i class="bi bi-robot text-white" style="font-size: 3rem;"></i>
+                            <i class="bi bi-robot text-dark" style="font-size: 3rem;"></i>
                         </div>
                         <h4 class="fw-bold mb-3">Anansi - Assistant IA</h4>
                         <p class="text-muted mb-4">
@@ -393,7 +393,7 @@
                         </div>
                         <h4 class="fw-bold mb-3">Artisans & Services</h4>
                         <p class="text-muted mb-4">
-                            Trouvez des artisans qualifiés près de chez vous : tailleurs, mécaniciens, coiffeurs, menuisiers...
+                            Trouvez des artisans qualifiés près de chez vous : tailleurs, mécaniciens, coiffeurs, menuisiers,commerçante...
                         </p>
                         <ul class="list-unstyled text-start mb-4 small text-muted">
                             <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-green me-2"></i> Géolocalisation précise</li>
@@ -402,32 +402,6 @@
                         </ul>
                         <a href="{{ route('artisans.index') }}" class="btn btn-benin-green w-100 rounded-pill">
                             <i class="bi bi-compass me-2"></i> Explorer les artisans
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gastronomie Card -->
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="category-card card border-0 shadow-sm h-100">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-4">
-                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                 style="width: 90px; height: 90px; background: linear-gradient(135deg, var(--benin-red), #ff2d47);">
-                                <i class="bi bi-egg-fried text-white" style="font-size: 2.5rem;"></i>
-                            </div>
-                        </div>
-                        <h4 class="fw-bold mb-3">Gastronomie</h4>
-                        <p class="text-muted mb-4">
-                            Découvrez les saveurs authentiques du Bénin avec nos plats traditionnels et leurs histoires fascinantes.
-                        </p>
-                        <ul class="list-unstyled text-start mb-4 small text-muted">
-                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Recettes traditionnelles</li>
-                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Audio prononciation</li>
-                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Origine culturelle</li>
-                        </ul>
-                        <a href="{{ route('gastronomie.index') }}" class="btn btn-benin-red w-100 rounded-pill">
-                            <i class="bi bi-compass me-2"></i> Découvrir les plats
                         </a>
                     </div>
                 </div>
@@ -454,6 +428,32 @@
                         </ul>
                         <a href="{{ route('products.index') }}" class="btn btn-benin-yellow w-100 rounded-pill text-charcoal">
                             <i class="bi bi-compass me-2"></i> Voir la marketplace
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Gastronomie Card -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="category-card card border-0 shadow-sm h-100">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-4">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 90px; height: 90px; background: linear-gradient(135deg, var(--benin-red), #ff2d47);">
+                                <i class="bi bi-egg-fried text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3">Gastronomie</h4>
+                        <p class="text-muted mb-4">
+                            Découvrez les saveurs authentiques du Bénin avec nos plats traditionnels et leurs histoires fascinantes.
+                        </p>
+                        <ul class="list-unstyled text-start mb-4 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Recettes traditionnelles</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Audio prononciation</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-red me-2"></i> Origine culturelle</li>
+                        </ul>
+                        <a href="{{ route('gastronomie.index') }}" class="btn btn-benin-red w-100 rounded-pill">
+                            <i class="bi bi-compass me-2"></i> Découvrir les plats
                         </a>
                     </div>
                 </div>
@@ -809,7 +809,7 @@
                         <h5 class="text-benin-yellow fw-bold mb-3" id="fact-title"></h5>
                         <p class="text-white-50 mb-3" id="fact-content"></p>
                         <button class="btn btn-outline-benin-yellow btn-sm rounded-pill" onclick="loadNewFact()">
-                            <i class="bi bi-arrow-repeat me-2"></i> Autre anecdote
+                            <i class="bi bi-arrow-repeat me-2" style="color: aliceblue"></i>Autre anecdote
                         </button>
                     </div>
                 </div>

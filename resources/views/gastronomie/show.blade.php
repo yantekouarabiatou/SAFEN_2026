@@ -13,19 +13,24 @@
         --charcoal: #2C3E50;
     }
 
-    /* Hero Section du plat */
+    /* Hero Section du plat amélioré */
     .dish-hero {
         position: relative;
-        height: 500px;
+        height: 600px;
         overflow: hidden;
-        border-radius: 0 0 30px 30px;
-        margin-bottom: 3rem;
+        margin-bottom: 4rem;
     }
 
     .dish-hero-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        filter: brightness(0.7);
+        transition: transform 0.5s ease;
+    }
+
+    .dish-hero:hover .dish-hero-image {
+        transform: scale(1.05);
     }
 
     .dish-hero-overlay {
@@ -33,8 +38,8 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
-        padding: 3rem 0 2rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%);
+        padding: 4rem 0 3rem;
     }
 
     .dish-hero-content {
@@ -44,151 +49,265 @@
 
     .dish-hero h1 {
         color: white;
-        font-size: 3rem;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        margin-bottom: 0.5rem;
+        font-size: 3.5rem;
+        font-weight: 800;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
     }
 
     .dish-local-name {
         color: var(--benin-yellow);
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-style: italic;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        margin-bottom: 1.5rem;
+        font-weight: 500;
     }
 
     /* Audio Button dans le hero */
     .hero-audio-btn {
         background: linear-gradient(135deg, var(--benin-yellow) 0%, var(--terracotta) 100%);
-        border: none;
-        width: 50px;
-        height: 50px;
+        border: 3px solid rgba(255,255,255,0.3);
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 6px 20px rgba(212,119,78,0.4);
-        margin-left: 1rem;
+        box-shadow: 0 8px 25px rgba(212,119,78,0.5);
+        margin-left: 1.5rem;
         vertical-align: middle;
+        position: relative;
+    }
+
+    .hero-audio-btn::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 50%;
+        border: 2px solid var(--benin-yellow);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .hero-audio-btn:hover::before {
+        opacity: 1;
+        animation: rippleEffect 1s infinite;
+    }
+
+    @keyframes rippleEffect {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
     }
 
     .hero-audio-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 8px 25px rgba(212,119,78,0.6);
+        transform: scale(1.15);
+        box-shadow: 0 12px 35px rgba(212,119,78,0.7);
     }
 
     .hero-audio-btn.playing {
         animation: pulse 1.5s infinite;
     }
 
-    .hero-audio-btn i {
-        color: white;
-        font-size: 1.3rem;
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2);
+        }
     }
 
-    /* Badges du hero */
+    .hero-audio-btn i {
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    /* Badges du hero améliorés */
     .hero-badges {
         display: flex;
-        gap: 1rem;
+        gap: 1.25rem;
         flex-wrap: wrap;
-        margin-top: 1.5rem;
+        margin-top: 2rem;
     }
 
     .hero-badge {
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 2px solid rgba(255,255,255,0.25);
         color: white;
-        padding: 0.5rem 1.2rem;
+        padding: 0.75rem 1.5rem;
         border-radius: 50px;
-        font-weight: 600;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .hero-badge:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
     .hero-badge i {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
     }
 
-    /* Section principale */
+    /* Navigation */
+    .dish-breadcrumb {
+        background: white;
+        padding: 1.25rem 2rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        display: inline-block;
+    }
+
+    .dish-breadcrumb .breadcrumb {
+        margin: 0;
+        background: transparent;
+        padding: 0;
+    }
+
+    .dish-breadcrumb .breadcrumb-item a {
+        color: var(--benin-green);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .dish-breadcrumb .breadcrumb-item a:hover {
+        color: var(--benin-red);
+    }
+
+    /* Section principale améliorée */
     .dish-content-section {
         background: white;
-        border-radius: 20px;
-        padding: 2.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
+        border-radius: 25px;
+        padding: 3rem;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        margin-bottom: 2.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .dish-content-section:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
     }
 
     .section-title {
         color: var(--charcoal);
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
+        position: relative;
+        padding-bottom: 1rem;
     }
 
     .section-title i {
         color: var(--benin-red);
-        font-size: 1.5rem;
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, var(--benin-red) 0%, var(--terracotta) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .section-title::after {
         content: '';
-        flex: 1;
-        height: 3px;
-        background: linear-gradient(to right, var(--benin-red), transparent);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--benin-red), var(--benin-yellow));
         border-radius: 10px;
     }
 
-    /* Description */
+    /* Description améliorée */
     .dish-description {
-        font-size: 1.1rem;
-        line-height: 1.8;
+        font-size: 1.15rem;
+        line-height: 2;
         color: var(--charcoal);
         margin-bottom: 2rem;
+        text-align: justify;
     }
 
-    /* Ingrédients */
+    /* Ingrédients améliorés */
     .ingredients-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.25rem;
         margin-bottom: 2rem;
     }
 
     .ingredient-item {
-        background: var(--beige);
-        padding: 1rem 1.25rem;
-        border-radius: 15px;
+        background: linear-gradient(135deg, var(--beige) 0%, #ede3d1 100%);
+        padding: 1.25rem 1.5rem;
+        border-radius: 20px;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        transition: all 0.3s ease;
+        gap: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ingredient-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .ingredient-item:hover::before {
+        left: 100%;
     }
 
     .ingredient-item:hover {
-        border-color: var(--benin-red);
-        transform: translateX(5px);
+        border-color: var(--benin-green);
+        transform: translateX(8px);
+        box-shadow: 0 6px 20px rgba(0,150,57,0.2);
     }
 
     .ingredient-item i {
         color: var(--benin-green);
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+        min-width: 24px;
     }
 
     .ingredient-item span {
         color: var(--charcoal);
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 1rem;
     }
 
-    /* Préparation */
+    /* Préparation améliorée */
     .preparation-steps {
         counter-reset: step-counter;
         list-style: none;
@@ -198,9 +317,11 @@
     .preparation-step {
         counter-increment: step-counter;
         position: relative;
-        padding-left: 4rem;
-        margin-bottom: 2rem;
-        line-height: 1.8;
+        padding-left: 5rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.9;
+        font-size: 1.05rem;
+        color: var(--charcoal);
     }
 
     .preparation-step::before {
@@ -208,271 +329,484 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 45px;
-        height: 45px;
+        width: 55px;
+        height: 55px;
         background: linear-gradient(135deg, var(--benin-red) 0%, var(--terracotta) 100%);
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 1.2rem;
-        box-shadow: 0 4px 15px rgba(232,17,45,0.3);
+        font-weight: 800;
+        font-size: 1.4rem;
+        box-shadow: 0 6px 20px rgba(232,17,45,0.4);
+        border: 3px solid white;
     }
 
-    /* Occasions */
+    .preparation-step:hover::before {
+        transform: scale(1.1) rotate(5deg);
+        transition: transform 0.3s ease;
+    }
+
+    /* Occasions améliorées */
     .occasions-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 1.25rem;
     }
 
     .occasion-tag {
         background: linear-gradient(135deg, var(--benin-green) 0%, #007a2e 100%);
         color: white;
-        padding: 0.75rem 1.5rem;
+        padding: 1rem 2rem;
         border-radius: 50px;
-        font-weight: 600;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,150,57,0.3);
-        transition: all 0.3s ease;
+        gap: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0,150,57,0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .occasion-tag::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.4s, height 0.4s;
+    }
+
+    .occasion-tag:hover::before {
+        width: 200%;
+        height: 200%;
     }
 
     .occasion-tag:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,150,57,0.5);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,150,57,0.6);
     }
 
     .occasion-tag i {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
-    /* Informations culturelles */
+    /* Informations culturelles améliorées */
     .cultural-info {
-        background: linear-gradient(135deg, rgba(0,150,57,0.1) 0%, rgba(232,17,45,0.1) 100%);
-        border-left: 5px solid var(--benin-red);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 2rem 0;
+        background: linear-gradient(135deg, rgba(0,150,57,0.08) 0%, rgba(232,17,45,0.08) 100%);
+        border-left: 6px solid var(--benin-red);
+        padding: 2rem;
+        border-radius: 20px;
+        margin: 2.5rem 0;
+        position: relative;
+    }
+
+    .cultural-info::before {
+        content: '"';
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-size: 5rem;
+        color: var(--benin-red);
+        opacity: 0.1;
+        font-family: Georgia, serif;
     }
 
     .cultural-info h4 {
         color: var(--benin-red);
-        font-weight: 700;
-        margin-bottom: 1rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        font-size: 1.3rem;
     }
 
     .cultural-info p {
         color: var(--charcoal);
-        line-height: 1.8;
+        line-height: 1.9;
         margin: 0;
+        font-size: 1.05rem;
     }
 
-    /* Galerie d'images */
+    /* Galerie d'images améliorée */
     .dish-gallery {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-top: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2.5rem;
     }
 
     .gallery-item {
         position: relative;
-        border-radius: 15px;
+        border-radius: 20px;
         overflow: hidden;
         aspect-ratio: 1;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .gallery-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .gallery-item:hover::before {
+        opacity: 1;
+    }
+
+    .gallery-item::after {
+        content: '\F33E';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        color: white;
+        font-size: 3rem;
+        z-index: 2;
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover::after {
+        transform: translate(-50%, -50%) scale(1);
     }
 
     .gallery-item:hover {
         transform: scale(1.05);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
     }
 
     .gallery-item img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.4s ease;
     }
 
-    /* Où déguster */
+    .gallery-item:hover img {
+        transform: scale(1.1);
+    }
+
+    /* Où déguster amélioré */
     .restaurants-list {
         display: grid;
-        gap: 1.5rem;
+        gap: 1.75rem;
     }
 
     .restaurant-card {
         background: white;
         border: 2px solid var(--beige);
-        border-radius: 15px;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .restaurant-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 0;
+        background: linear-gradient(to bottom, var(--benin-red), var(--benin-green));
+        transition: height 0.3s ease;
+    }
+
+    .restaurant-card:hover::before {
+        height: 100%;
     }
 
     .restaurant-card:hover {
         border-color: var(--benin-red);
-        box-shadow: 0 6px 20px rgba(232,17,45,0.15);
-        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(232,17,45,0.2);
+        transform: translateX(5px);
     }
 
     .restaurant-card h5 {
         color: var(--charcoal);
-        font-weight: 700;
-        margin-bottom: 0.75rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        font-size: 1.2rem;
     }
 
     .restaurant-card h5 i {
         color: var(--benin-red);
+        font-size: 1.4rem;
     }
 
     .restaurant-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.75rem;
         color: #666;
-        font-size: 0.95rem;
+        font-size: 1rem;
+    }
+
+    .restaurant-info div {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
     }
 
     .restaurant-info i {
         color: var(--benin-green);
-        width: 20px;
+        width: 24px;
+        font-size: 1.1rem;
     }
 
-    /* Navigation entre plats */
+    /* Navigation entre plats améliorée */
     .dish-navigation {
-        display: flex;
-        justify-content: space-between;
-        gap: 2rem;
-        margin-top: 3rem;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        margin-top: 4rem;
     }
 
     .nav-dish-card {
-        flex: 1;
-        min-width: 250px;
         background: white;
-        border-radius: 15px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
         color: inherit;
+        position: relative;
+    }
+
+    .nav-dish-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--benin-red) 0%, var(--benin-green) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .nav-dish-card:hover::before {
+        opacity: 0.05;
     }
 
     .nav-dish-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     }
 
     .nav-dish-image {
-        height: 150px;
+        height: 200px;
         overflow: hidden;
+        position: relative;
+    }
+
+    .nav-dish-image::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
     }
 
     .nav-dish-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s ease;
+        transition: transform 0.5s ease;
     }
 
     .nav-dish-card:hover .nav-dish-image img {
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
 
     .nav-dish-content {
-        padding: 1.25rem;
+        padding: 1.75rem;
+        position: relative;
+        z-index: 1;
     }
 
     .nav-dish-label {
         color: var(--benin-red);
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        letter-spacing: 0.5px;
     }
 
     .nav-dish-name {
         color: var(--charcoal);
-        font-size: 1.1rem;
-        font-weight: 700;
+        font-size: 1.3rem;
+        font-weight: 800;
+        line-height: 1.4;
     }
 
-    /* Stats */
+    /* Stats améliorées */
     .dish-stats {
         display: flex;
-        gap: 2rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 2px solid var(--beige);
+        gap: 2.5rem;
+        margin-top: 2.5rem;
+        padding-top: 2.5rem;
+        border-top: 3px solid var(--beige);
         flex-wrap: wrap;
     }
 
     .stat-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: var(--beige);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        background: linear-gradient(135deg, var(--beige) 0%, #ede3d1 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
     .stat-icon {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         background: linear-gradient(135deg, var(--benin-red) 0%, var(--terracotta) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 1.3rem;
+        font-size: 1.5rem;
+        box-shadow: 0 6px 20px rgba(232,17,45,0.3);
     }
 
     .stat-content strong {
         display: block;
         color: var(--charcoal);
-        font-size: 1.3rem;
-        font-weight: 700;
+        font-size: 1.5rem;
+        font-weight: 800;
     }
 
     .stat-content span {
         color: #666;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        font-weight: 600;
     }
 
-    /* Bouton de retour */
+    /* Bouton de retour amélioré */
     .back-button {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        background: var(--beige);
+        gap: 0.75rem;
+        background: white;
         color: var(--charcoal);
-        padding: 0.75rem 1.5rem;
+        padding: 1rem 2rem;
         border-radius: 50px;
         text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        margin-bottom: 2rem;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 2.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid var(--beige);
     }
 
     .back-button:hover {
-        background: var(--benin-red);
+        background: linear-gradient(135deg, var(--benin-red) 0%, var(--terracotta) 100%);
         color: white;
-        transform: translateX(-5px);
+        transform: translateX(-8px);
+        box-shadow: 0 6px 20px rgba(232,17,45,0.3);
+        border-color: var(--benin-red);
+    }
+
+    .back-button i {
+        transition: transform 0.3s ease;
+    }
+
+    .back-button:hover i {
+        transform: translateX(-4px);
+    }
+
+    /* Lightbox amélioré */
+    .lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        cursor: pointer;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    .lightbox img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        animation: zoomIn 0.3s;
+    }
+
+    @keyframes zoomIn {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 
     /* Responsive */
+    @media (max-width: 992px) {
+        .dish-hero {
+            height: 500px;
+        }
+
+        .dish-hero h1 {
+            font-size: 2.5rem;
+        }
+    }
+
     @media (max-width: 768px) {
         .dish-hero {
             height: 400px;
@@ -483,27 +817,37 @@
         }
 
         .dish-local-name {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .dish-content-section {
-            padding: 1.5rem;
+            padding: 2rem;
         }
 
         .section-title {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
         }
 
         .ingredients-grid {
             grid-template-columns: 1fr;
         }
 
-        .dish-navigation {
-            flex-direction: column;
+        .preparation-step {
+            padding-left: 4rem;
+        }
+
+        .preparation-step::before {
+            width: 45px;
+            height: 45px;
         }
 
         .dish-stats {
-            gap: 1rem;
+            gap: 1.5rem;
+        }
+
+        .hero-audio-btn {
+            width: 50px;
+            height: 50px;
         }
     }
 </style>
@@ -513,7 +857,7 @@
 <!-- Hero Section -->
 <div class="dish-hero">
     @if($dish->images->first())
-        <img src="{{ $dish->images->first()->image_url }}"
+        <img src="{{ asset($dish->images->first()->image_url) }}"
              alt="{{ $dish->name }}"
              class="dish-hero-image">
     @else
@@ -529,7 +873,7 @@
                     <h1>{{ $dish->name }}</h1>
                     @if($dish->audio_url)
                         <button class="hero-audio-btn"
-                                onclick="playAudio(this, '{{ $dish->audio_url }}')"
+                                onclick="playAudio(this, '{{ asset($dish->audio_url) }}')"
                                 title="Écouter la prononciation"
                                 aria-label="Écouter la prononciation">
                             <i class="bi bi-volume-up-fill"></i>
@@ -563,7 +907,17 @@
 </div>
 
 <div class="container">
-    <!-- Bouton de retour -->
+    <!-- Breadcrumb & Back Button -->
+    <div class="dish-breadcrumb">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('gastronomie.index') }}">Gastronomie</a></li>
+                <li class="breadcrumb-item active">{{ Str::limit($dish->name, 30) }}</li>
+            </ol>
+        </nav>
+    </div>
+
     <a href="{{ route('gastronomie.index') }}" class="back-button">
         <i class="bi bi-arrow-left"></i>
         Retour à la liste
@@ -645,8 +999,8 @@
                     </h2>
                     <div class="dish-gallery">
                         @foreach($dish->images as $image)
-                            <div class="gallery-item">
-                                <img src="{{ $image->image_url }}" alt="{{ $dish->name }}">
+                            <div class="gallery-item" onclick="openLightbox('{{ asset($image->image_url) }}')">
+                                <img src="{{ asset($image->image_url) }}" alt="{{ $dish->name }}">
                             </div>
                         @endforeach
                     </div>
@@ -691,13 +1045,13 @@
                                     @if(isset($restaurant['address']))
                                         <div>
                                             <i class="bi bi-geo-alt-fill"></i>
-                                            {{ $restaurant['address'] }}
+                                            <span>{{ $restaurant['address'] }}</span>
                                         </div>
                                     @endif
                                     @if(isset($restaurant['phone']))
                                         <div>
                                             <i class="bi bi-telephone-fill"></i>
-                                            {{ $restaurant['phone'] }}
+                                            <span>{{ $restaurant['phone'] }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -734,9 +1088,8 @@
             @if(isset($previousDish))
                 <a href="{{ route('gastronomie.show', $previousDish) }}" class="nav-dish-card">
                     <div class="nav-dish-image">
-                        <img src="{{ $dish->images->first()->image_url ?? asset('images/default-dish.jpg') }}"
-                                 alt="{{ $dish->name }}"
-                                 loading="lazy">
+                        <img src="{{ asset($previousDish->images->first()->image_url ?? 'images/default-dish.jpg') }}"
+                             alt="{{ $previousDish->name }}">
                     </div>
                     <div class="nav-dish-content">
                         <div class="nav-dish-label">
@@ -751,7 +1104,7 @@
             @if(isset($nextDish))
                 <a href="{{ route('gastronomie.show', $nextDish) }}" class="nav-dish-card">
                     <div class="nav-dish-image">
-                        <img src="{{ $nextDish->images->first()->image_url ?? asset('images/default-dish.jpg') }}"
+                        <img src="{{ asset($nextDish->images->first()->image_url ?? 'images/default-dish.jpg') }}"
                              alt="{{ $nextDish->name }}">
                     </div>
                     <div class="nav-dish-content">
@@ -775,19 +1128,16 @@ let currentAudio = null;
 let currentButton = null;
 
 function playAudio(button, audioUrl) {
-    // Si un audio est déjà en cours
     if (currentAudio && !currentAudio.paused) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
 
-        // Retirer l'état playing du bouton précédent
         if (currentButton) {
             currentButton.classList.remove('playing');
             currentButton.querySelector('i').classList.remove('bi-pause-fill');
             currentButton.querySelector('i').classList.add('bi-volume-up-fill');
         }
 
-        // Si c'est le même bouton, on arrête ici
         if (currentButton === button) {
             currentAudio = null;
             currentButton = null;
@@ -795,11 +1145,9 @@ function playAudio(button, audioUrl) {
         }
     }
 
-    // Créer et jouer le nouvel audio
     currentAudio = new Audio(audioUrl);
     currentButton = button;
 
-    // Ajouter l'état playing
     button.classList.add('playing');
     button.querySelector('i').classList.remove('bi-volume-up-fill');
     button.querySelector('i').classList.add('bi-pause-fill');
@@ -811,7 +1159,6 @@ function playAudio(button, audioUrl) {
         button.querySelector('i').classList.add('bi-volume-up-fill');
     });
 
-    // Quand l'audio se termine
     currentAudio.addEventListener('ended', function() {
         button.classList.remove('playing');
         button.querySelector('i').classList.remove('bi-pause-fill');
@@ -820,52 +1167,38 @@ function playAudio(button, audioUrl) {
         currentButton = null;
     });
 
-    // Vibration légère (si disponible)
     if ('vibrate' in navigator) {
         navigator.vibrate(50);
     }
 }
 
-// Lightbox pour la galerie
-document.addEventListener('DOMContentLoaded', function() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-
-    galleryItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const img = this.querySelector('img');
-            // Créer une lightbox simple
-            const lightbox = document.createElement('div');
-            lightbox.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                cursor: pointer;
-            `;
-
-            const lightboxImg = document.createElement('img');
-            lightboxImg.src = img.src;
-            lightboxImg.style.cssText = `
-                max-width: 90%;
-                max-height: 90%;
-                border-radius: 10px;
-                box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-            `;
-
-            lightbox.appendChild(lightboxImg);
-            document.body.appendChild(lightbox);
-
-            lightbox.addEventListener('click', function() {
-                document.body.removeChild(lightbox);
-            });
-        });
+// Lightbox amélioré
+function openLightbox(imageUrl) {
+    const lightbox = document.createElement('div');
+    lightbox.className = 'lightbox';
+    
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = 'Image agrandie';
+    
+    lightbox.appendChild(img);
+    document.body.appendChild(lightbox);
+    
+    // Fermer au clic
+    lightbox.addEventListener('click', function() {
+        lightbox.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(lightbox);
+        }, 300);
     });
-});
+    
+    // Fermer avec Escape
+    document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape' && document.querySelector('.lightbox')) {
+            lightbox.click();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    });
+}
 </script>
 @endpush

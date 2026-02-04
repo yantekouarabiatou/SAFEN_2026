@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -103,5 +104,10 @@ class Product extends Model
         ];
 
         return $categories[$this->category] ?? $this->category;
+    }
+
+     public function getFullUrlAttribute()
+    {
+        return Storage::url($this->image_url);
     }
 }

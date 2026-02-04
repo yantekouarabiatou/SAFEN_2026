@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('audio_url')->nullable();
             $table->enum('category', [
                 'masque', 'sculpture', 'tissu', 'bijou', 'instrument',
-                'decoration', 'peinture', 'vannerie', 'poterie', 'autre'
+                'decoration', 'peinture', 'vannerie', 'poterie','cuisine', 'autre'
             ]);
             $table->string('subcategory')->nullable();
             $table->string('ethnic_origin')->nullable();

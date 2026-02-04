@@ -26,9 +26,9 @@
             --benin-red: #E8112D;
             --terracotta: #D4754E;
             --beige: #F5E6D3;
-            --charcoal: #2C2C2C;
+            --charcoal: #639e62;
             --gold: #C9A962;
-            --navy: #1E3A5F;
+            --navy: #5c2d19;
         }
 
         * {

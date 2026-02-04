@@ -625,13 +625,19 @@
                                     {{ $dish->name }}
                                 </a>
                             </h6>
-                            @if($dish->audio_url)
-                                <button class="audio-btn"
-                                        onclick="playAudio(this, '{{ $dish->audio_url }}')"
-                                        title="Écouter la prononciation"
-                                        aria-label="Écouter la prononciation de {{ $dish->name }}">
-                                    <i class="bi bi-volume-up-fill"></i>
-                                </button>
+                           <!-- Local Name with Audio -->
+                            @if($dish->name_local)
+                                <div class="local-name">
+                                    <i class="bi bi-translate"></i>
+                                    {{ $dish->name_local }}
+
+                                    <!-- Bouton qui déclenche la synthèse vocale -->
+                                    <button class="audio-btn"
+                                            onclick="speakText('{{ addslashes($dish->name_local) }}')"
+                                            title="Écouter la prononciation">
+                                        <i class="bi bi-volume-up-fill"></i>
+                                    </button>
+                                </div>
                             @endif
                         </div>
 
@@ -808,6 +814,44 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 });
+
+    // Fonction de synthèse vocale (celle qui fonctionne bien)
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Arrêter toute lecture en cours
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fr-FR';
+                
+                // Optionnel : régler la voix, la vitesse, le ton
+                utterance.rate = 1.0;   // vitesse (0.5 à 2)
+                utterance.pitch = 1.0;  // ton (0 à 2)
+                utterance.volume = 1.0; // volume
+
+                // Trouver une voix française si possible
+                const voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => voice.lang === 'fr-FR' || voice.lang === 'fr');
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+
+                console.log("Synthèse vocale lancée pour :", text);
+            } else {
+                console.log("Synthèse vocale non supportée par ce navigateur");
+                alert("La synthèse vocale n'est pas disponible sur votre navigateur.");
+            }
+        }
+
+        // Optionnel : recharger les voix au cas où elles ne soient pas encore chargées
+        window.speechSynthesis.onvoiceschanged = () => {
+            // Les voix sont maintenant disponibles
+            console.log("Voix disponibles :", window.speechSynthesis.getVoices());
+        };        function toggleFavorite(button) {
+            const productId = button.dataset.productId;
+            const isActive = button.classList.contains('active');}
 
 // Auto-submit pour la recherche avec debounce
 const searchInput = document.querySelector('input[name="search"]');

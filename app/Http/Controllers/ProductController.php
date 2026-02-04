@@ -3,110 +3,78 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Artisan;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['artisan.user', 'images'])
-            ->where('stock_status', '!=', 'out_of_stock');
+        $products = Product::with(['artisan.user', 'artisan.photos', 'images'])
+            ->when($request->search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('name_local', 'like', "%{$search}%");
+            })
+            ->when($request->category, function ($query, $category) {
+                return $query->where('category', $category);
+            })
+            ->when($request->ethnic_origin, function ($query, $origin) {
+                return $query->where('ethnic_origin', $origin);
+            })
+            ->when($request->material, function ($query, $material) {
+                return $query->whereJsonContains('materials', $material);
+            })
+            ->when($request->min_price, function ($query, $min) {
+                return $query->where('price', '>=', $min);
+            })
+            ->when($request->max_price, function ($query, $max) {
+                return $query->where('price', '<=', $max);
+            })
+            ->when($request->sort, function ($query, $sort) {
+                switch ($sort) {
+                    case 'newest':
+                        return $query->latest();
+                    case 'price_asc':
+                        return $query->orderBy('price', 'asc');
+                    case 'price_desc':
+                        return $query->orderBy('price', 'desc');
+                    default: // popular
+                        return $query->orderBy('views', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('views', 'desc');
+            })
+            ->paginate(16);
 
-        // Filtres
-        if ($request->has('category') && $request->category) {
-            $query->where('category', $request->category);
-        }
+        $categories = Product::select('category')->distinct()->pluck('category');
+        $ethnicOrigins = Product::select('ethnic_origin')->distinct()->pluck('ethnic_origin');
+        $allMaterials = Product::whereNotNull('materials')->get()
+            ->pluck('materials')->flatten()->unique()->values();
 
-        if ($request->has('ethnic_origin') && $request->ethnic_origin) {
-            $query->where('ethnic_origin', $request->ethnic_origin);
-        }
-
-        if ($request->has('material') && $request->material) {
-            $query->whereJsonContains('materials', $request->material);
-        }
-
-        if ($request->has('min_price') && $request->min_price) {
-            $query->where('price', '>=', $request->min_price);
-        }
-
-        if ($request->has('max_price') && $request->max_price) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        if ($request->has('artisan') && $request->artisan) {
-            $query->where('artisan_id', $request->artisan);
-        }
-
-        // Recherche
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                  ->orWhere('name_local', 'like', "%$search%")
-                  ->orWhere('description', 'like', "%$search%");
-            });
-        }
-
-        // Tri
-        $sort = $request->sort ?? 'popular';
-        switch ($sort) {
-            case 'newest':
-                $query->orderBy('created_at', 'desc');
-                break;
-            case 'price_asc':
-                $query->orderBy('price');
-                break;
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'popular':
-            default:
-                $query->orderBy('views', 'desc');
-                break;
-        }
-
-        $products = $query->paginate(16);
-
-        // Données pour les filtres
-        $categories = Product::distinct('category')->pluck('category');
-        $ethnicOrigins = Product::distinct('ethnic_origin')->pluck('ethnic_origin');
-        $artisans = Artisan::whereHas('products')->pluck('business_name', 'id');
-
-        // Extraire tous les matériaux uniques
-        $allMaterials = Product::whereNotNull('materials')->pluck('materials')->flatten()->unique();
-
-        return view('products.index', compact('products', 'categories', 'ethnicOrigins', 'artisans', 'allMaterials'));
+        return view('products.index', compact('products', 'categories', 'ethnicOrigins', 'allMaterials'));
     }
 
     public function show(Product $product)
     {
-        if ($product->stock_status === 'out_of_stock' && !auth()->check()) {
-            abort(404);
-        }
-
-        $product->load(['artisan.user', 'artisan.photos', 'images']);
-
-        // Incrémenter les vues
         $product->increment('views');
+        $product->load(['artisan.user', 'artisan.photos', 'images', 'reviews.user']);
 
         // Produits similaires
         $similarProducts = Product::where('category', $product->category)
             ->where('id', '!=', $product->id)
-            ->where('stock_status', '!=', 'out_of_stock')
-            ->inRandomOrder()
-            ->limit(6)
+            ->with(['images', 'artisan'])
+            ->take(4)
             ->get();
 
-        // Produits du même artisan
+        // Autres produits du même artisan
         $sameArtisanProducts = Product::where('artisan_id', $product->artisan_id)
             ->where('id', '!=', $product->id)
-            ->where('stock_status', '!=', 'out_of_stock')
-            ->limit(4)
+            ->with(['images'])
+            ->take(4)
             ->get();
 
         return view('products.show', compact('product', 'similarProducts', 'sameArtisanProducts'));
     }
+
 
     public function create()
     {

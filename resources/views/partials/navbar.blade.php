@@ -7,7 +7,7 @@
                 <i class="bi bi-flower1 text-white fs-4"></i>
             </div>
             <div>
-                <span class="fw-bold text-benin-green fs-5">AFRI-HERITAGE</span>
+                <span class="fw-bold text-benin-green fs-5">TOTCHEMEGNON</span>
                 <span class="d-block text-muted" style="font-size: 0.7rem; margin-top: -5px;">Bénin</span>
             </div>
         </a>
@@ -27,7 +27,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('artisans.index') ? 'active' : '' }}" href="{{ route('artisans.index') }}">
+                    <a class="nav-link {{ request()->routeIs('artisans.*') ? 'active' : '' }}" href="{{ route('artisans.vue') }}">
                         <i class="bi bi-tools me-1"></i> Artisans & Services
                     </a>
                 </li>
