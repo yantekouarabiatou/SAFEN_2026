@@ -259,12 +259,12 @@
 
                 <!-- Vue Grille / Liste -->
                 <div id="view-content" data-view-content="grid" data-view-content="list" style="display: none;">
-                    <div class="view-wrapper {{ currentView == 'grid' ? 'artisan-grid' : 'artisan-list' }}">
+                    <div class="view-wrapper artisan-grid">
                         @forelse($artisans as $artisan)
-                            <div class="artisan-card {{ currentView == 'list' ? 'd-flex mb-3' : '' }}">
+                            <div class="artisan-card">
                                 <!-- Image -->
-                                <div class="{{ currentView == 'list' ? 'flex-shrink-0' : '' }}"
-                                    style="{{ currentView == 'list' ? 'width: 240px;' : '' }}">
+                                <div class=""
+                                    style="">
                                     <a href="{{ route('artisans.show', $artisan) }}">
                                         <img src="{{ $artisan->photos->first()?->full_url ?? asset('images/default-artisan.jpg') }}"
                                             alt="{{ $artisan->user->name }}" class="img-fluid w-100"
@@ -283,7 +283,7 @@
                                 </div>
 
                                 <!-- Contenu -->
-                                <div class="{{ currentView == 'list' ? 'flex-grow-1 p-4' : 'p-4' }}">
+                                <div class="p-4">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <div>
                                             <h5 class="mb-1">
@@ -380,6 +380,46 @@
         if (activeBtn) {
             activeBtn.classList.remove('btn-outline-secondary');
             activeBtn.classList.add('active', 'btn-primary');
+        }
+
+        // Gestion des vues grid/list
+        const viewWrapper = document.querySelector('.view-wrapper');
+        const artisanCards = document.querySelectorAll('.artisan-card');
+
+        if (view === 'grid') {
+            viewWrapper.classList.remove('artisan-list');
+            viewWrapper.classList.add('artisan-grid');
+
+            artisanCards.forEach(card => {
+                card.classList.remove('d-flex', 'mb-3');
+                const imageDiv = card.querySelector('div:first-child');
+                const contentDiv = card.querySelector('div.p-4');
+
+                if (imageDiv) {
+                    imageDiv.classList.remove('flex-shrink-0');
+                    imageDiv.style.width = '';
+                }
+                if (contentDiv) {
+                    contentDiv.classList.remove('flex-grow-1');
+                }
+            });
+        } else if (view === 'list') {
+            viewWrapper.classList.remove('artisan-grid');
+            viewWrapper.classList.add('artisan-list');
+
+            artisanCards.forEach(card => {
+                card.classList.add('d-flex', 'mb-3');
+                const imageDiv = card.querySelector('div:first-child');
+                const contentDiv = card.querySelector('div.p-4');
+
+                if (imageDiv) {
+                    imageDiv.classList.add('flex-shrink-0');
+                    imageDiv.style.width = '240px';
+                }
+                if (contentDiv) {
+                    contentDiv.classList.add('flex-grow-1');
+                }
+            });
         }
 
         // Affichage des contenus

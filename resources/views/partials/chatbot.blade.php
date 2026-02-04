@@ -77,15 +77,10 @@
     </template>
 
     <!-- Toggle Button -->
-    <div x-data="{ isOpen: false, toggleChat() { this.isOpen = !this.isOpen } }">
-    <button class="chatbot-btn" @click="toggleChat" aria-label="Open chat">
-        <template x-if="!isOpen">
-            <i class="bi bi-chat-dots-fill fs-4"></i>
-        </template>
-        <template x-if="isOpen">
-            <i class="bi bi-x-lg fs-4"></i>
-        </template>
-    </button>
+    <div>
+        <button class="chatbot-btn" @click="isOpen = !isOpen; if(isOpen) { $nextTick(() => scrollToBottom()) }" aria-label="Open chat">
+            <i :class="isOpen ? 'bi bi-x-lg fs-4' : 'bi bi-chat-dots-fill fs-4'"></i>
+        </button>
     </div>
 
 </div>
@@ -94,13 +89,7 @@
 function chatbot() {
     return {
         isOpen: false,
-        messages: [
-            {
-                role: 'assistant',
-                content: "Bonjour ! Je suis Anansi, votre guide culturel. Comment puis-je vous aider à découvrir le Bénin aujourd'hui ?",
-                time: this.getCurrentTime()
-            }
-        ],
+        messages: [],
         input: '',
         loading: false,
         language: 'fr',
@@ -113,6 +102,13 @@ function chatbot() {
         ],
 
         init() {
+            // Initialiser le message de bienvenue
+            this.messages.push({
+                role: 'assistant',
+                content: "Bonjour ! Je suis Anansi, votre guide culturel. Comment puis-je vous aider à découvrir le Bénin aujourd'hui ?",
+                time: this.getCurrentTime()
+            });
+
             // Charger l'historique depuis localStorage
             const savedHistory = localStorage.getItem('chatbotHistory');
             if (savedHistory) {
@@ -213,6 +209,19 @@ function chatbot() {
             // Garder seulement les 20 derniers messages
             const history = this.messages.slice(-20);
             localStorage.setItem('chatbotHistory', JSON.stringify(history));
+        }
+    }
+}
+
+// Fonction globale pour ouvrir le chatbot depuis l'extérieur
+function openChat() {
+    const chatbotElement = document.querySelector('.chatbot-widget');
+    if (chatbotElement && chatbotElement._x_dataStack) {
+        const chatbotInstance = chatbotElement._x_dataStack[0];
+        if (chatbotInstance && typeof chatbotInstance.toggleChat === 'function') {
+            if (!chatbotInstance.isOpen) {
+                chatbotInstance.toggleChat();
+            }
         }
     }
 }

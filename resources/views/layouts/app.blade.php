@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AFRI-HERITAGE - Marketplace culturelle béninoise propulsée par l'IA">
     <meta name="author" content="AFRI-HERITAGE Bénin">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'AFRI-HERITAGE Bénin')</title>
 

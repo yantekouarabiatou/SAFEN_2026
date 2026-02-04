@@ -11,17 +11,27 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // Sanctum (si API + SPA)
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // Alias middleware personnalisés
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
 
-        //
+        // Throttle personnalisé chatbot (si tu veux)
+        $middleware->throttleApi('chatbot', 30); 
+        // => 30 requêtes/minute (modifiable)
+
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+
+    ->create();

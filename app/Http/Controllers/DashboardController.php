@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artisan;
+use App\Models\ChatLog;
 use App\Models\Product;
 use App\Models\Favorite;
+use Illuminate\Container\Attributes\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB as FacadesDB;
 
 class DashboardController extends Controller
 {
@@ -96,5 +99,11 @@ class DashboardController extends Controller
 
         return redirect()->route('dashboard.profile')
             ->with('success', 'Profil mis à jour avec succès !');
+    }
+
+    public function messages()
+    {
+        // Rediriger vers la page de messages principale
+        return redirect()->route('messages.index');
     }
 }

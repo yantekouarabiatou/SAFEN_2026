@@ -101,22 +101,39 @@ class ArtisanController extends Controller
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
             'craft' => 'required|string',
-            'bio' => 'nullable|string',
-            'years_experience' => 'nullable|integer|min:0',
+            'description' => 'required|string',
+            'specialties' => 'nullable|string',
+            'experience_years' => 'nullable|string',
             'city' => 'required|string',
-            'neighborhood' => 'nullable|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'whatsapp' => 'required|string',
-            'phone' => 'nullable|string',
-            'languages_spoken' => 'nullable|array',
-            'pricing_info' => 'nullable|string',
+            'district' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'address' => 'nullable|string',
+            'phone' => 'required|string',
+            'email' => 'nullable|email',
+            'visible' => 'boolean',
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
-        $validated['user_id'] = auth()->id();
-        $validated['languages_spoken'] = json_encode($validated['languages_spoken'] ?? []);
+        // Mapping des champs du formulaire vers les champs de la base de données
+        $artisanData = [
+            'user_id' => auth()->id(),
+            'business_name' => $validated['business_name'],
+            'craft' => $validated['craft'],
+            'bio' => $validated['description'], // description -> bio
+            'years_experience' => $this->parseExperienceYears($validated['experience_years']), // experience_years -> years_experience
+            'city' => $validated['city'],
+            'neighborhood' => $validated['district'], // district -> neighborhood
+            'phone' => $validated['phone'],
+            'visible' => $request->boolean('visible', true),
+        ];
 
-        $artisan = Artisan::create($validated);
+        // Ajouter l'email à l'utilisateur si fourni
+        if (!empty($validated['email'])) {
+            $user = auth()->user();
+            $user->update(['email' => $validated['email']]);
+        }
+
+        $artisan = Artisan::create($artisanData);
 
         // Traitement des photos
         if ($request->hasFile('photos')) {
@@ -133,5 +150,25 @@ class ArtisanController extends Controller
 
         return redirect()->route('artisans.show', $artisan)
             ->with('success', 'Votre profil artisan a été créé avec succès !');
+    }
+
+    private function parseExperienceYears($experienceString)
+    {
+        if (empty($experienceString)) {
+            return null;
+        }
+
+        switch ($experienceString) {
+            case '1-2':
+                return 1;
+            case '3-5':
+                return 3;
+            case '6-10':
+                return 6;
+            case '10+':
+                return 10;
+            default:
+                return null;
+        }
     }
 }

@@ -70,7 +70,20 @@ class MessageController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return view('messages.show', compact('conversation', 'messages', 'user'));
+        // Récupérer toutes les conversations de l'utilisateur pour la sidebar
+        $conversations = Conversation::where(function($query) {
+                $query->where('user1_id', Auth::id())
+                      ->orWhere('user2_id', Auth::id());
+            })
+            ->with(['user1', 'user2', 'lastMessage'])
+            ->withCount(['messages as unread_count' => function($query) {
+                $query->where('read_at', null)
+                      ->where('receiver_id', Auth::id());
+            }])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('messages.show', compact('conversation', 'messages', 'user', 'conversations'));
     }
 
     public function send(Request $request, User $user)
@@ -262,5 +275,30 @@ class MessageController extends Controller
         $user = $vendor->user;
 
         return $this->send($request, $user);
+    }
+
+    public function markAllRead(Request $request)
+    {
+        Message::where('receiver_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function clearAll(Request $request)
+    {
+        // Supprimer toutes les conversations de l'utilisateur
+        $conversations = Conversation::where(function($query) {
+            $query->where('user1_id', Auth::id())
+                  ->orWhere('user2_id', Auth::id());
+        })->get();
+
+        foreach ($conversations as $conversation) {
+            $conversation->messages()->delete();
+            $conversation->delete();
+        }
+
+        return response()->json(['success' => true]);
     }
 }

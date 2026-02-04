@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -22,67 +23,84 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'options' => 'nullable|array'
+            'quantity' => 'required|integer|min:1|max:99',
+            'options' => 'nullable|array',
+            'options.*' => 'string|max:255'
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        try {
+            $product = Product::findOrFail($request->product_id);
+            $cart = Cart::getOrCreateCart();
 
-        // Vérifier le stock
-        if ($product->stock_status === 'out_of_stock') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ce produit est en rupture de stock.'
-            ], 400);
-        }
+            // Calculer la quantité actuelle dans le panier
+            $currentCartQuantity = 0;
+            $optionsKey = $request->options ? json_encode($request->options) : null;
 
-        if ($product->stock_status === 'low_stock' && $request->quantity > 2) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Stock limité. Maximum 2 unités.'
-            ], 400);
-        }
+            $existingItem = $cart->items()
+                ->where('product_id', $product->id)
+                ->when($optionsKey, function($query) use ($optionsKey) {
+                    return $query->where('options', $optionsKey);
+                })
+                ->when(!$optionsKey, function($query) {
+                    return $query->whereNull('options');
+                })
+                ->first();
 
-        $cart = Cart::getOrCreateCart();
+            if ($existingItem) {
+                $currentCartQuantity = $existingItem->quantity;
+            }
 
-        // Vérifier si le produit est déjà dans le panier
-        $existingItem = $cart->items()->where('product_id', $product->id)->first();
-
-        if ($existingItem) {
-            // Mettre à jour la quantité
-            $newQuantity = $existingItem->quantity + $request->quantity;
-
-            // Vérifier à nouveau le stock
-            if ($product->stock_status === 'low_stock' && $newQuantity > 2) {
+            // Valider la disponibilité
+            $validation = $this->validateProductAvailability($product, $request->quantity, $currentCartQuantity);
+            if (!$validation['valid']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Stock limité. Maximum 2 unités au total.'
+                    'message' => $validation['message']
                 ], 400);
             }
 
-            $existingItem->update([
-                'quantity' => $newQuantity
+            if ($existingItem) {
+                // Mettre à jour la quantité
+                $existingItem->update([
+                    'quantity' => $existingItem->quantity + $request->quantity
+                ]);
+            } else {
+                // Ajouter un nouvel item
+                CartItem::create([
+                    'cart_id' => $cart->id,
+                    'product_id' => $product->id,
+                    'quantity' => $request->quantity,
+                    'price' => $product->price,
+                    'options' => $request->options
+                ]);
+            }
+
+            // Mettre à jour les totaux
+            $cart->updateTotals();
+
+            // Recharger le panier avec les relations
+            $cart->load(['items.product']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produit ajouté au panier avec succès !',
+                'cart_count' => $cart->item_count,
+                'cart_total' => $cart->formatted_total,
+                'item' => [
+                    'product_name' => $product->name,
+                    'quantity' => $request->quantity,
+                    'options' => $request->options
+                ]
             ]);
-        } else {
-            // Ajouter un nouvel item
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $product->id,
-                'quantity' => $request->quantity,
-                'price' => $product->price,
-                'options' => $request->options
-            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur ajout au panier: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de l\'ajout au panier. Veuillez réessayer.'
+            ], 500);
         }
-
-        // Mettre à jour les totaux
-        $cart->updateTotals();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Produit ajouté au panier.',
-            'cart_count' => $cart->item_count,
-            'cart_total' => $cart->formatted_total
-        ]);
     }
 
     public function update(Request $request, CartItem $item)
@@ -147,11 +165,62 @@ class CartController extends Controller
 
     public function getCartCount()
     {
-        $cart = Cart::getOrCreateCart();
+        try {
+            $cart = Cart::getOrCreateCart();
 
-        return response()->json([
-            'count' => $cart->item_count,
-            'total' => $cart->formatted_total
-        ]);
+            return response()->json([
+                'success' => true,
+                'count' => $cart->item_count,
+                'total' => $cart->formatted_total
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'count' => 0,
+                'total' => '0 FCFA'
+            ], 500);
+        }
+    }
+
+    /**
+     * Fusionner le panier de session avec le panier utilisateur (appelé lors de la connexion)
+     */
+    public function mergeSessionCart()
+    {
+        if (!auth()->check()) {
+            return response()->json(['success' => false], 401);
+        }
+
+        try {
+            $sessionId = session()->getId();
+            Cart::mergeSessionCartToUser(auth()->id(), $sessionId);
+
+            $cart = Cart::getOrCreateCart();
+
+            return response()->json([
+                'success' => true,
+                'cart_count' => $cart->item_count,
+                'cart_total' => $cart->formatted_total
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la fusion des paniers.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Valider la disponibilité d'un produit avant ajout
+     */
+    private function validateProductAvailability(Product $product, int $quantity, ?int $currentCartQuantity = 0): array
+    {
+        if (!$product->is_available) {
+            return ['valid' => false, 'message' => 'Ce produit n\'est pas disponible actuellement.'];
+        }
+
+        // Pour les produits sur commande, ne pas vérifier le stock
+        // Tous les produits sont sur commande selon les spécifications
+        return ['valid' => true];
     }
 }

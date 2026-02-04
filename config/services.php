@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+        'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4-turbo-preview'),
+        'max_tokens' => env('OPENAI_MAX_TOKENS', 500),
+    ],
+    'elevenlabs' => [
+        'key' => env('ELEVENLABS_API_KEY'),
+        'voice_id' => env('ELEVENLABS_VOICE_ID', 'pNInz6obpgDQGcFmaJgB'), // Adam
+    ],
+
 ];

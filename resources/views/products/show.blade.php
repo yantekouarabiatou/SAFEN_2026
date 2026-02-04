@@ -1333,6 +1333,152 @@
         let isAutoplayActive = true;
         let carouselInstance;
 
+        // Fonction pour ajouter au panier
+        function addToCart(productId, quantity = 1) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        // Mettre à jour le compteur du panier si disponible
+                        if (data.cart_count !== undefined) {
+                            updateCartCount(data.cart_count);
+                        }
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    let errorMessage = 'Une erreur est survenue lors de l\'ajout au panier.';
+
+                    if (error.message.includes('HTTP 419')) {
+                        errorMessage = 'Session expirée. Veuillez recharger la page.';
+                    } else if (error.message.includes('HTTP 422')) {
+                        errorMessage = 'Données invalides. Vérifiez la quantité.';
+                    }
+
+                    showToast(errorMessage, 'error');
+                });
+        }
+
+        // Fonction pour afficher les notifications toast
+        function showToast(message, type = 'info') {
+            const bgColor = type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-info');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white ${bgColor} border-0 position-fixed top-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Supprimer le toast du DOM après qu'il soit caché
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+
+        // Fonction pour mettre à jour le compteur du panier
+        function updateCartCount(count) {
+            const cartCounters = document.querySelectorAll('.cart-count');
+            cartCounters.forEach(counter => {
+                counter.textContent = count;
+                counter.style.display = count > 0 ? 'inline' : 'none';
+            });
+        }
+
+        // Fonction pour gérer les favoris
+        function toggleFavorite(productId) {
+            const button = document.getElementById('favorite-btn');
+            const isActive = button.classList.contains('active');
+
+            button.classList.toggle('active');
+            const icon = button.querySelector('i');
+            icon.className = isActive ? 'bi bi-heart' : 'bi bi-heart-fill';
+
+            fetch('/favorites/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        showToast(data.message, data.success ? 'success' : 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur favoris:', error);
+                    showToast('Erreur lors de la mise à jour des favoris.', 'error');
+                });
+        }
+
+        // Fonction pour contacter l'artisan
+        function contactArtisan() {
+            // Ouvrir le chatbot ou rediriger vers la page de contact
+            if (typeof openChat === 'function') {
+                openChat();
+            } else {
+                // Fallback: rediriger vers la page de l'artisan
+                window.location.href = '/artisans/{{ $product->vendor_id }}';
+            }
+        }
+
+        // Fonction pour partager le produit
+        function shareProduct() {
+            const url = window.location.href;
+            const title = '{{ $product->name }}';
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                });
+            } else {
+                // Fallback: copier dans le presse-papiers
+                navigator.clipboard.writeText(url).then(function() {
+                    showToast('Lien copié dans le presse-papiers !', 'success');
+                }).catch(function() {
+                    // Fallback final: ouvrir une popup de partage
+                    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    window.open(shareUrl, 'share', 'width=600,height=400');
+                });
+            }
+        }
+
         // Initialisation du carousel quand le DOM est chargé
         document.addEventListener('DOMContentLoaded', function () {
             const carouselElement = document.getElementById('productCarousel');

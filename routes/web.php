@@ -100,19 +100,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
     Route::get('/favorites/{type?}', [FavoriteController::class, 'index'])->name('favorites.index');
 
-    // Panier
+    // Panier (accessible sans authentification)
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::put('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{item}', [CartController::class, 'remove'])->name('cart.remove');
     Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/cart/count', [CartController::class, 'getCartCount']);
+    Route::get('/cart/count', [CartController::class, 'getCartCount'])->name('cart.count');
+    Route::post('/cart/merge-session', [CartController::class, 'mergeSessionCart'])->name('cart.merge-session');
 
-    // Paiement & Checkout
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-    Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+    // Paiement & Checkout (nécessite authentification)
+    Route::middleware('auth')->group(function () {
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+        Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+    });
 
     // Devis
     Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
@@ -132,6 +135,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{user}', [MessageController::class, 'send'])->name('messages.send');
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::post('/messages/mark-all-read', [MessageController::class, 'markAllRead'])->name('messages.markAllRead');
+    Route::delete('/messages/clear-all', [MessageController::class, 'clearAll'])->name('messages.clearAll');
 
     // Contact (utilisateurs connectés)
     Route::post('/contact/artisan/{artisan}', [ContactController::class, 'contactArtisan'])->name('contact.artisan');
@@ -204,6 +209,9 @@ Route::prefix('api')->group(function () {
 
 Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
 
+// Route pour le chatbot
+Route::post('/chatbot/send', [ChatbotController::class, 'send'])
+    ->name('chatbot.send');
 // Routes de fallback
 Route::fallback(function () {
     return redirect()->route('home');
