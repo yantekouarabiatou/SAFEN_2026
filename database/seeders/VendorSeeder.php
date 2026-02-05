@@ -14,7 +14,7 @@ class VendorSeeder extends Seeder
         // On suppose que des plats existent déjà (DishSeeder exécuté avant)
         $dishes = Dish::all()->pluck('id')->toArray();
 
-        if ($dishes->isEmpty()) {
+        if (empty($dishes)) {
             $this->command->warn("Aucun plat trouvé → exécute DishSeeder d'abord pour de vraies spécialités");
             // On continue quand même avec des IDs fictifs si besoin
         }

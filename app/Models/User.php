@@ -144,4 +144,27 @@ class User extends Authenticatable
         return $this->hasOne(Cart::class);
     }
 
+    // Dans User.php
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->whereNull('read_at');
+    }
+
+    public function recentMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->latest()
+            ->with('sender');
+    }
+
+    public function isOnline()
+    {
+        return $this->last_seen && $this->last_seen->diffInMinutes(now()) < 5;
+    }
+
+    public function cartTotal()
+    {
+        return $this->cartItems()->sum('total');
+    }
 }

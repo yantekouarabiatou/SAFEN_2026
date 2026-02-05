@@ -73,7 +73,7 @@ class Product extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 0, ',', ' ') . ' FCFA';
+        return number_format((float) $this->price, 0, ',', ' ') . ' FCFA';
     }
 
     public function getPriceInCurrencyAttribute()
@@ -85,7 +85,7 @@ class Product extends Model
         ];
 
         $symbol = $currencies[$this->currency] ?? $this->currency;
-        return number_format($this->price, $this->currency === 'XOF' ? 0 : 2, ',', ' ') . ' ' . $symbol;
+        return number_format((float) $this->price, $this->currency === 'XOF' ? 0 : 2, ',', ' ') . ' ' . $symbol;
     }
 
     public function getCategoryLabelAttribute()

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ArtisanController;
+use App\Http\Controllers\ArtisanProfileController;
 use App\Http\Controllers\GastronomieController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ChatbotController;
@@ -228,9 +229,33 @@ Route::post('/chatbot/send', [ChatbotController::class, 'send'])
 Route::fallback(function () {
     return redirect()->route('home');
 });
-
+// Routes pour les profils artisans
+Route::prefix('artisan')->name('artisan.')->group(function () {
+    // Profil
+    Route::get('profile/{id}', [ArtisanProfileController::class, 'show'])->name('profile.show');
+    Route::get('profile/{id}/edit', [ArtisanProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile/{id}', [ArtisanProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile/{id}', [ArtisanProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Mot de passe
+    Route::post('profile/change-password', [ArtisanProfileController::class, 'changePassword'])->name('profile.change-password');
+    
+    // Produits
+    Route::get('profile/{id}/products', [ArtisanProfileController::class, 'products'])->name('products.index');
+    
+    // Avis
+    Route::get('profile/{id}/reviews', [ArtisanProfileController::class, 'reviews'])->name('reviews.index');
+    
+    // Activation/désactivation
+    Route::put('profile/{id}/toggle-status', [ArtisanProfileController::class, 'toggleStatus'])->name('profile.toggle-status');
+});
 // Dans web.php - ajouter cette route
 Route::get('/cart/deposit', [CartController::class, 'getDepositAmount'])->name('cart.deposit');
-
+// Routes pour la navbar
+Route::get('/search', 'SearchController@index')->name('search');
+Route::get('/search/ajax', 'SearchController@ajax')->name('search.ajax');
+Route::post('/notifications/mark-all-read', 'NotificationController@markAllRead')->name('notifications.markAllRead');
+Route::post('/notifications/mark-as-read', 'NotificationController@markAsRead')->name('notifications.markAsRead');
+Route::post('/user/online', 'UserController@updateOnlineStatus')->name('user.online');
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

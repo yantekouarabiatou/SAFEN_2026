@@ -204,4 +204,28 @@ class ArtisanController extends Controller
         return redirect()->route('dashboard.artisan')
             ->with('success', 'Votre profil artisan a été supprimé.');
     }
+
+    /**
+     * Convertir le range d'années d'expérience en entier
+     */
+    private function parseExperienceYears($experienceRange)
+    {
+        if (!$experienceRange) {
+            return null;
+        }
+
+        switch ($experienceRange) {
+            case '1-2':
+                return 1;
+            case '3-5':
+                return 3;
+            case '6-10':
+                return 6;
+            case '10+':
+                return 10;
+            default:
+                return null;
+        }
+    }
 }
+

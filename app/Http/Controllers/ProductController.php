@@ -130,9 +130,9 @@ class ProductController extends Controller
         }
 
         // Générer la description culturelle avec IA (asynchrone)
-        if (empty($validated['description_cultural'])) {
-            dispatch(new \App\Jobs\GenerateCulturalDescription($product));
-        }
+        // if (empty($validated['description_cultural'])) {
+        //     dispatch(new \App\Jobs\GenerateCulturalDescription($product));
+        // }
 
         return redirect()->route('products.show', $product)
             ->with('success', 'Produit ajouté avec succès !');

@@ -58,7 +58,7 @@
                     <i data-feather="message-square"></i>
                     <span>Messages</span>
                     @php
-                        $unreadCount = auth()->user()->unreadMessages ?? 0;
+                        $unreadCount = auth()->user()->unreadMessages?->count() ?? 0;
                     @endphp
                     @if($unreadCount > 0)
                         <span class="badge badge-primary">{{ $unreadCount }}</span>
@@ -87,14 +87,14 @@
             <li class="menu-header">Mon Compte</li>
             
             @if(auth()->user()->artisan)
-            <li class="{{ request()->routeIs('artisans.edit') ? 'active' : '' }}">
-                <a href="{{ route('artisans.edit', auth()->user()->artisan) }}" class="nav-link">
+            <li class="{{ request()->routeIs('artisan.profile.edit') ? 'active' : '' }}">
+                <a href="{{ route('artisan.profile.edit', auth()->user()->artisan->id) }}" class="nav-link">
                     <i data-feather="user"></i>
                     <span>Mon profil artisan</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('artisans.show', auth()->user()->artisan) }}" class="nav-link" target="_blank">
+                <a href="{{ route('artisans.show', auth()->user()->artisan->id) }}" class="nav-link" target="_blank">
                     <i data-feather="external-link"></i>
                     <span>Voir profil public</span>
                 </a>
