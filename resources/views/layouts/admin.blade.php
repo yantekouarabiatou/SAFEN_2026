@@ -70,8 +70,16 @@
             {{-- Navbar --}}
             @include('admin.partials.navbar')
             
-            {{-- Sidebar --}}
-            @include('admin.partials.sidebar')
+            {{-- Sidebar - Selon le rôle de l'utilisateur --}}
+            @if(auth()->user()->hasRole('admin'))
+                @include('admin.partials.sidebar')
+            @elseif(auth()->user()->hasRole('artisan'))
+                @include('admin.partials.sidebar-artisan')
+            @elseif(auth()->user()->hasRole('vendor'))
+                @include('admin.partials.sidebar-vendor')
+            @else
+                @include('admin.partials.sidebar-artisan')
+            @endif
             
             {{-- Main Content --}}
             <div class="main-content">

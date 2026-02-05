@@ -97,4 +97,147 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.profile')
             ->with('success', 'Profil mis à jour avec succès !');
     }
+
+    public function artisan()
+    {
+        $user = auth()->user();
+        $artisan = $user->artisan;
+
+        $data['stats'] = [
+            'products' => $artisan ? $artisan->products()->count() : 0,
+            'views' => $artisan ? $artisan->views : 0,
+            'rating' => $artisan ? $artisan->rating_avg : 0,
+            'contacts' => 0,
+        ];
+
+        $data['recentProducts'] = $artisan ? $artisan->products()
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get() : collect();
+
+        $data['popularProducts'] = $artisan ? $artisan->products()
+            ->orderBy('views', 'desc')
+            ->limit(5)
+            ->get() : collect();
+
+        return view('dashboard.artisan', $data);
+    }
+
+    public function artisanProducts()
+    {
+        $user = auth()->user();
+        $artisan = $user->artisan;
+        
+        $products = $artisan ? $artisan->products()->paginate(12) : collect();
+        
+        return view('dashboard.artisan-products', compact('products'));
+    }
+
+    public function artisanOrders()
+    {
+        $user = auth()->user();
+        $artisan = $user->artisan;
+        
+        $orders = $artisan ? $artisan->orders()->orderBy('created_at', 'desc')->paginate(20) : collect();
+        
+        return view('dashboard.artisan-orders', compact('orders'));
+    }
+
+    public function artisanAnalytics()
+    {
+        $user = auth()->user();
+        $artisan = $user->artisan;
+        
+        $data = [
+            'totalViews' => $artisan ? $artisan->views : 0,
+            'totalProducts' => $artisan ? $artisan->products()->count() : 0,
+            'avgRating' => $artisan ? $artisan->rating_avg : 0,
+        ];
+        
+        return view('dashboard.artisan-analytics', $data);
+    }
+
+    public function artisanReviews()
+    {
+        $user = auth()->user();
+        $artisan = $user->artisan;
+        
+        $reviews = $artisan ? $artisan->reviews()->orderBy('created_at', 'desc')->paginate(20) : collect();
+        
+        return view('dashboard.artisan-reviews', compact('reviews'));
+    }
+
+    public function orders()
+    {
+        $orders = auth()->user()->orders()->orderBy('created_at', 'desc')->paginate(20);
+        return view('dashboard.orders', compact('orders'));
+    }
+
+    public function messages()
+    {
+        $messages = auth()->user()->conversations()->with('messages')->orderBy('updated_at', 'desc')->paginate(20);
+        return view('dashboard.messages', compact('messages'));
+    }
+
+    public function notifications()
+    {
+        $notifications = auth()->user()->notifications()->paginate(20);
+        return view('dashboard.notifications', compact('notifications'));
+    }
+
+    public function settings()
+    {
+        return view('dashboard.settings');
+    }
+
+    public function vendor()
+    {
+        $user = auth()->user();
+        $vendor = $user->vendor;
+        
+        $data = [
+            'stats' => [
+                'dishes' => $vendor ? $vendor->dishes()->count() : 0,
+                'orders' => $vendor ? $vendor->orders()->count() : 0,
+                'rating' => $vendor ? $vendor->rating_avg : 0,
+            ],
+        ];
+        
+        return view('dashboard.vendor', $data);
+    }
+
+    public function admin()
+    {
+        return view('dashboard.admin');
+    }
+
+    public function adminUsers()
+    {
+        return view('admin.users.index');
+    }
+
+    public function adminArtisans()
+    {
+        return view('admin.artisans.index');
+    }
+
+    public function adminProducts()
+    {
+        return view('admin.products.index');
+    }
+
+    public function adminOrders()
+    {
+        return view('admin.orders.index');
+    }
+
+    public function adminReviews()
+    {
+        return view('admin.reviews.index');
+    }
+
+    public function adminAnalytics()
+    {
+        return view('admin.analytics');
+    }
 }
