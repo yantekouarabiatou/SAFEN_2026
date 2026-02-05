@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Artisans & Services - AFRI-HERITAGE Bénin')
+@section('title', __('artisans.title'))
 
 @push('styles')
     <style>
@@ -147,18 +147,18 @@
         <div class="container position-relative">
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb text-white">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white">Accueil</a></li>
-                    <li class="breadcrumb-item active text-white">Artisans & Services</li>
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white">{{ __('messages.home') }}</a></li>
+                    <li class="breadcrumb-item active text-white">{{ __('artisans.title') }}</li>
                 </ol>
             </nav>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-4">
                 <div>
-                    <h1 class="display-5 fw-bold text-white mb-2">Artisans & Services</h1>
-                    <p class="lead text-white-75 mb-0">Trouvez les meilleurs artisans près de chez vous</p>
+                    <h1 class="display-5 fw-bold text-white mb-2">{{ __('artisans.title') }}</h1>
+                    <p class="lead text-white-75 mb-0">{{ __('artisans.subtitle') }}</p>
                 </div>
                 <a href="{{ route('artisans.create') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold">
-                    <i class="bi bi-plus-circle me-2"></i> Devenir artisan
+                    <i class="bi bi-plus-circle me-2"></i> {{ __('artisans.become_artisan') ?? 'Devenir artisan' }}
                 </a>
             </div>
         </div>
@@ -170,22 +170,22 @@
             <div class="col-lg-3">
                 <div class="filter-sidebar sticky-top" style="top: 2rem;">
                     <h5 class="fw-bold mb-4">
-                        <i class="bi bi-funnel me-2 text-benin-green"></i> Filtres
+                        <i class="bi bi-funnel me-2 text-benin-green"></i> {{ __('messages.filter') }}
                     </h5>
 
                     <form method="GET" action="{{ route('artisans.index') }}">
                         <div class="mb-4">
-                            <label for="search" class="form-label fw-bold">Rechercher</label>
+                            <label for="search" class="form-label fw-bold">{{ __('messages.search') }}</label>
                             <input type="text" name="search" id="search" class="form-control rounded-pill"
-                                value="{{ request('search') }}" placeholder="Nom, métier...">
+                                value="{{ request('search') }}" placeholder="{{ __('artisans.search_placeholder') }}">
                         </div>
 
                         <div class="mb-4">
-                            <label for="craft" class="form-label fw-bold">Métier</label>
+                            <label for="craft" class="form-label fw-bold">{{ __('artisans.filter_by_craft') }}</label>
                             <select name="craft" id="craft" class="form-select rounded-pill">
-                                <option value="">Tous les métiers</option>
-                                @foreach($crafts as $craft)
-                                    <option value="{{ $craft }}" {{ request('craft') == $craft ? 'selected' : '' }}>
+                                <option value="">{{ __('artisans.all_crafts') }}</option>
+                                @foreach(__('artisans.crafts') as $key => $craft)
+                                    <option value="{{ $key }}" {{ request('craft') == $key ? 'selected' : '' }}>
                                         {{ $craft }}
                                     </option>
                                 @endforeach
@@ -193,11 +193,11 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="city" class="form-label fw-bold">Ville</label>
+                            <label for="city" class="form-label fw-bold">{{ __('artisans.filter_by_city') }}</label>
                             <select name="city" id="city" class="form-select rounded-pill">
-                                <option value="">Toutes les villes</option>
-                                @foreach($cities as $city)
-                                    <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
+                                <option value="">{{ __('artisans.all_cities') }}</option>
+                                @foreach(__('artisans.cities') as $key => $city)
+                                    <option value="{{ $key }}" {{ request('city') == $key ? 'selected' : '' }}>
                                         {{ $city }}
                                     </option>
                                 @endforeach
@@ -218,7 +218,7 @@
                         @endif
 
                         <button type="submit" class="btn btn-benin-green w-100 rounded-pill py-2">
-                            <i class="bi bi-search me-2"></i> Filtrer
+                            <i class="bi bi-search me-2"></i> {{ __('messages.filter') }}
                         </button>
                     </form>
                 </div>
@@ -230,22 +230,22 @@
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <span class="fs-5 fw-bold text-charcoal">
-                            {{ $artisans->total() }} artisans trouvés
+                            {{ $artisans->total() }} {{ __('artisans.found_artisans') ?? 'artisans trouvés' }}
                         </span>
                     </div>
 
                     <div class="btn-group view-toggle" role="group">
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="grid"
                             onclick="changeView('grid')">
-                            <i class="bi bi-grid-3x3-gap"></i> Grille
+                            <i class="bi bi-grid-3x3-gap"></i> {{ __('artisans.view_grid') }}
                         </button>
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="list"
                             onclick="changeView('list')">
-                            <i class="bi bi-list-ul"></i> Liste
+                            <i class="bi bi-list-ul"></i> {{ __('artisans.view_list') }}
                         </button>
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="map"
                             onclick="changeView('map')">
-                            <i class="bi bi-geo-alt"></i> Carte
+                            <i class="bi bi-geo-alt"></i> {{ __('artisans.view_map') }}
                         </button>
                     </div>
                 </div>
@@ -332,7 +332,7 @@
                                             @endif
                                             <a href="{{ route('artisans.show', $artisan) }}"
                                                 class="btn btn-benin-green btn-sm rounded-pill px-4">
-                                                Voir profil
+                                                {{ __('views.see') }} {{ __('views.view_profile') }}
                                             </a>
                                         </div>
                                     </div>
@@ -342,8 +342,8 @@
                             <div class="col-12">
                                 <div class="empty-state">
                                     <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
-                                    <h4>Aucun artisan trouvé</h4>
-                                    <p class="text-muted">Modifiez vos critères de recherche</p>
+                                    <h4>{{ __('views.no_artisans_found') }}</h4>
+                                    <p class="text-muted">{{ __('views.modify_search') }}</p>
                                 </div>
                             </div>
                         @endforelse

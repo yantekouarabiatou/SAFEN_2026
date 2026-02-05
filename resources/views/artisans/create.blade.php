@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Créer un Artisan - AFRI-HERITAGE Bénin')
+@section('title', __('artisan_create.form_title') . ' - AFRI-HERITAGE Bénin')
 
 @push('styles')
     <style>
@@ -118,8 +118,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center">
-                    <h1 class="display-4 fw-bold mb-3">Devenir Artisan</h1>
-                    <p class="lead mb-0">Rejoignez notre communauté d'artisans béninois et partagez votre savoir-faire traditionnel</p>
+                    <h1 class="display-4 fw-bold mb-3">{{ __('artisan_create.form_title') }}</h1>
+                    <p class="lead mb-0">{{ __('artisan_create.form_subtitle') }}</p>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="business_name" class="form-label">Nom de l'entreprise *</label>
+                                    <label for="business_name" class="form-label">{{ __('artisan_create.business_name') }} *</label>
                                     <input type="text" class="form-control @error('business_name') is-invalid @enderror"
                                            id="business_name" name="business_name" value="{{ old('business_name') }}" required>
                                     @error('business_name')
@@ -146,9 +146,9 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="craft" class="form-label">Métier/Artisanat *</label>
+                                    <label for="craft" class="form-label">{{ __('artisan_create.craft') }} *</label>
                                     <select class="form-select @error('craft') is-invalid @enderror" id="craft" name="craft" required>
-                                        <option value="">Choisir un métier</option>
+                                        <option value="">{{ __('artisan_create.choose_craft') }}</option>
                                         <option value="forgeron" {{ old('craft') == 'forgeron' ? 'selected' : '' }}>Forgeron</option>
                                         <option value="tisserand" {{ old('craft') == 'tisserand' ? 'selected' : '' }}>Tisserand</option>
                                         <option value="potier" {{ old('craft') == 'potier' ? 'selected' : '' }}>Potier</option>
@@ -168,7 +168,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="phone" class="form-label">Téléphone *</label>
+                                    <label for="phone" class="form-label">{{ __('artisan_create.phone') }} *</label>
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror"
                                            id="phone" name="phone" value="{{ old('phone') }}" required>
                                     @error('phone')
@@ -179,7 +179,7 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="email" class="form-label">Email</label>
+                                    <label for="email" class="form-label">{{ __('artisan_create.email') }}</label>
                                     <input type="email" class="form-control @error('email') is-invalid @enderror"
                                            id="email" name="email" value="{{ old('email') }}">
                                     @error('email')
@@ -192,7 +192,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="city" class="form-label">Ville *</label>
+                                    <label for="city" class="form-label">{{ __('artisan_create.city') }} *</label>
                                     <input type="text" class="form-control @error('city') is-invalid @enderror"
                                            id="city" name="city" value="{{ old('city') }}" required>
                                     @error('city')
@@ -203,7 +203,7 @@
 
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="district" class="form-label">Quartier</label>
+                                    <label for="district" class="form-label">{{ __('artisan_create.district') }}</label>
                                     <input type="text" class="form-control @error('district') is-invalid @enderror"
                                            id="district" name="district" value="{{ old('district') }}">
                                     @error('district')
@@ -214,7 +214,7 @@
 
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="postal_code" class="form-label">Code postal</label>
+                                    <label for="postal_code" class="form-label">{{ __('artisan_create.postal_code') }}</label>
                                     <input type="text" class="form-control @error('postal_code') is-invalid @enderror"
                                            id="postal_code" name="postal_code" value="{{ old('postal_code') }}">
                                     @error('postal_code')
@@ -225,7 +225,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="address" class="form-label">Adresse complète</label>
+                            <label for="address" class="form-label">{{ __('artisan_create.address') }}</label>
                             <textarea class="form-control @error('address') is-invalid @enderror"
                                       id="address" name="address" rows="3">{{ old('address') }}</textarea>
                             @error('address')
@@ -234,7 +234,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="description" class="form-label">Description de vos services *</label>
+                            <label for="description" class="form-label">{{ __('artisan_create.description') }} *</label>
                             <textarea class="form-control @error('description') is-invalid @enderror"
                                       id="description" name="description" rows="4" required>{{ old('description') }}</textarea>
                             @error('description')
@@ -243,23 +243,23 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="specialties" class="form-label">Spécialités (séparées par des virgules)</label>
+                            <label for="specialties" class="form-label">{{ __('artisan_create.specialties') }}</label>
                             <input type="text" class="form-control @error('specialties') is-invalid @enderror"
                                    id="specialties" name="specialties" value="{{ old('specialties') }}"
-                                   placeholder="Ex: ferronnerie d'art, réparation de vélos, soudure">
+                                   placeholder="{{ __('artisan_create.specialties_placeholder') }}">
                             @error('specialties')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="form-group">
-                            <label for="experience_years" class="form-label">Années d'expérience</label>
+                            <label for="experience_years" class="form-label">{{ __('artisan_create.experience_years') }}</label>
                             <select class="form-select @error('experience_years') is-invalid @enderror" id="experience_years" name="experience_years">
-                                <option value="">Choisir</option>
-                                <option value="1-2" {{ old('experience_years') == '1-2' ? 'selected' : '' }}>1-2 ans</option>
-                                <option value="3-5" {{ old('experience_years') == '3-5' ? 'selected' : '' }}>3-5 ans</option>
-                                <option value="6-10" {{ old('experience_years') == '6-10' ? 'selected' : '' }}>6-10 ans</option>
-                                <option value="10+" {{ old('experience_years') == '10+' ? 'selected' : '' }}>Plus de 10 ans</option>
+                                <option value="">{{ __('artisan_create.choose') }}</option>
+                                <option value="1-2" {{ old('experience_years') == '1-2' ? 'selected' : '' }}>{{ __('artisan_create.exp_1_2') }}</option>
+                                <option value="3-5" {{ old('experience_years') == '3-5' ? 'selected' : '' }}>{{ __('artisan_create.exp_3_5') }}</option>
+                                <option value="6-10" {{ old('experience_years') == '6-10' ? 'selected' : '' }}>{{ __('artisan_create.exp_6_10') }}</option>
+                                <option value="10+" {{ old('experience_years') == '10+' ? 'selected' : '' }}>{{ __('artisan_create.exp_10_plus') }}</option>
                             </select>
                             @error('experience_years')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -267,11 +267,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Photos de vos travaux</label>
+                            <label class="form-label">{{ __('artisan_create.photos') }}</label>
                             <div class="image-upload" onclick="document.getElementById('photos').click()">
                                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                                <p class="mb-0">Cliquez pour ajouter des photos</p>
-                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF. Taille max: 5MB par image</small>
+                                <p class="mb-0">{{ __('artisan_create.click_to_add_photos') }}</p>
+                                <small class="text-muted">{{ __('artisan_create.photo_requirements') }}</small>
                             </div>
                             <input type="file" id="photos" name="photos[]" multiple accept="image/*" style="display: none;" onchange="previewImages(this)">
                             <div class="image-preview" id="imagePreview"></div>
@@ -283,13 +283,13 @@
                         <div class="form-check mb-4">
                             <input class="form-check-input" type="checkbox" id="visible" name="visible" value="1" {{ old('visible', true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="visible">
-                                Rendre mon profil visible sur la plateforme
+                                {{ __('artisan_create.make_profile_visible') }}
                             </label>
                         </div>
 
                         <div class="text-center">
                             <button type="submit" class="btn btn-submit">
-                                <i class="fas fa-user-plus me-2"></i>Créer mon profil d'artisan
+                                <i class="fas fa-user-plus me-2"></i>{{ __('artisan_create.submit_button') }}
                             </button>
                         </div>
                     </form>

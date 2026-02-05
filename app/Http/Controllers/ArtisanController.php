@@ -47,20 +47,7 @@ class ArtisanController extends Controller
 
         $artisans = $query->paginate(12)->withQueryString(); // conserve les filtres dans la pagination
 
-        // Pour les filtres du formulaire
-        $crafts = Artisan::where('visible', true)
-            ->select('craft')
-            ->distinct()
-            ->pluck('craft', 'craft')
-            ->all();
-
-        $cities = Artisan::where('visible', true)
-            ->select('city')
-            ->distinct()
-            ->pluck('city', 'city')
-            ->all();
-
-        return view('artisans.vue', compact('artisans', 'crafts', 'cities'));
+        return view('artisans.vue', compact('artisans'));
     }
     public function show(Artisan $artisan)
     {

@@ -19,13 +19,18 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // Middleware pour la langue
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         // Alias middleware personnalisés
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
 
         // Throttle personnalisé chatbot (si tu veux)
-        $middleware->throttleApi('chatbot', 30); 
+        $middleware->throttleApi('chatbot', 30);
         // => 30 requêtes/minute (modifiable)
 
     })

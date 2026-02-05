@@ -23,12 +23,12 @@
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                        <i class="bi bi-house-door me-1"></i> Accueil
+                        <i class="bi bi-house-door me-1"></i> {{ __('messages.home') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('artisans.*') ? 'active' : '' }}" href="{{ route('artisans.vue') }}">
-                        <i class="bi bi-tools me-1"></i> Artisans & Services
+                        <i class="bi bi-tools me-1"></i> {{ __('artisans & services') }}
                     </a>
                 </li>
                 <li class="nav-item">
@@ -53,13 +53,36 @@
                 <!-- Language Selector -->
                 <div class="dropdown lang-selector">
                     <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-label="Select language">
-                        <span class="me-1">🇫🇷</span> FR
+                            aria-label="{{ __('messages.language') }}">
+                        <span class="me-1">
+                            @if(app()->getLocale() === 'fr')
+                                🇫🇷
+                            @elseif(app()->getLocale() === 'en')
+                                🇬🇧
+                            @else
+                                🇧🇯
+                            @endif
+                        </span> {{ strtoupper(app()->getLocale()) }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><button class="dropdown-item"><span class="me-2">🇫🇷</span> Français</button></li>
-                        <li><button class="dropdown-item"><span class="me-2">🇬🇧</span> English</button></li>
-                        <li><button class="dropdown-item"><span class="me-2">🇧🇯</span> Fon</button></li>
+                        <li>
+                            <a class="dropdown-item {{ app()->getLocale() === 'fr' ? 'active' : '' }}"
+                               href="{{ route('lang.switch', 'fr') }}">
+                                <span class="me-2">🇫🇷</span> {{ __('messages.french') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}"
+                               href="{{ route('lang.switch', 'en') }}">
+                                <span class="me-2">🇬🇧</span> {{ __('messages.english') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {{ app()->getLocale() === 'fon' ? 'active' : '' }}"
+                               href="{{ route('lang.switch', 'fon') }}">
+                                <span class="me-2">🇧🇯</span> {{ __('fon') }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -81,17 +104,17 @@
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i> Déconnexion</button>
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i> {{ __('messages.logout') }}</button>
                                 </form>
                             </li>
                         </ul>
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="btn btn-outline-benin-green btn-sm">
-                        Connexion
+                        {{ __('messages.login') }}
                     </a>
                     <a href="{{ route('register') }}" class="btn btn-benin-green btn-sm">
-                        Inscription
+                        {{ __('messages.register') }}
                     </a>
                 @endauth
             </div>

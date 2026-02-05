@@ -19,7 +19,14 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\LanguageController;
+
+// Routes pour changer la langue
+Route::get('/lang/{locale}', [LanguageController::class, 'switchLang'])->name('lang.switch');
+
+// Route de test multilangue
+Route::get('/test', [TestController::class, 'index'])->name('test');
 
 // Pages publiques
 Route::get('/', [HomeController::class, 'index'])->name('home');
