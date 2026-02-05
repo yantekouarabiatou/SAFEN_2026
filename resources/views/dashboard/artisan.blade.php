@@ -199,7 +199,7 @@
             <a href="{{ route('dashboard') }}" class="nav-link-dashboard active">
                 <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
             </a>
-            <a href="{{ route('dashboard.products') }}" class="nav-link-dashboard">
+            <a href="{{ route('dashboard.artisan.products') }}" class="nav-link-dashboard">
                 <i class="bi bi-palette me-2"></i> Mes produits
             </a>
             <a href="{{ route('dashboard.orders') }}" class="nav-link-dashboard">
@@ -338,7 +338,7 @@
                     @endforelse
                 </div>
                 <div class="card-footer bg-white border-0 text-center">
-                    <a href="{{ route('dashboard.products') }}" class="btn btn-benin-green rounded-pill">
+                    <a href="{{ route('dashboard.artisan.products') }}" class="btn btn-benin-green rounded-pill">
                         <i class="bi bi-grid me-2"></i> Gérer tous les produits
                     </a>
                 </div>
