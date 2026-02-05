@@ -110,4 +110,83 @@ class Product extends Model
     {
         return Storage::url($this->image_url);
     }
+
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    // Accesseurs
+    public function getIsAvailableAttribute()
+    {
+        return $this->available_for_order && $this->is_active;
+    }
+
+    public function getRequiredDepositAmountAttribute()
+    {
+        if (!$this->requires_deposit) {
+            return 0;
+        }
+        return round($this->price * ($this->deposit_percentage / 100), 0);
+    }
+
+    public function getFormattedDepositAttribute()
+    {
+        return number_format($this->required_deposit_amount, 0, ',', ' ') . ' FCFA';
+    }
+
+    public function getProductionTimeTextAttribute()
+    {
+        $days = $this->production_time_days;
+        
+        if ($days <= 7) {
+            return "1 semaine";
+        } elseif ($days <= 14) {
+            return "2 semaines";
+        } elseif ($days <= 21) {
+            return "3 semaines";
+        } elseif ($days <= 30) {
+            return "1 mois";
+        } else {
+            $months = ceil($days / 30);
+            return $months . " mois";
+        }
+    }
+
+    public function getEstimatedDeliveryDateAttribute()
+    {
+        return now()->addDays($this->production_time_days)->format('d/m/Y');
+    }
+
+    // Méthodes
+    public function canBeOrdered($quantity = 1)
+    {
+        if (!$this->is_available) {
+            return [
+                'can_order' => false,
+                'message' => 'Ce produit n\'est pas disponible pour le moment.'
+            ];
+        }
+
+        if ($quantity < $this->min_order_quantity) {
+            return [
+                'can_order' => false,
+                'message' => "Quantité minimum : {$this->min_order_quantity}"
+            ];
+        }
+
+        if ($this->max_order_quantity && $quantity > $this->max_order_quantity) {
+            return [
+                'can_order' => false,
+                'message' => "Quantité maximum : {$this->max_order_quantity}"
+            ];
+        }
+
+        return [
+            'can_order' => true,
+            'message' => 'Produit disponible sur commande'
+        ];
+    }
 }
+

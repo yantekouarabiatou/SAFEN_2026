@@ -3,216 +3,419 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\Models\GuestOrder;
 use App\Models\Product;
+use App\Services\DeliveryService;
+use App\Services\FedaPayService;
+use App\Notifications\OrderPlacedNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class CheckoutController extends Controller
 {
+    protected $fedaPayService;
+
+    public function __construct(FedaPayService $fedaPayService)
+    {
+        $this->fedaPayService = $fedaPayService;
+    }
+
     public function index()
     {
         $cart = Cart::getOrCreateCart();
-
-        if ($cart->items->isEmpty()) {
+        
+        if ($cart->items->count() === 0) {
             return redirect()->route('cart.index')
                 ->with('error', 'Votre panier est vide.');
         }
 
-        // Vérifier le stock des produits
-        foreach ($cart->items as $item) {
-            if ($item->product->stock_status === 'out_of_stock') {
-                return redirect()->route('cart.index')
-                    ->with('error', "Le produit {$item->product->name} n'est plus disponible.");
-            }
-        }
+        $cart->load(['items.product.images', 'items.product.artisan']);
+        
+        // Frais de livraison par défaut (sera recalculé dynamiquement)
+        $deliveryFee = 2000;
+        $subtotal = $cart->total;
+        $total = $subtotal + $deliveryFee;
+        
+        // Pourcentage d'acompte configurable (30% par défaut)
+        $depositPercentage = 30;
+        $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
+        $remainingAmount = $total - $depositAmount;
 
-        $user = Auth::user();
-        $addresses = $user->addresses ?? [];
-
-        return view('checkout.index', compact('cart', 'user', 'addresses'));
+        return view('checkout.index', compact(
+            'cart', 
+            'deliveryFee', 
+            'subtotal', 
+            'total', 
+            'depositAmount',
+            'remainingAmount',
+            'depositPercentage'
+        ));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'shipping_address' => 'required|string',
-            'shipping_city' => 'required|string',
-            'shipping_neighborhood' => 'nullable|string',
-            'shipping_phone' => 'required|string',
-            'shipping_notes' => 'nullable|string',
-            'payment_method' => 'required|in:kkiapay,mtn_momo,moov_money,visa,mastercard',
-            'billing_same_as_shipping' => 'boolean'
-        ]);
-
-        $cart = Cart::getOrCreateCart();
-
-        if ($cart->items->isEmpty()) {
-            return redirect()->route('cart.index')
-                ->with('error', 'Votre panier est vide.');
-        }
-
-        // Vérifier le stock à nouveau
-        foreach ($cart->items as $item) {
-            $product = $item->product;
-
-            if ($product->stock_status === 'out_of_stock') {
-                return redirect()->route('cart.index')
-                    ->with('error', "Le produit {$product->name} n'est plus disponible.");
-            }
-
-            if ($product->stock_status === 'low_stock' && $item->quantity > 2) {
-                return redirect()->route('cart.index')
-                    ->with('error', "Stock limité pour {$product->name}.");
-            }
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // Créer la commande
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'order_number' => 'CMD-' . time() . '-' . rand(1000, 9999),
-                'status' => 'pending',
-                'total' => $cart->total,
-                'item_count' => $cart->item_count,
-
-                // Informations de livraison
-                'shipping_address' => $request->shipping_address,
-                'shipping_city' => $request->shipping_city,
-                'shipping_neighborhood' => $request->shipping_neighborhood,
-                'shipping_phone' => $request->shipping_phone,
-                'shipping_notes' => $request->shipping_notes,
-
-                // Informations de facturation
-                'billing_address' => $request->billing_same_as_shipping ? $request->shipping_address : $request->billing_address,
-                'billing_city' => $request->billing_same_as_shipping ? $request->shipping_city : $request->billing_city,
-
-                // Méthode de paiement
-                'payment_method' => $request->payment_method,
-                'payment_status' => 'pending',
-
-                // Frais
-                'shipping_fee' => 0, // Livraison gratuite pour le MVP
-                'tax_amount' => 0,   // Taxes incluses
-
-                // Informations artisanales
-                'artisan_notes' => 'Commande générée depuis AFRI-HERITAGE',
-            ]);
-
-            // Créer les items de commande
-            foreach ($cart->items as $cartItem) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'artisan_id' => $cartItem->product->artisan_id,
-                    'quantity' => $cartItem->quantity,
-                    'unit_price' => $cartItem->price,
-                    'total_price' => $cartItem->total,
-                    'product_data' => json_encode([
-                        'name' => $cartItem->product->name,
-                        'image' => $cartItem->product->images->first()->image_url ?? null,
-                        'artisan_name' => $cartItem->product->artisan->user->name,
-                    ]),
-                ]);
-
-                // Mettre à jour le stock du produit
-                $product = $cartItem->product;
-                if ($product->stock_status === 'low_stock') {
-                    $product->stock_status = 'out_of_stock';
-                }
-                $product->order_count += $cartItem->quantity;
-                $product->save();
-            }
-
-            // Vider le panier
-            $cart->items()->delete();
-            $cart->update(['status' => 'completed']);
-
-            DB::commit();
-
-            // Initialiser le paiement via l'API choisie
-            if (in_array($request->payment_method, ['kkiapay', 'mtn_momo', 'moov_money'])) {
-                return $this->initiateMobilePayment($order);
-            } else {
-                // Pour les cartes, rediriger vers la page de paiement
-                return redirect()->route('checkout.success', $order)
-                    ->with('success', 'Commande créée avec succès !');
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors de la commande: ' . $e->getMessage());
-        }
-    }
-
-    public function success(Order $order)
-    {
-        // Vérifier que la commande appartient à l'utilisateur connecté
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        return view('checkout.success', compact('order'));
+        return $this->process($request);
     }
 
     public function cancel()
     {
-        return view('checkout.cancel')
+        return redirect()->route('cart.index')
             ->with('error', 'Le paiement a été annulé.');
     }
-
-    protected function initiateMobilePayment(Order $order)
-    {
-        // Configuration pour KkiaPay (exemple)
-        $config = [
-            'public_key' => config('services.kkiapay.public_key'),
-            'amount' => $order->total * 100, // En centimes
-            'currency' => 'XOF',
-            'order_id' => $order->order_number,
-            'metadata' => json_encode(['order_id' => $order->id]),
-            'callback_url' => route('checkout.webhook'),
-            'theme' => '#009639',
-            'name' => 'AFRI-HERITAGE Bénin',
-        ];
-
-        // Pour le MVP, on simule un paiement réussi
-        $order->update([
-            'payment_status' => 'paid',
-            'status' => 'processing',
-            'paid_at' => now(),
-        ]);
-
-        return redirect()->route('checkout.success', $order)
-            ->with('success', 'Paiement effectué avec succès !');
+            'depositAmount', 
+            'remainingAmount',
+            'depositPercentage'
+        ));
     }
 
-    public function webhook(Request $request)
+    /**
+     * Calculer les frais de livraison en AJAX
+     */
+    public function calculateDelivery(Request $request)
     {
-        // Gérer les webhooks de paiement
-        $data = $request->all();
+        $request->validate([
+            'city' => 'required|string',
+            'subtotal' => 'required|numeric'
+        ]);
 
-        if ($data['status'] === 'SUCCESS') {
-            $order = Order::where('order_number', $data['order_id'])->first();
+        $deliveryDetails = DeliveryService::getDeliveryDetails(
+            $request->city, 
+            $request->subtotal
+        );
 
-            if ($order) {
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => 'processing',
-                    'paid_at' => now(),
-                    'payment_reference' => $data['transaction_id'],
-                ]);
+        $total = $request->subtotal + $deliveryDetails['fee'];
+        $depositPercentage = 30;
+        $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
 
-                // Notifier l'utilisateur et les artisans
-                // $this->sendOrderNotifications($order);
+        return response()->json([
+            'success' => true,
+            'delivery' => $deliveryDetails,
+            'total' => $total,
+            'formatted_total' => number_format($total, 0, ',', ' ') . ' FCFA',
+            'deposit_amount' => $depositAmount,
+            'formatted_deposit' => number_format($depositAmount, 0, ',', ' ') . ' FCFA',
+            'remaining_amount' => $total - $depositAmount,
+            'formatted_remaining' => number_format($total - $depositAmount, 0, ',', ' ') . ' FCFA'
+        ]);
+    }
+
+    public function process(Request $request)
+    {
+        $validated = $request->validate([
+            'guest_name' => 'required|string|max:255',
+            'guest_email' => 'required|email|max:255',
+            'guest_phone' => 'required|string|max:20',
+            'guest_address' => 'required|string|max:500',
+            'guest_city' => 'required|string|max:100',
+            'customer_notes' => 'nullable|string|max:1000',
+            'payment_method' => 'required|in:fedapay,cash_on_delivery'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $cart = Cart::getOrCreateCart();
+            
+            if ($cart->items->count() === 0) {
+                return back()->with('error', 'Votre panier est vide.');
             }
+
+            // Calculer les frais de livraison
+            $subtotal = $cart->total;
+            $deliveryDetails = DeliveryService::getDeliveryDetails($validated['guest_city'], $subtotal);
+            $deliveryFee = $deliveryDetails['fee'];
+            $total = $subtotal + $deliveryFee;
+            
+            // Calculer l'acompte (30%)
+            $depositPercentage = 30;
+            $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
+            $remainingAmount = $total - $depositAmount;
+
+            // Préparer les items de la commande
+            $orderItems = $cart->items->map(function ($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product->name,
+                    'product_name_local' => $item->product->name_local,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'subtotal' => $item->quantity * $item->price,
+                    'artisan_id' => $item->product->artisan_id,
+                    'artisan_name' => $item->product->artisan->business_name ?? $item->product->artisan->user->name ?? 'N/A',
+                    'image' => $item->product->images->first()->image_url ?? null,
+                ];
+            })->toArray();
+
+            // Créer la commande
+            $order = GuestOrder::create([
+                'order_number' => GuestOrder::generateOrderNumber(),
+                'user_id' => auth()->id(),
+                'guest_name' => $validated['guest_name'],
+                'guest_email' => $validated['guest_email'],
+                'guest_phone' => $validated['guest_phone'],
+                'guest_address' => $validated['guest_address'],
+                'guest_city' => $validated['guest_city'],
+                'guest_country' => 'Bénin',
+                'subtotal' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'delivery_distance' => $deliveryDetails['distance'],
+                'delivery_estimate' => $deliveryDetails['estimated_delivery'],
+                'total_amount' => $total,
+                'deposit_amount' => $depositAmount,
+                'deposit_percentage' => $depositPercentage,
+                'remaining_amount' => $remainingAmount,
+                'payment_status' => 'pending',
+                'order_status' => 'pending',
+                'payment_method' => $validated['payment_method'],
+                'order_items' => $orderItems,
+                'customer_notes' => $validated['customer_notes'] ?? null,
+            ]);
+
+            // Si paiement FedaPay, créer la transaction
+            if ($validated['payment_method'] === 'fedapay') {
+                // Séparer le nom en prénom et nom
+                $nameParts = explode(' ', $validated['guest_name'], 2);
+                
+                $customerData = [
+                    'firstname' => $nameParts[0] ?? '',
+                    'lastname' => $nameParts[1] ?? '',
+                    'email' => $validated['guest_email'],
+                    'phone' => $validated['guest_phone']
+                ];
+
+                $fedaPayResult = $this->fedaPayService->createTransaction(
+                    $order->order_number,
+                    $depositAmount,
+                    $customerData,
+                    "Acompte commande AFRI-HERITAGE #{$order->order_number}"
+                );
+
+                if (!$fedaPayResult['success']) {
+                    DB::rollBack();
+                    return back()->withInput()
+                        ->with('error', 'Erreur lors de la création du paiement: ' . $fedaPayResult['message']);
+                }
+
+                // Enregistrer les détails de la transaction
+                $order->update([
+                    'fedapay_transaction_id' => $fedaPayResult['transaction_id'],
+                    'fedapay_token' => $fedaPayResult['token']
+                ]);
+            }
+
+            // Envoyer les notifications
+            $this->sendOrderNotifications($order);
+
+            // Vider le panier
+            $cart->items()->delete();
+            $cart->updateTotals();
+
+            DB::commit();
+
+            // Redirection selon le mode de paiement
+            if ($validated['payment_method'] === 'fedapay') {
+                return redirect()->route('checkout.payment', $order)
+                    ->with('success', 'Commande créée ! Procédez au paiement de l\'acompte.');
+            } else {
+                return redirect()->route('checkout.success', $order)
+                    ->with('success', 'Commande enregistrée ! Vous paierez à la livraison.');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur création commande: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return back()->withInput()
+                ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
+        }
+    }
+
+    public function payment(GuestOrder $order)
+    {
+        if ($order->payment_method !== 'fedapay') {
+            return redirect()->route('checkout.success', $order);
         }
 
-        return response()->json(['status' => 'received']);
+        if (!$order->fedapay_token) {
+            return redirect()->route('checkout.index')
+                ->with('error', 'Token de paiement invalide.');
+        }
+
+        return view('checkout.payment', compact('order'));
+    }
+
+    public function success(GuestOrder $order)
+    {
+        return view('checkout.success', compact('order'));
+    }
+
+    /**
+     * Callback FedaPay
+     */
+    public function fedapayCallback(Request $request)
+    {
+        try {
+            $transactionId = $request->input('id');
+            
+            if (!$transactionId) {
+                Log::error('FedaPay Callback: No transaction ID');
+                return redirect()->route('home')
+                    ->with('error', 'Transaction invalide.');
+            }
+
+            // Récupérer les détails de la transaction
+            $result = $this->fedaPayService->getTransaction($transactionId);
+
+            if (!$result['success']) {
+                Log::error('FedaPay Callback Error: ' . $result['message']);
+                return redirect()->route('home')
+                    ->with('error', 'Erreur lors de la vérification du paiement.');
+            }
+
+            $transaction = $result['transaction'];
+            $orderNumber = $transaction->custom_metadata['order_number'] ?? null;
+
+            if (!$orderNumber) {
+                Log::error('FedaPay Callback: No order number in metadata');
+                return redirect()->route('home')
+                    ->with('error', 'Commande non trouvée.');
+            }
+
+            $order = GuestOrder::where('order_number', $orderNumber)->first();
+
+            if (!$order) {
+                Log::error('FedaPay Callback: Order not found - ' . $orderNumber);
+                return redirect()->route('home')
+                    ->with('error', 'Commande non trouvée.');
+            }
+
+            // Mettre à jour le statut selon la transaction
+            if ($transaction->status === 'approved') {
+                $order->update([
+                    'payment_status' => 'partial',
+                    'payment_reference' => $transactionId,
+                    'deposit_paid_at' => now(),
+                    'order_status' => 'confirmed'
+                ]);
+
+                // Notification de confirmation
+                $this->sendPaymentConfirmationNotification($order);
+
+                return redirect()->route('checkout.success', $order)
+                    ->with('success', 'Paiement réussi ! Votre commande est confirmée.');
+
+            } elseif ($transaction->status === 'declined') {
+                $order->update([
+                    'payment_status' => 'failed',
+                    'order_status' => 'cancelled'
+                ]);
+
+                return redirect()->route('checkout.index')
+                    ->with('error', 'Le paiement a échoué. Veuillez réessayer.');
+            }
+
+            return redirect()->route('checkout.payment', $order)
+                ->with('info', 'Paiement en cours de traitement...');
+
+        } catch (\Exception $e) {
+            Log::error('FedaPay Callback Exception: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return redirect()->route('home')
+                ->with('error', 'Une erreur est survenue.');
+        }
+    }
+
+    /**
+     * Webhook FedaPay
+     */
+    public function fedapayWebhook(Request $request)
+    {
+        try {
+            $payload = $request->getContent();
+            $signature = $request->header('X-FedaPay-Signature');
+
+            if (!$this->fedaPayService->verifyWebhookSignature($payload, $signature)) {
+                Log::error('FedaPay Webhook: Invalid signature');
+                return response()->json(['error' => 'Invalid signature'], 403);
+            }
+
+            $event = json_decode($payload, true);
+            
+            Log::info('FedaPay Webhook received', ['event' => $event]);
+
+            if ($event['entity'] === 'transaction' && isset($event['object'])) {
+                $transaction = $event['object'];
+                $orderNumber = $transaction['custom_metadata']['order_number'] ?? null;
+
+                if ($orderNumber) {
+                    $order = GuestOrder::where('order_number', $orderNumber)->first();
+
+                    if ($order) {
+                        if ($transaction['status'] === 'approved') {
+                            $order->update([
+                                'payment_status' => 'partial',
+                                'payment_reference' => $transaction['id'],
+                                'deposit_paid_at' => now(),
+                                'order_status' => 'confirmed'
+                            ]);
+
+                            $this->sendPaymentConfirmationNotification($order);
+                        }
+                    }
+                }
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            Log::error('FedaPay Webhook Exception: ' . $e->getMessage());
+            return response()->json(['error' => 'Server error'], 500);
+        }
+    }
+
+    private function sendOrderNotifications(GuestOrder $order)
+    {
+        try {
+            // Notifier le client
+            Notification::route('mail', $order->guest_email)
+                ->notify(new OrderPlacedNotification($order, 'customer'));
+
+            // Notifier les admins
+            $admins = \App\Models\User::whereHas('roles', function($q) {
+                $q->where('name', 'admin');
+            })->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new OrderPlacedNotification($order, 'admin'));
+            }
+
+            // Notifier les artisans concernés
+            $artisanIds = collect($order->order_items)
+                ->pluck('artisan_id')
+                ->filter()
+                ->unique();
+
+            foreach ($artisanIds as $artisanId) {
+                $artisan = \App\Models\Artisan::find($artisanId);
+                if ($artisan && $artisan->user) {
+                    $artisan->user->notify(new OrderPlacedNotification($order, 'artisan'));
+                }
+            }
+
+            Log::info('Notifications commande envoyées', ['order_number' => $order->order_number]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi notifications: ' . $e->getMessage());
+        }
+    }
+
+    private function sendPaymentConfirmationNotification(GuestOrder $order)
+    {
+        Notification::route('mail', $order->guest_email)
+            ->notify(new \App\Notifications\PaymentReceivedNotification($order));
     }
 }

@@ -21,6 +21,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\CheckoutController;
 
 // Routes pour changer la langue
 Route::get('/lang/{locale}', [LanguageController::class, 'switchLang'])->name('lang.switch');
@@ -124,6 +125,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
     });
 
+    // FedaPay Webhook Callback (webhook public, pas besoin d'authentification)
+    Route::post('/fedapay/callback', [CheckoutController::class, 'fedapayCallback'])->name('fedapay.callback');
+
     // Devis
     Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes', [QuoteController::class, 'store'])->name('quotes.store');
@@ -224,6 +228,9 @@ Route::post('/chatbot/send', [ChatbotController::class, 'send'])
 Route::fallback(function () {
     return redirect()->route('home');
 });
+
+// Dans web.php - ajouter cette route
+Route::get('/cart/deposit', [CartController::class, 'getDepositAmount'])->name('cart.deposit');
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

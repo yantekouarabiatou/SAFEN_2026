@@ -68,6 +68,18 @@ class Artisan extends Model
         return $this->morphMany(Favorite::class, 'favoritable');
     }
 
+    public function orders()
+    {
+        return $this->hasManyThrough(
+            OrderItem::class,
+            Product::class,
+            'artisan_id',
+            'product_id',
+            'id',
+            'id'
+        );
+    }
+
     public function getCraftLabelAttribute()
     {
         $crafts = [
