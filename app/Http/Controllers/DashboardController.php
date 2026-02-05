@@ -101,12 +101,6 @@ class DashboardController extends Controller
             ->with('success', 'Profil mis à jour avec succès !');
     }
 
-<<<<<<< HEAD
-    public function messages()
-    {
-        // Rediriger vers la page de messages principale
-        return redirect()->route('messages.index');
-=======
     public function artisan()
     {
         $user = auth()->user();
@@ -248,6 +242,5 @@ class DashboardController extends Controller
     public function adminAnalytics()
     {
         return view('admin.analytics');
->>>>>>> 7aaa8e97d412cdcaded064a5429c71755e98e2ff
     }
 }
