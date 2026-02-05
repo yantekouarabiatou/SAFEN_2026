@@ -175,7 +175,7 @@ class DashboardController extends Controller
 
     public function messages()
     {
-        $messages = auth()->user()->conversations()->with('messages')->orderBy('updated_at', 'desc')->paginate(20);
+        $messages = auth()->user()->conversations()->orderBy('updated_at', 'desc')->paginate(20);
         return view('dashboard.messages', compact('messages'));
     }
 
