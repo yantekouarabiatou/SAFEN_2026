@@ -68,11 +68,11 @@ class RegisteredUserController extends Controller
 
         // Redirection selon le rôle
         if ($user->role === 'artisan') {
-            return redirect()->route('artisan.dashboard')
+            return redirect()->route('dashboard.artisan')
                 ->with('success', 'Bienvenue ! Complétez votre profil pour commencer.');
         }
 
         return redirect()->route('dashboard')
-            ->with('success', 'Bienvenue sur AFRI-HERITAGE !');
+            ->with('success', 'Bienvenue sur SAFEN !');
     }
 }

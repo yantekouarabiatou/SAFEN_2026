@@ -155,6 +155,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/artisan/products', [DashboardController::class, 'artisanProducts'])->name('dashboard.artisan.products');
     Route::get('/dashboard/artisan/orders', [DashboardController::class, 'artisanOrders'])->name('dashboard.artisan.orders');
     Route::get('/dashboard/artisan/analytics', [DashboardController::class, 'artisanAnalytics'])->name('dashboard.artisan.analytics');
+    Route::get('/dashboard/artisan/reviews', [DashboardController::class, 'artisanReviews'])->name('dashboard.artisan.reviews');
 });
 
 // Artisans CRUD
@@ -225,3 +226,4 @@ Route::fallback(function () {
 });
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';
