@@ -125,8 +125,19 @@
 <div class="checkout-container">
     <form action="{{ route('checkout.process') }}" method="POST">
         @csrf
-        
+
         <div class="row">
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Erreur dans le formulaire :</strong>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <!-- Formulaire client -->
             <div class="col-lg-7">
                 <div class="checkout-card">
@@ -138,19 +149,19 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Nom complet *</label>
-                            <input type="text" name="guest_name" class="form-control" 
+                            <input type="text" name="guest_name" class="form-control"
                                    value="{{ old('guest_name', auth()->user()->name ?? '') }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Email *</label>
-                            <input type="email" name="guest_email" class="form-control" 
+                            <input type="email" name="guest_email" class="form-control"
                                    value="{{ old('guest_email', auth()->user()->email ?? '') }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Téléphone *</label>
-                            <input type="tel" name="guest_phone" class="form-control" 
+                            <input type="tel" name="guest_phone" class="form-control"
                                    value="{{ old('guest_phone') }}" placeholder="+229 XX XX XX XX" required>
                         </div>
 
@@ -173,14 +184,14 @@
 
                         <div class="col-12">
                             <label class="form-label">Adresse de livraison *</label>
-                            <textarea name="guest_address" class="form-control" rows="3" 
+                            <textarea name="guest_address" class="form-control" rows="3"
                                       style="border-radius: 20px;" required>{{ old('guest_address') }}</textarea>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label">Notes (optionnel)</label>
-                            <textarea name="customer_notes" class="form-control" rows="3" 
-                                      style="border-radius: 20px;" 
+                            <textarea name="customer_notes" class="form-control" rows="3"
+                                      style="border-radius: 20px;"
                                       placeholder="Instructions spéciales, préférences...">{{ old('customer_notes') }}</textarea>
                         </div>
                     </div>
@@ -188,7 +199,7 @@
                     <!-- Méthodes de paiement -->
                     <div class="mt-4">
                         <h5 class="mb-3"><i class="bi bi-credit-card me-2"></i>Mode de paiement</h5>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="payment-method">

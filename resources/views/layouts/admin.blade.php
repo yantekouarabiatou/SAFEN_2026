@@ -505,9 +505,7 @@
             <div class="navbar-bg"></div>
 
             {{-- Navbar --}}
-            @include('admin.partials.navbar')
-
-            {{-- Sidebar - Selon le rôle de l'utilisateur --}}
+           {{-- Sidebar - Selon le rôle de l'utilisateur --}}
             @if(auth()->user()->hasRole('admin'))
                 @include('admin.partials.sidebar')
             @elseif(auth()->user()->hasRole('artisan'))
@@ -515,7 +513,8 @@
             @elseif(auth()->user()->hasRole('vendor'))
                 @include('admin.partials.sidebar-vendor')
             @else
-                @include('admin.partials.sidebar-artisan')
+                {{-- Par défaut = client / utilisateur normal --}}
+                @include('admin.partials.sidebar-client')
             @endif
 
             {{-- Main Content --}}

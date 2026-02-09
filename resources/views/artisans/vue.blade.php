@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('artisans.title'))
+@section('title', __('Liste des artisans '))
 
 @push('styles')
     <style>
@@ -148,14 +148,14 @@
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb text-white">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white">{{ __('messages.home') }}</a></li>
-                    <li class="breadcrumb-item active text-white">{{ __('artisans.title') }}</li>
+                    <li class="breadcrumb-item active text-white">{{ __('Liste des Artisans') }}</li>
                 </ol>
             </nav>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-4">
                 <div>
                     <h1 class="display-5 fw-bold text-white mb-2">{{ __('artisans.title') }}</h1>
-                    <p class="lead text-white-75 mb-0">{{ __('artisans.subtitle') }}</p>
+                    <p class="lead text-white-75 mb-0">{{ __('Liste des artisans') }}</p>
                 </div>
                 <a href="{{ route('artisans.create') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold">
                     <i class="bi bi-plus-circle me-2"></i> {{ __('artisans.become_artisan') ?? 'Devenir artisan' }}
@@ -208,7 +208,7 @@
                             <input type="hidden" name="latitude" value="{{ request('latitude') }}">
                             <input type="hidden" name="longitude" value="{{ request('longitude') }}">
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Rayon (km)</label>
+                                <label class="form-label fw-bold">{{ __('artisans.radius') ?? 'Rayon (km)' }}</label>
                                 <input type="range" name="radius" min="5" max="100" step="5" value="{{ request('radius', 30) }}"
                                     class="form-range" oninput="document.getElementById('radiusVal').textContent = this.value">
                                 <div class="text-center mt-2 fw-bold">
@@ -293,7 +293,7 @@
                                                 </a>
                                                 @if($artisan->verified)
                                                     <span class="verified-badge ms-2">
-                                                        <i class="bi bi-patch-check-fill me-1"></i>Vérifié
+                                                        <i class="bi bi-patch-check-fill me-1"></i>{{ __('artisans.verified') }}
                                                     </span>
                                                 @endif
                                             </h5>
@@ -486,7 +486,7 @@
                         <p class="small mb-2">${data.city}</p>
                         ${data.distance ? `<p class="small mb-2 text-success"><strong>${data.distance.toFixed(1)} km</strong></p>` : ''}
                         <a href="/artisans/${data.id}" class="btn btn-sm btn-benin-green w-100 mt-2">
-                            Voir profil
+                            {{ __('artisans.view_profile') }}
                         </a>
                     </div>
                 `

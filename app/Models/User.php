@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Artisan as ModelsArtisan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Artisan;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -55,7 +59,17 @@ class User extends Authenticatable
 
     public function artisan()
     {
-        return $this->hasOne(Artisan::class);
+        return $this->hasOne(ModelsArtisan::class);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est administrateur
+     */
+    public function isAdmin()
+    {
+        // Adaptez cette logique selon votre système de rôles
+        // Par exemple, si vous avez une colonne 'role' dans la table users
+        return $this->role === 'admin' || $this->role === 'super_admin';
     }
 
     public function favorites()
@@ -76,11 +90,6 @@ class User extends Authenticatable
     public function isArtisan()
     {
         return $this->role === 'artisan';
-    }
-
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
     }
 
     public function getAvatarUrlAttribute()
@@ -167,4 +176,10 @@ class User extends Authenticatable
     {
         return $this->cartItems()->sum('total');
     }
+    public function orders()
+    {
+        return $this->hasMany(GuestOrder::class, 'user_id');
+    }
+
+   
 }

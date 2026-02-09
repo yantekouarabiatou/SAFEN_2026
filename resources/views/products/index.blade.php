@@ -741,9 +741,9 @@
                                             class="artisan-avatar">
                                     @else
                                         <!-- Initiales -->
-                                        <div class="avatar-initials" style="width: 32px; height: 32px; border-radius: 50%; 
-                                                                        background: var(--benin-green); color: white; 
-                                                                        display: flex; align-items: center; justify-content: center; 
+                                        <div class="avatar-initials" style="width: 32px; height: 32px; border-radius: 50%;
+                                                                        background: var(--benin-green); color: white;
+                                                                        display: flex; align-items: center; justify-content: center;
                                                                         font-weight: bold; font-size: 1rem; border: 2px solid white;">
                                             {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
                                         (str_word_count($product->artisan->user->name ?? '') > 1
@@ -816,7 +816,7 @@
 
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'fr-FR';
-                
+
                 // Optionnel : régler la voix, la vitesse, le ton
                 utterance.rate = 1.0;   // vitesse (0.5 à 2)
                 utterance.pitch = 1.0;  // ton (0 à 2)
@@ -852,9 +852,10 @@
 
             fetch('/favorites/toggle', {
                 method: 'POST',
-                headers: {
+                    headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     product_id: productId
@@ -868,22 +869,84 @@
                 });
         }
 
-        function addToCart(productId) {
+       // Fonction pour ajouter au panier
+        function addToCart(productId, quantity = 1) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
             fetch('/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     product_id: productId,
-                    quantity: 1
+                    quantity: quantity
                 })
             })
-                .then(response => response.json())
-                .then(data => {
-                    showToast(data.message, data.success ? 'success' : 'error');
+                .then(response => {
+                    // D'abord, obtenir la réponse en texte
+                    return response.text().then(text => {
+                        // Essayer de parser en JSON
+                        let data;
+                        try {
+                            data = JSON.parse(text);
+                        } catch (e) {
+                            // Si ce n'est pas du JSON, on retourne le texte brut
+                            return {
+                                status: response.status,
+                                ok: response.ok,
+                                text: text
+                            };
+                        }
+                        // Si c'est du JSON, on retourne l'objet
+                        return {
+                            status: response.status,
+                            ok: response.ok,
+                            data: data
+                        };
+                    });
+                })
+                .then(result => {
+                    if (!result.ok) {
+                        // Si la réponse n'est pas OK, afficher l'erreur
+                        if (result.text) {
+                            // C'est du texte (HTML probablement)
+                            console.error('Réponse non JSON:', result.text);
+                            // Extraire le message d'erreur de la page HTML si possible
+                            const match = result.text.match(/<title>(.*?)<\/title>/);
+                            let message = 'Erreur serveur. Veuillez réessayer.';
+                            if (match) {
+                                message = match[1];
+                            }
+                            throw new Error(message);
+                        } else {
+                            // C'est du JSON
+                            throw new Error(result.data.message || 'Une erreur est survenue.');
+                        }
+                    }
+
+                    // Succès
+                    if (result.data.success) {
+                        showToast("✅ Produit ajouté au panier avec succès !");
+                    } else {
+                        throw new Error(result.data.message || 'Erreur inconnue.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    // Afficher l'erreur à l'utilisateur
+                    alert('Erreur: ' + error.message);
                 });
+        }
+           // Fonction pour mettre à jour le compteur du panier
+        function updateCartCount(count) {
+            const cartCounters = document.querySelectorAll('.cart-count');
+            cartCounters.forEach(counter => {
+                counter.textContent = count;
+                counter.style.display = count > 0 ? 'inline' : 'none';
+            });
         }
 
         function showToast(message, type = 'info') {

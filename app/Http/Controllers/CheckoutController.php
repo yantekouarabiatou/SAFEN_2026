@@ -22,32 +22,36 @@ class CheckoutController extends Controller
         $this->fedaPayService = $fedaPayService;
     }
 
+    public function cancel()
+    {
+        return redirect()->route('cart.index')
+            ->with('error', 'Le paiement a été annulé.');
+    }
+
     public function index()
     {
         $cart = Cart::getOrCreateCart();
-        
+
         if ($cart->items->count() === 0) {
             return redirect()->route('cart.index')
                 ->with('error', 'Votre panier est vide.');
         }
 
         $cart->load(['items.product.images', 'items.product.artisan']);
-        
-        // Frais de livraison par défaut (sera recalculé dynamiquement)
+
         $deliveryFee = 2000;
         $subtotal = $cart->total;
         $total = $subtotal + $deliveryFee;
-        
-        // Pourcentage d'acompte configurable (30% par défaut)
+
         $depositPercentage = 30;
         $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
         $remainingAmount = $total - $depositAmount;
 
         return view('checkout.index', compact(
-            'cart', 
-            'deliveryFee', 
-            'subtotal', 
-            'total', 
+            'cart',
+            'deliveryFee',
+            'subtotal',
+            'total',
             'depositAmount',
             'remainingAmount',
             'depositPercentage'
@@ -58,18 +62,6 @@ class CheckoutController extends Controller
     {
         return $this->process($request);
     }
-
-    public function cancel()
-    {
-        return redirect()->route('cart.index')
-            ->with('error', 'Le paiement a été annulé.');
-    }
-            'depositAmount', 
-            'remainingAmount',
-            'depositPercentage'
-        ));
-    }
-
     /**
      * Calculer les frais de livraison en AJAX
      */
@@ -81,7 +73,7 @@ class CheckoutController extends Controller
         ]);
 
         $deliveryDetails = DeliveryService::getDeliveryDetails(
-            $request->city, 
+            $request->city,
             $request->subtotal
         );
 
@@ -110,14 +102,14 @@ class CheckoutController extends Controller
             'guest_address' => 'required|string|max:500',
             'guest_city' => 'required|string|max:100',
             'customer_notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:fedapay,cash_on_delivery'
+            'payment_method' => 'required|in:mtn_money,moov_money,bank_transfer,cash_on_delivery', // ← ICI
         ]);
 
         try {
             DB::beginTransaction();
 
             $cart = Cart::getOrCreateCart();
-            
+
             if ($cart->items->count() === 0) {
                 return back()->with('error', 'Votre panier est vide.');
             }
@@ -127,7 +119,7 @@ class CheckoutController extends Controller
             $deliveryDetails = DeliveryService::getDeliveryDetails($validated['guest_city'], $subtotal);
             $deliveryFee = $deliveryDetails['fee'];
             $total = $subtotal + $deliveryFee;
-            
+
             // Calculer l'acompte (30%)
             $depositPercentage = 30;
             $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
@@ -177,7 +169,7 @@ class CheckoutController extends Controller
             if ($validated['payment_method'] === 'fedapay') {
                 // Séparer le nom en prénom et nom
                 $nameParts = explode(' ', $validated['guest_name'], 2);
-                
+
                 $customerData = [
                     'firstname' => $nameParts[0] ?? '',
                     'lastname' => $nameParts[1] ?? '',
@@ -222,12 +214,11 @@ class CheckoutController extends Controller
                 return redirect()->route('checkout.success', $order)
                     ->with('success', 'Commande enregistrée ! Vous paierez à la livraison.');
             }
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Erreur création commande: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            
+
             return back()->withInput()
                 ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
         }
@@ -247,11 +238,6 @@ class CheckoutController extends Controller
         return view('checkout.payment', compact('order'));
     }
 
-    public function success(GuestOrder $order)
-    {
-        return view('checkout.success', compact('order'));
-    }
-
     /**
      * Callback FedaPay
      */
@@ -259,7 +245,7 @@ class CheckoutController extends Controller
     {
         try {
             $transactionId = $request->input('id');
-            
+
             if (!$transactionId) {
                 Log::error('FedaPay Callback: No transaction ID');
                 return redirect()->route('home')
@@ -306,7 +292,6 @@ class CheckoutController extends Controller
 
                 return redirect()->route('checkout.success', $order)
                     ->with('success', 'Paiement réussi ! Votre commande est confirmée.');
-
             } elseif ($transaction->status === 'declined') {
                 $order->update([
                     'payment_status' => 'failed',
@@ -319,11 +304,10 @@ class CheckoutController extends Controller
 
             return redirect()->route('checkout.payment', $order)
                 ->with('info', 'Paiement en cours de traitement...');
-
         } catch (\Exception $e) {
             Log::error('FedaPay Callback Exception: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            
+
             return redirect()->route('home')
                 ->with('error', 'Une erreur est survenue.');
         }
@@ -344,7 +328,7 @@ class CheckoutController extends Controller
             }
 
             $event = json_decode($payload, true);
-            
+
             Log::info('FedaPay Webhook received', ['event' => $event]);
 
             if ($event['entity'] === 'transaction' && isset($event['object'])) {
@@ -370,7 +354,6 @@ class CheckoutController extends Controller
             }
 
             return response()->json(['success' => true]);
-
         } catch (\Exception $e) {
             Log::error('FedaPay Webhook Exception: ' . $e->getMessage());
             return response()->json(['error' => 'Server error'], 500);
@@ -385,7 +368,7 @@ class CheckoutController extends Controller
                 ->notify(new OrderPlacedNotification($order, 'customer'));
 
             // Notifier les admins
-            $admins = \App\Models\User::whereHas('roles', function($q) {
+            $admins = \App\Models\User::whereHas('roles', function ($q) {
                 $q->where('name', 'admin');
             })->get();
 
@@ -407,7 +390,6 @@ class CheckoutController extends Controller
             }
 
             Log::info('Notifications commande envoyées', ['order_number' => $order->order_number]);
-
         } catch (\Exception $e) {
             Log::error('Erreur envoi notifications: ' . $e->getMessage());
         }
@@ -417,5 +399,10 @@ class CheckoutController extends Controller
     {
         Notification::route('mail', $order->guest_email)
             ->notify(new \App\Notifications\PaymentReceivedNotification($order));
+    }
+
+    public function success(GuestOrder $order)
+    {
+        return view('checkout.success', compact('order'));
     }
 }

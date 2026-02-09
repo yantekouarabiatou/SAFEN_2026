@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
@@ -16,7 +17,7 @@ class CartController extends Controller
         $cart->load(['items.product.images', 'items.product.artisan']);
 
         // Calculer le délai de production maximum
-        $maxProductionTime = $cart->items->max(function($item) {
+        $maxProductionTime = $cart->items->max(function ($item) {
             return $item->product->production_time_days ?? 0;
         });
 
@@ -25,94 +26,119 @@ class CartController extends Controller
 
     public function add(Request $request)
     {
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Veuillez vous connecter pour ajouter au panier.'
+            ], 401);
+        }
+
         try {
-            $validated = $request->validate([
-                'product_id' => 'required|exists:products,id',
-                'quantity' => 'nullable|integer|min:1|max:99',
-            ]);
+            Log::info('Cart add request', $request->all());
 
-            $product = Product::findOrFail($validated['product_id']);
-            $quantity = $validated['quantity'] ?? 1;
+            // Validation simple
+            $productId = $request->input('product_id');
+            $quantity = $request->input('quantity', 1);
 
-            // Vérifier la disponibilité du produit
-            $availabilityCheck = $product->canBeOrdered($quantity);
-            
-            if (!$availabilityCheck['can_order']) {
+            if (!$productId) {
                 return response()->json([
                     'success' => false,
-                    'message' => $availabilityCheck['message']
+                    'message' => 'ID produit manquant.'
                 ], 400);
             }
 
-            $cart = Cart::getOrCreateCart();
-
-            // Vérifier si le produit existe déjà dans le panier
-            $existingItem = $cart->items()
-                ->where('product_id', $product->id)
-                ->first();
-
-            if ($existingItem) {
-                // Mettre à jour la quantité
-                $newQuantity = $existingItem->quantity + $quantity;
-                
-                // Vérifier la nouvelle quantité
-                $quantityCheck = $product->canBeOrdered($newQuantity);
-                if (!$quantityCheck['can_order']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $quantityCheck['message']
-                    ], 400);
-                }
-                
-                $existingItem->update(['quantity' => $newQuantity]);
-                $message = 'Quantité mise à jour dans le panier !';
-            } else {
-                // Créer un nouvel item
-                CartItem::create([
-                    'cart_id' => $cart->id,
-                    'product_id' => $product->id,
-                    'quantity' => $quantity,
-                    'price' => $product->price,
-                ]);
-                
-                $message = 'Produit ajouté au panier !';
+            // Vérifier si le produit existe
+            $product = Product::find($productId);
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Produit non trouvé.'
+                ], 404);
             }
 
-            // Mettre à jour les totaux du panier
-            $cart->updateTotals();
+            // Récupérer le panier
+            $cart = Cart::firstOrCreate(
+                ['user_id' => Auth::id()],
+                ['session_id' => session()->getId(), 'total' => 0, 'item_count' => 0]
+            );
 
-            // Calculer l'acompte total requis
-            $cart->load(['items.product']);
-            $totalDeposit = $cart->items->sum(function($item) {
-                return $item->product->required_deposit_amount * $item->quantity;
-            });
+            // Vérifier si l'article existe déjà
+            $cartItem = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $productId)
+                ->first();
+
+            if ($cartItem) {
+                // Mettre à jour la quantité
+                $cartItem->quantity += $quantity;
+                $cartItem->save();
+            } else {
+                // Créer un nouvel article
+                CartItem::create([
+                    'cart_id' => $cart->id,
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'price' => $product->price
+                ]);
+            }
+
+            // Mettre à jour le total du panier
+            $cart->updateTotals();
 
             return response()->json([
                 'success' => true,
-                'message' => $message,
+                'message' => 'Produit ajouté au panier.',
                 'cart_count' => $cart->item_count,
-                'cart_total' => $cart->formatted_total,
-                'deposit_required' => number_format($totalDeposit, 0, ',', ' ') . ' FCFA',
-                'info' => 'Produit fabriqué sur commande. Acompte de ' . $product->deposit_percentage . '% requis.'
+                'cart_total' => number_format($cart->total, 0, ',', ' ') . ' FCFA'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Cart add error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Données invalides.',
-                'errors' => $e->errors()
-            ], 422);
-            
-        } catch (\Exception $e) {
-            Log::error('Erreur ajout au panier: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Une erreur est survenue. Veuillez réessayer.'
+                'message' => 'Erreur serveur: ' . $e->getMessage()
             ], 500);
         }
     }
+
+    public function checkProduct(Request $request, $productId)
+    {
+        $cart = Cart::getOrCreateCart();
+
+        $exists = $cart->items()
+            ->where('product_id', $productId)
+            ->exists();
+
+        return response()->json([
+            'in_cart' => $exists
+        ]);
+    }
+
+    public function updateTotals()
+    {
+        try {
+            $cart = $this;
+            $total = 0;
+            $itemCount = 0;
+
+            foreach ($cart->items as $item) {
+                $total += $item->price * $item->quantity;
+                $itemCount += $item->quantity;
+            }
+
+            $cart->total = $total;
+            $cart->item_count = $itemCount;
+            $cart->save();
+        } catch (\Exception $e) {
+            Log::error('Error updating cart totals: ' . $e->getMessage());
+        }
+    }
+
+
 
     public function update(Request $request, CartItem $item)
     {
@@ -127,16 +153,18 @@ class CartController extends Controller
                 abort(403, 'Accès non autorisé');
             }
 
-            // Vérifier la disponibilité
-            $product = $item->product;
-            $availabilityCheck = $product->canBeOrdered($validated['quantity']);
-            
-            if (!$availabilityCheck['can_order']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $availabilityCheck['message']
-                ], 400);
-            }
+            // --------------------------------------
+            // Commenter ou supprimer cette partie
+            // $product = $item->product;
+            // $availabilityCheck = $product->canBeOrdered($validated['quantity']);
+            //
+            // if (!$availabilityCheck['can_order']) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => $availabilityCheck['message']
+            //     ], 400);
+            // }
+            // --------------------------------------
 
             $item->update([
                 'quantity' => $validated['quantity']
@@ -155,17 +183,15 @@ class CartController extends Controller
             }
 
             return redirect()->back()->with('success', 'Quantité mise à jour.');
-
         } catch (\Exception $e) {
             Log::error('Erreur mise à jour panier: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la mise à jour.'
             ], 500);
         }
     }
-
     public function remove(CartItem $item)
     {
         try {
@@ -189,10 +215,9 @@ class CartController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Produit retiré du panier.');
-
         } catch (\Exception $e) {
             Log::error('Erreur suppression item panier: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -223,10 +248,9 @@ class CartController extends Controller
 
             return redirect()->route('cart.index')
                 ->with('success', 'Panier vidé.');
-
         } catch (\Exception $e) {
             Log::error('Erreur vidage panier: ' . $e->getMessage());
-            
+
             return redirect()->route('cart.index')
                 ->with('error', 'Erreur lors du vidage du panier.');
         }
@@ -244,7 +268,7 @@ class CartController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Erreur récupération compteur panier: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'count' => 0,
@@ -262,7 +286,7 @@ class CartController extends Controller
             $cart = Cart::getOrCreateCart();
             $cart->load(['items.product']);
 
-            $totalDeposit = $cart->items->sum(function($item) {
+            $totalDeposit = $cart->items->sum(function ($item) {
                 return $item->product->required_deposit_amount * $item->quantity;
             });
 
@@ -273,10 +297,9 @@ class CartController extends Controller
                 'cart_total' => $cart->total,
                 'formatted_total' => $cart->formatted_total
             ]);
-
         } catch (\Exception $e) {
             Log::error('Erreur calcul acompte: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors du calcul de l\'acompte.'

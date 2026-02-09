@@ -106,7 +106,7 @@ class Product extends Model
         return $categories[$this->category] ?? $this->category;
     }
 
-     public function getFullUrlAttribute()
+    public function getFullUrlAttribute()
     {
         return Storage::url($this->image_url);
     }
@@ -139,7 +139,7 @@ class Product extends Model
     public function getProductionTimeTextAttribute()
     {
         $days = $this->production_time_days;
-        
+
         if ($days <= 7) {
             return "1 semaine";
         } elseif ($days <= 14) {
@@ -159,34 +159,54 @@ class Product extends Model
         return now()->addDays($this->production_time_days)->format('d/m/Y');
     }
 
-    // Méthodes
+
     public function canBeOrdered($quantity = 1)
     {
-        if (!$this->is_available) {
+        // Pour les produits sur commande, on ne vérifie pas le stock
+        if ($this->is_custom || $this->production_type === 'made_to_order') {
             return [
-                'can_order' => false,
-                'message' => 'Ce produit n\'est pas disponible pour le moment.'
+                'can_order' => true,
+                'message' => 'Produit fabriqué sur commande - délai: ' . $this->production_time_days . ' jours'
             ];
         }
 
-        if ($quantity < $this->min_order_quantity) {
+        // Pour les produits en stock
+        if ($this->stock >= $quantity) {
             return [
-                'can_order' => false,
-                'message' => "Quantité minimum : {$this->min_order_quantity}"
-            ];
-        }
-
-        if ($this->max_order_quantity && $quantity > $this->max_order_quantity) {
-            return [
-                'can_order' => false,
-                'message' => "Quantité maximum : {$this->max_order_quantity}"
+                'can_order' => true,
+                'message' => 'En stock'
             ];
         }
 
         return [
-            'can_order' => true,
-            'message' => 'Produit disponible sur commande'
+            'can_order' => false,
+            'message' => 'Stock insuffisant'
         ];
     }
-}
 
+    // Accesseur pour le statut de disponibilité
+    public function getAvailabilityStatusAttribute()
+    {
+        if ($this->is_custom) {
+            return 'Sur commande';
+        }
+
+        if ($this->stock > 10) {
+            return 'En stock';
+        } elseif ($this->stock > 0) {
+            return 'Stock limité';
+        } else {
+            return 'Rupture de stock';
+        }
+    }
+
+    public function getRatingAvgAttribute($value)
+    {
+        return $value ?? 0;
+    }
+
+    public function getRatingCountAttribute($value)
+    {
+        return $value ?? 0;
+    }
+}

@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\ArtisanController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\ArtisanProfileController;
 use App\Http\Controllers\GastronomieController;
 use App\Http\Controllers\ProductController;
@@ -23,6 +24,10 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DashboardController as ControllersDashboardController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CulturalEventController;
 
 // Routes pour changer la langue
 Route::get('/lang/{locale}', [LanguageController::class, 'switchLang'])->name('lang.switch');
@@ -40,7 +45,10 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/legal', [HomeController::class, 'legal'])->name('legal');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
-
+// Routes pour les témoignages/avis
+Route::get('/artisan/{artisan}/testimonials', [HomeController::class, 'getArtisanTestimonials'])->name('artisan.testimonials');
+Route::get('/product/{product}/testimonials', [HomeController::class, 'getProductTestimonials'])->name('product.testimonials');
+Route::post('/testimonials/submit', [HomeController::class, 'submitTestimonial'])->name('testimonials.submit');
 // Culture & Patrimoine
 Route::get('/culture', [CultureController::class, 'index'])->name('culture.index');
 Route::get('/culture/traditions', [CultureController::class, 'traditions'])->name('culture.traditions');
@@ -117,15 +125,44 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/count', [CartController::class, 'getCartCount'])->name('cart.count');
     Route::post('/cart/merge-session', [CartController::class, 'mergeSessionCart'])->name('cart.merge-session');
-
+    Route::get('/cart/check/{productId}', [CartController::class, 'checkProduct'])->name('cart.check');
+    Route::patch('/cart/update/{item}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     // Paiement & Checkout (nécessite authentification)
-    Route::middleware('auth')->group(function () {
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-        Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-        Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
-    });
+    Route::prefix('checkout')->name('checkout.')->controller(CheckoutController::class)->group(function () {
 
+        Route::get('/', 'index')->name('index');
+        Route::post('/process', 'process')->name('process');           // ← celle-ci manquait
+        Route::get('/payment/{order}', 'payment')->name('payment');
+        Route::get('/success/{order}', 'success')->name('success');
+        Route::get('/cancel', 'cancel')->name('cancel');
+
+        // AJAX
+        Route::post('/calculate-delivery', 'calculateDelivery')->name('calculate-delivery');
+    });
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])
+        ->name('checkout.success');
+    // Groupe des routes authentifiées (ajoute ceci si ce n'est pas déjà dans un groupe auth)
+    Route::middleware('auth')->group(function () {
+
+        // Dashboard client (si tu en as un)
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // === ROUTES POUR LES COMMANDES DU CLIENT ===
+        Route::prefix('orders')->name('orders.')->group(function () {
+            // Liste des commandes de l'utilisateur connecté
+            Route::get('/', [OrderController::class, 'index'])->name('index');
+
+            // Détails d'une commande spécifique
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+
+            // Optionnel : suivi de commande (tracking)
+            Route::get('/track', [OrderController::class, 'tracking'])->name('tracking');
+        });
+    });
+    Route::get('/orders/track', [OrderController::class, 'tracking'])
+        ->name('orders.tracking');
     // FedaPay Webhook Callback (webhook public, pas besoin d'authentification)
     Route::post('/fedapay/callback', [CheckoutController::class, 'fedapayCallback'])->name('fedapay.callback');
 
@@ -138,7 +175,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/quotes/{quote}/reject', [QuoteController::class, 'reject'])->name('quotes.reject');
 
     // Avis
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store')->middleware('auth');
     Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
@@ -163,14 +200,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/artisan/reviews', [DashboardController::class, 'artisanReviews'])->name('dashboard.artisan.reviews');
 });
 
+// Dans toutes les routes nécessitant connexion
+Route::middleware(['auth'])->group(function () {
+    // Devis
+    Route::post('/quotes', [QuoteController::class, 'store'])->name('quotes.store');
+
+    // Favoris
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{favorite}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+
+    // Avis/Reviews
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Panier
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+});
+
 // Artisans CRUD
 Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
 Route::get('/artisans/create', [ArtisanController::class, 'create'])->name('artisans.create');
 Route::post('/artisans', [ArtisanController::class, 'store'])->name('artisans.store');
+Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
 Route::get('/artisans/{artisan}/edit', [ArtisanController::class, 'edit'])->name('artisans.edit');
 Route::put('/artisans/{artisan}', [ArtisanController::class, 'update'])->name('artisans.update');
 Route::delete('/artisans/{artisan}', [ArtisanController::class, 'destroy'])->name('artisans.destroy');
-Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
 // Products CRUD
 Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
 Route::post('/products', [ProductController::class, 'store'])->name('products.store');
@@ -190,7 +243,7 @@ Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('
 Route::get('/dashboard/vendor', [DashboardController::class, 'vendor'])->name('dashboard.vendor');
 
 // Routes pour administrateurs
-Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
+Route::get('/admin', [AdminDashboardController::class, 'admin'])->name('admin.dashboard');
 Route::get('/admin/users', [DashboardController::class, 'adminUsers'])->name('admin.users');
 Route::get('/admin/artisans', [DashboardController::class, 'adminArtisans'])->name('admin.artisans');
 Route::get('/admin/products', [DashboardController::class, 'adminProducts'])->name('admin.products');
@@ -201,7 +254,6 @@ Route::get('/admin/analytics', [DashboardController::class, 'adminAnalytics'])->
 Route::post('/admin/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('admin.artisans.verify');
 Route::post('/admin/products/{product}/feature', [ProductController::class, 'feature'])->name('admin.products.feature');
 Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
-
 
 
 // Routes API pour AJAX
@@ -221,6 +273,7 @@ Route::prefix('api')->group(function () {
 });
 
 Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
+Route::get('/artisans/create', [ArtisanController::class, 'create'])->name('artisans.create');
 
 // Route pour le chatbot
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])
@@ -236,16 +289,16 @@ Route::prefix('artisan')->name('artisan.')->group(function () {
     Route::get('profile/{id}/edit', [ArtisanProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile/{id}', [ArtisanProfileController::class, 'update'])->name('profile.update');
     Route::delete('profile/{id}', [ArtisanProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     // Mot de passe
     Route::post('profile/change-password', [ArtisanProfileController::class, 'changePassword'])->name('profile.change-password');
-    
+
     // Produits
     Route::get('profile/{id}/products', [ArtisanProfileController::class, 'products'])->name('products.index');
-    
+
     // Avis
     Route::get('profile/{id}/reviews', [ArtisanProfileController::class, 'reviews'])->name('reviews.index');
-    
+
     // Activation/désactivation
     Route::put('profile/{id}/toggle-status', [ArtisanProfileController::class, 'toggleStatus'])->name('profile.toggle-status');
 });
@@ -257,5 +310,71 @@ Route::get('/search/ajax', 'SearchController@ajax')->name('search.ajax');
 Route::post('/notifications/mark-all-read', 'NotificationController@markAllRead')->name('notifications.markAllRead');
 Route::post('/notifications/mark-as-read', 'NotificationController@markAsRead')->name('notifications.markAsRead');
 Route::post('/user/online', 'UserController@updateOnlineStatus')->name('user.online');
+
+// routes/web.php
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/artisans/pending', [ArtisanController::class, 'pendingList'])->name('artisans.pending');
+    Route::post('/artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('artisans.approve');
+    Route::post('/artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('artisans.reject');
+});
+
+// Routes protégées par authentification
+Route::middleware(['auth'])->group(function () {
+    // Dashboard principal
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Sections du dashboard
+    Route::get('/dashboard/favorites', [ControllersDashboardController::class, 'favorites'])->name('dashboard.favorites');
+    Route::get('/dashboard/requests', [DashboardController::class, 'requests'])->name('dashboard.requests');
+    Route::get('/dashboard/orders', [DashboardController::class, 'orders'])->name('dashboard.orders');
+    Route::get('/dashboard/messages', [DashboardController::class, 'messages'])->name('dashboard.messages');
+    Route::get('/dashboard/profile', [DashboardController::class, 'profile'])->name('dashboard.profile');
+    Route::post('/dashboard/profile/update', [DashboardController::class, 'updateProfile'])->name('dashboard.profile.update');
+
+    // Dashboard artisan (si nécessaire)
+    Route::get('/dashboard/artisan', [DashboardController::class, 'artisan'])->name('dashboard.artisan');
+});
+
+Route::middleware('auth')->group(function () {
+
+
+    // Favoris de l'utilisateur connecté
+    Route::get('/favorites', [FavoriteController::class, 'index'])
+        ->name('favorites');
+
+    // Optionnel : routes pour ajouter/supprimer un favori (AJAX ou POST)
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{favorite}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+
+});
+
+Route::middleware('auth')->group(function () {
+    // Profil
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile', [ProfileController::class, 'show'])
+        ->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// routes/web.php
+
+Route::get('/evenements', [CulturalEventController::class, 'index'])->name('events.index');
+Route::get('/evenements/{event}', [CulturalEventController::class, 'show'])->name('events.show');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/evenements/{event}/subscribe', [CulturalEventController::class, 'subscribe'])
+        ->name('events.subscribe');
+    Route::delete('/evenements/{event}/unsubscribe', [CulturalEventController::class, 'unsubscribe'])
+        ->name('events.unsubscribe');
+    Route::post('/evenements/preferences', [CulturalEventController::class, 'updatePreferences'])
+        ->name('events.preferences');
+});
+
+// Routes publiques
+Route::resource('artisans', ArtisanController::class)->except(['destroy']);
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

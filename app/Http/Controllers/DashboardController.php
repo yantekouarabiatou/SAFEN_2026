@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Artisan;
 use App\Models\ChatLog;
-use App\Models\Product;
 use App\Models\Favorite;
+use App\Models\Product;
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB as FacadesDB;
@@ -17,22 +17,36 @@ class DashboardController extends Controller
         $user = auth()->user();
         $data = [];
 
-        if ($user->hasRole('artisan')) {
+        // Vérifier si l'utilisateur est connecté
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Dashboard artisan
+        if ($user->role === 'artisan') {
             $artisan = $user->artisan;
+
+            // Si l'artisan n'existe pas encore
+            if (!$artisan) {
+                return redirect()->route('artisans.create')
+                    ->with('info', 'Veuillez compléter votre profil artisan.');
+            }
 
             $data['stats'] = [
                 'products' => $artisan->products()->count(),
-                'views' => $artisan->views,
-                'rating' => $artisan->rating_avg,
-                'contacts' => 0, // À implémenter avec système de contact
+                'views' => $artisan->views ?? 0,
+                'rating' => $artisan->rating_avg ?? 0,
+                'contacts' => $artisan->quotes()->where('status', 'pending')->count(),
             ];
 
             $data['recentProducts'] = $artisan->products()
+                ->with('images')
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get();
 
             $data['popularProducts'] = $artisan->products()
+                ->with('images')
                 ->orderBy('views', 'desc')
                 ->limit(5)
                 ->get();
@@ -40,25 +54,33 @@ class DashboardController extends Controller
             return view('dashboard.artisan', $data);
         }
 
-        // Dashboard client
+        // Dashboard client (rôle par défaut)
         $data['favorites'] = Favorite::where('user_id', $user->id)
             ->with(['favoritable'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        $data['recentViews'] = Product::whereIn('id', session()->get('recently_viewed', []))
-            ->with('images')
-            ->limit(6)
-            ->get();
+        // Récupérer les produits récemment consultés
+        $recentlyViewedIds = session()->get('recently_viewed', []);
 
-        return view('dashboard.client', $data);
+        if (!empty($recentlyViewedIds)) {
+            $data['recentViews'] = Product::whereIn('id', $recentlyViewedIds)
+                ->with('images', 'artisan.user')
+                ->limit(6)
+                ->get();
+        } else {
+            $data['recentViews'] = collect();
+        }
+
+        return view('admin.dashboard.index', $data);
     }
 
     public function favorites()
     {
         $favorites = Favorite::where('user_id', auth()->id())
             ->with(['favoritable'])
+            ->orderBy('created_at', 'desc')
             ->paginate(20);
 
         return view('dashboard.favorites', compact('favorites'));
@@ -66,8 +88,9 @@ class DashboardController extends Controller
 
     public function requests()
     {
-        // Historique des demandes de devis/contacts
-        $requests = auth()->user()->requests()
+        // Historique des demandes de devis
+        $requests = auth()->user()->quotes()
+            ->with(['artisan.user', 'product'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -85,6 +108,7 @@ class DashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . auth()->id(),
             'phone' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|max:2048',
         ]);
 
@@ -130,9 +154,9 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $artisan = $user->artisan;
-        
+
         $products = $artisan ? $artisan->products()->paginate(12) : collect();
-        
+
         return view('dashboard.artisan-products', compact('products'));
     }
 
@@ -140,9 +164,9 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $artisan = $user->artisan;
-        
+
         $orders = $artisan ? $artisan->orders()->orderBy('created_at', 'desc')->paginate(20) : collect();
-        
+
         return view('dashboard.artisan-orders', compact('orders'));
     }
 
@@ -150,13 +174,13 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $artisan = $user->artisan;
-        
+
         $data = [
             'totalViews' => $artisan ? $artisan->views : 0,
             'totalProducts' => $artisan ? $artisan->products()->count() : 0,
             'avgRating' => $artisan ? $artisan->rating_avg : 0,
         ];
-        
+
         return view('dashboard.artisan-analytics', $data);
     }
 
@@ -164,9 +188,9 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $artisan = $user->artisan;
-        
+
         $reviews = $artisan ? $artisan->reviews()->orderBy('created_at', 'desc')->paginate(20) : collect();
-        
+
         return view('dashboard.artisan-reviews', compact('reviews'));
     }
 
@@ -197,7 +221,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $vendor = $user->vendor;
-        
+
         $data = [
             'stats' => [
                 'dishes' => $vendor ? $vendor->dishes()->count() : 0,
@@ -205,7 +229,7 @@ class DashboardController extends Controller
                 'rating' => $vendor ? $vendor->rating_avg : 0,
             ],
         ];
-        
+
         return view('dashboard.vendor', $data);
     }
 

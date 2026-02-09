@@ -27,10 +27,15 @@ class Artisan extends Model
         'pricing_info',
         'rating_avg',
         'rating_count',
+        'status', // Ajouté
         'verified',
         'featured',
         'visible',
         'views',
+        'rejection_reason',
+        'approved_at',
+        'rejected_at',
+        'approved_by',
     ];
 
     protected $casts = [
@@ -41,7 +46,76 @@ class Artisan extends Model
         'rating_avg' => 'decimal:2',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
+
+    // Scopes pour filtrer par statut
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    public function scopeVisibleToPublic($query)
+    {
+        return $query->where('status', 'approved')
+            ->where('visible', true);
+    }
+
+    // Relations
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    // Méthodes pour changer le statut
+    public function approve(User $approver = null)
+    {
+        $this->update([
+            'status' => 'approved',
+            'approved_at' => now(),
+            'approved_by' => $approver?->id,
+            'rejected_at' => null,
+            'rejection_reason' => null,
+        ]);
+    }
+
+    public function reject(string $reason = null, User $rejector = null)
+    {
+        $this->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+            'rejection_reason' => $reason,
+            'approved_at' => null,
+        ]);
+    }
+
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isApproved()
+    {
+        return $this->status === 'approved';
+    }
+
+    public function isRejected()
+    {
+        return $this->status === 'rejected';
+    }
+
+
 
     public function user()
     {
@@ -96,9 +170,9 @@ class Artisan extends Model
             'tanneur' => 'Tanneur',
             'corroyeur' => 'Corroyeur',
             'musicien' => 'Musicien traditionnel',
+            'commercante' => 'Vendeuses ou vendeurs traditionnel',
             'autre' => 'Autre artisan',
         ];
-
         return $crafts[$this->craft] ?? $this->craft;
     }
 
@@ -121,5 +195,23 @@ class Artisan extends Model
             ->whereNotNull('longitude')
             ->having('distance', '<', $radius)
             ->orderBy('distance');
+    }
+
+    public function getRatingAvgAttribute($value)
+    {
+        return $value ?? 0;
+    }
+
+    public function getRatingCountAttribute($value)
+    {
+        return $value ?? 0;
+    }
+
+    public function calculateRating()
+    {
+        $reviews = $this->reviews();
+        $this->rating_avg = $reviews->avg('rating') ?? 0;
+        $this->rating_count = $reviews->count();
+        $this->save();
     }
 }
