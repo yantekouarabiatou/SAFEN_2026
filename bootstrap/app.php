@@ -13,32 +13,24 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Sanctum (si API + SPA)
+        // Sanctum pour les requêtes API/SPA
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
-        // Middleware pour la langue
+        // Middleware pour la langue (SetLocale) – bien configuré
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
 
-        // Alias middleware - ESSAYEZ LES DEUX VERSIONS
-        // Version 1: Middleware (singulier)
+        // Alias pour les middlewares de Spatie Permission (CORRIGÉ : namespace au singulier)
         $middleware->alias([
-            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'role' => \App\Http\Middleware\Role::class, // Votre middleware personnalisé
+            'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
-        // Version 2: Middlewares (pluriel) - décommentez si version 1 ne fonctionne pas
-        // $middleware->alias([
-        //     'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-        //     'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
-        //     'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
-        //     'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
-        // ]);
-
-        // Throttle personnalisé chatbot
+        // Throttle personnalisé chatbot (optionnel)
         $middleware->throttleApi('chatbot', 30);
     })
     ->withSchedule(function (Schedule $schedule): void {

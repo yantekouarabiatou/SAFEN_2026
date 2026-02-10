@@ -502,25 +502,13 @@
     <div class="loader"></div>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
+            {{-- Navbar --}}
             <div class="navbar-bg">
                 @include('admin.partials.navbar')
             </div>
 
-            {{-- Navbar --}}
            {{-- Sidebar - Selon le rôle de l'utilisateur --}}
-           @if(auth()->user()->hasRole('super-admin'))
-                @include('admin.partials.sidebar')
-            @elseif(auth()->user()->hasRole('admin'))
-                @include('admin.partials.sidebar')
-            @elseif(auth()->user()->hasRole('artisan'))
-                @include('admin.partials.sidebar-artisan')
-            @elseif(auth()->user()->hasRole('vendor'))
-                @include('admin.partials.sidebar-vendor')
-            @else
-                {{-- Par défaut = client / utilisateur normal --}}
-                @include('admin.partials.sidebar-client')
-            @endif
-
+            @include('admin.partials.sidebar')
             {{-- Main Content --}}
             <div class="main-content">
                 <section class="section">
@@ -544,6 +532,9 @@
     </div>
 
     <!-- General JS Scripts -->
+    <!-- Dans layouts/admin.blade.php, dans @push('scripts') ou directement dans <head> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script> <!-- optionnel mais beau -->
     <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
 
     <!-- JS Libraries -->
