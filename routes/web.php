@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ArtisanController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -15,7 +15,6 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\VendorController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CultureController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\FavoriteController;
@@ -24,7 +23,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\DashboardController as ControllersDashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CulturalEventController;
@@ -243,7 +241,7 @@ Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('
 Route::get('/dashboard/vendor', [DashboardController::class, 'vendor'])->name('dashboard.vendor');
 
 // Routes pour administrateurs
-Route::get('/admin', [AdminDashboardController::class, 'admin'])->name('admin.dashboard');
+Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
 Route::get('/admin/users', [DashboardController::class, 'adminUsers'])->name('admin.users');
 Route::get('/admin/artisans', [DashboardController::class, 'adminArtisans'])->name('admin.artisans');
 Route::get('/admin/products', [DashboardController::class, 'adminProducts'])->name('admin.products');
@@ -372,6 +370,80 @@ Route::middleware('auth')->group(function () {
         ->name('events.unsubscribe');
     Route::post('/evenements/preferences', [CulturalEventController::class, 'updatePreferences'])
         ->name('events.preferences');
+});
+
+// // Routes pour admin
+// Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
+//     // Dashboard
+//     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+//     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
+
+//     // Routes pour super-admin seulement
+//     Route::middleware(['role:super-admin'])->group(function () {
+//         Route::get('/super-dashboard', [DashboardController::class, 'superAdminDashboard'])->name('super-dashboard');
+//         Route::resource('roles', RoleController::class);
+//         Route::prefix('settings')->name('settings.')->group(function () {
+//             Route::get('general', [SettingController::class, 'general'])->name('general');
+//             Route::post('general', [SettingController::class, 'saveGeneral'])->name('general.save');
+//         });
+//     });
+
+//     // Routes communes à admin et super-admin
+//     Route::resource('artisans', ArtisanController::class);
+//     Route::get('artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('artisans.approve');
+//     Route::get('artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('artisans.reject');
+
+//     Route::resource('products', ProductController::class);
+//     Route::resource('vendors', VendorController::class);
+//     Route::resource('dishes', GastronomieController::class);
+//     //Route::resource('users', UserController::class);
+//     Route::resource('orders', OrderController::class);
+//     Route::resource('events', CulturalEventController::class);
+//     Route::resource('contacts', ContactController::class);
+//     Route::resource('reviews', ReviewController::class);
+//     Route::resource('quotes', QuoteController::class);
+// });
+
+
+// Routes d'administration
+Route::middleware(['auth', 'setlocale'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard accessible à tous les utilisateurs authentifiés
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Routes réservées aux super-admins/admins
+    Route::middleware(['role:super-admin|admin'])->group(function () {
+        Route::resource('artisans', ArtisanController::class);
+        Route::resource('products', ProductController::class);
+        //Route::resource('users', UserController::class);
+        // ... autres routes admin
+    });
+
+    // Routes pour les artisans
+    Route::middleware(['role:artisan'])->group(function () {
+        Route::get('/artisan/dashboard', [ArtisanController::class, 'dashboard'])->name('artisan.dashboard');
+        // ... autres routes artisan
+    });
+
+     // Routes communes à admin et super-admin
+    Route::resource('artisans', ArtisanController::class);
+    Route::get('artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('artisans.approve');
+    Route::get('artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('artisans.reject');
+
+    Route::resource('products', ProductController::class);
+    Route::resource('vendors', VendorController::class);
+    Route::resource('dishes', GastronomieController::class);
+    //Route::resource('users', UserController::class);
+    Route::resource('orders', OrderController::class);
+    Route::resource('events', CulturalEventController::class);
+    Route::resource('contacts', ContactController::class);
+    Route::resource('reviews', ReviewController::class);
+    Route::resource('quotes', QuoteController::class);
+
+     // Routes communes à admin et super-admin
+    Route::resource('artisans', ArtisanController::class);
+    Route::get('artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('artisans.approve');
+    Route::get('artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('artisans.reject');
+
 });
 
 // Routes publiques

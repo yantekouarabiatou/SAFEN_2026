@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'AFRI-HERITAGE - Le Bénin authentique, raconté par l\'IA')
+@section('title', 'TOTCHEMEGNON - Le Bénin authentique, raconté par l\'IA')
 
 @push('styles')
 <!-- Swiper CSS -->

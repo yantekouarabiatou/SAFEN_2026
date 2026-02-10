@@ -502,11 +502,15 @@
     <div class="loader"></div>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg"></div>
+            <div class="navbar-bg">
+                @include('admin.partials.navbar')
+            </div>
 
             {{-- Navbar --}}
            {{-- Sidebar - Selon le rôle de l'utilisateur --}}
-            @if(auth()->user()->hasRole('admin'))
+           @if(auth()->user()->hasRole('super-admin'))
+                @include('admin.partials.sidebar')
+            @elseif(auth()->user()->hasRole('admin'))
                 @include('admin.partials.sidebar')
             @elseif(auth()->user()->hasRole('artisan'))
                 @include('admin.partials.sidebar-artisan')

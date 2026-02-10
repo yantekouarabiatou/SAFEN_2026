@@ -15,8 +15,16 @@ return new class extends Migration
             $table->string('audio_url')->nullable();
             $table->string('ethnic_origin')->nullable();
             $table->string('region')->nullable();
-            $table->enum('category', ['main', 'drink', 'snack', 'dessert', 'sauce']);
-            $table->json('ingredients')->nullable();
+            $table->enum('category', [
+                'Plat principal',
+                'Entrée',
+                'Accompagnement',
+                'Dessert',
+                'Boisson',
+                'Sauce',
+                'Snack',
+            ])->nullable();
+             $table->json('ingredients')->nullable();
             $table->text('recipe')->nullable();
             $table->json('nutritional_info')->nullable();
             $table->text('cultural_description')->nullable();
@@ -30,6 +38,9 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('dishes');
-    }
+      Schema::table('categories', function (Blueprint $table) {
+            $table->dropColumn('category');
+            $table->enum('category', ['plat principal', 'drink', 'snack', 'dessert', 'sauce'])->after('id');
+        });
+         }
 };

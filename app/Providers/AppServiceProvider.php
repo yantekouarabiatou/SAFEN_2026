@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
                 $unreadNotificationsCount = $user->unreadNotifications()->count();
 
                 if ($user->hasRole('client')) {
-                    $cartCount = $user->cartItems()->count();
+                    $cartCount = $user->cart()->count();
                 }
             }
 

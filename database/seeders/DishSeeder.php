@@ -15,7 +15,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Amiwo',
                     'name_local'           => 'Amiwɔ / Djèwɔ',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Fon',
                     'region'               => 'Atlantique, Littoral',
                     'ingredients'          => ['farine de maïs', 'tomate', 'huile rouge', 'oignon', 'piment'],
@@ -33,7 +33,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Akassa',
                     'name_local'           => 'Akassa',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Fon / Aja',
                     'region'               => 'Ouémé, Atlantique',
                     'ingredients'          => ['farine de maïs fermentée', 'eau', 'sel'],
@@ -66,7 +66,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Igame pilée',
                     'name_local'           => 'Igame pilée',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Nord Béninois',
                     'region'               => 'Atacora, Alibori...',
                     'ingredients'          => ['igname', 'Viandes de poulets ,bouef,ou poisson', 'sauce gombo ,feuille,tomate,arahide'],
@@ -83,7 +83,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Gboman',
                     'name_local'           => 'Gboman',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'SUD Béninois',
                     'region'               => 'Oueme, Plateau...',
                     'ingredients'          => ['sauce légumes ', 'piment sec', 'huile rouge', 'viande ou poisson','goussi'],
@@ -99,7 +99,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Wassa-wassa',
                     'name_local'           => 'Wassa-wassa',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Bariba / Peulh',
                     'region'               => 'Borgou, Alibori',
                     'ingredients'          => ['igname pilée', 'sauce feuille', 'viande ou poisson'],
@@ -115,7 +115,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'foula',
                     'name_local'           => 'foula',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Bariba / Peulh',
                     'region'               => 'Borgou, Alibori',
                     'ingredients'          => ['sorgho', 'laits'],
@@ -131,7 +131,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Attassi',
                     'name_local'           => 'Attassi',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => ' Nord Béninois',
                     'region'               => 'Borgou, Alibori',
                     'ingredients'          => ['haricot', 'friture', 'viande ou poisson'],
@@ -147,7 +147,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'eba',
                     'name_local'           => 'eba',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Fon / Goun',
                     'region'               => 'Oueme, Plateau',
                     'ingredients'          => ['gari', 'sauce feuille', 'viande ou poisson'],
@@ -194,7 +194,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Télibo',
                     'name_local'           => 'Télibɔ',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Fon',
                     'region'               => 'Zou, Collines',
                     'ingredients'          => ['cossettes d’igname fermentées', 'sauce arachide'],
@@ -210,7 +210,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Tchakpalo',
                     'name_local'           => 'Tchakpalo',
-                    'category'             => 'main',
+                    'category'             => 'plat principal',
                     'ethnic_origin'        => 'Fon / Yoruba',
                     'region'               => 'Sud et Centre du Bénin',
                     'ingredients'          => ['farine de maïs', 'eau'],
@@ -226,7 +226,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Tchoukoutou',
                     'name_local'           => 'Tchoukoutou',
-                    'category'             => 'drink',
+                    'category'             => 'boisson ',
                     'ethnic_origin'        => 'Bariba / Dendi',
                     'region'               => 'Nord du Bénin',
                     'ingredients'          => ['sorgho', 'eau'],
@@ -240,7 +240,7 @@ class DishSeeder extends Seeder
                 'data' => [
                     'name'                 => 'Atan',
                     'name_local'           => 'Atan (vin de palme)',
-                    'category'             => 'drink',
+                    'category'             => 'boisson ',
                     'ethnic_origin'        => 'Fon / Aja',
                     'region'               => 'Sud du Bénin',
                     'ingredients'          => ['sève de palmier'],

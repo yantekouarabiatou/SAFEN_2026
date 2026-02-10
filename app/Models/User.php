@@ -180,6 +180,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(GuestOrder::class, 'user_id');
     }
+    
 
-   
 }

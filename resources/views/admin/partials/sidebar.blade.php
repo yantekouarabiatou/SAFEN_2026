@@ -2,166 +2,188 @@
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
             <a href="{{ route('admin.dashboard') }}">
-                <span class="logo-name">SAFEN</span>
+                <span class="logo-name">TOTCHEMON</span>
             </a>
         </div>
+        <div class="sidebar-brand sidebar-brand-sm">
+            <a href="{{ route('admin.dashboard') }}">SA</a>
+        </div>
+
         <ul class="sidebar-menu">
             {{-- Dashboard --}}
             <li class="menu-header">Tableau de bord</li>
             <li class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link">
-                    <i data-feather="monitor"></i>
+                    <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-            
-            {{-- Gestion des contenus --}}
-            <li class="menu-header">Gestion du contenu</li>
-            
-            {{-- Artisans --}}
-            <li class="dropdown {{ request()->routeIs('admin.artisans.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="users"></i>
-                    <span>Artisans</span>
+
+            {{-- Super Admin Dashboard (uniquement pour super-admin) --}}
+            @if(auth()->user()->hasRole('super-admin'))
+            <li class="{{ request()->routeIs('admin.super-dashboard') ? 'active' : '' }}">
+                <a href="{{ route('admin.super-dashboard') }}" class="nav-link">
+                    <i class="fas fa-crown text-warning"></i>
+                    <span>Super Admin</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- Gestion des artisans --}}
+            <li class="menu-header">Gestion des artisans</li>
+
+            <li class="dropdown {{ request()->is('admin/artisans*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-palette"></i><span>Artisans</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.artisans.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.artisans.index') }}">Liste des artisans</a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.artisans.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.artisans.create') }}">Ajouter un artisan</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.artisans.index') }}">Tous les artisans</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'pending']) }}">En attente</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'approved']) }}">Approuvés</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'rejected']) }}">Rejetés</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.artisans.create') }}">Ajouter un artisan</a></li>
                 </ul>
             </li>
-            
-            {{-- Produits --}}
-            <li class="dropdown {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="shopping-bag"></i>
-                    <span>Produits</span>
+
+            {{-- Gestion des produits --}}
+            <li class="dropdown {{ request()->is('admin/products*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-shopping-bag"></i><span>Produits</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.products.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.products.index') }}">Liste des produits</a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.products.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.products.create') }}">Ajouter un produit</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.products.index') }}">Tous les produits</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'pending']) }}">En attente</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'active']) }}">Actifs</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.products.create') }}">Ajouter un produit</a></li>
                 </ul>
             </li>
-            
-            {{-- Plats / Gastronomie --}}
-            <li class="dropdown {{ request()->routeIs('admin.dishes.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="coffee"></i>
-                    <span>Gastronomie</span>
+
+            {{-- Gestion des vendeurs --}}
+            <li class="dropdown {{ request()->is('admin/vendors*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-store"></i><span>Vendeurs</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.dishes.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.dishes.index') }}">Liste des plats</a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.dishes.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.dishes.create') }}">Ajouter un plat</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.vendors.index') }}">Tous les vendeurs</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.vendors.create') }}">Ajouter un vendeur</a></li>
                 </ul>
             </li>
-            
-            {{-- Vendeurs --}}
-            <li class="dropdown {{ request()->routeIs('admin.vendors.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="home"></i>
-                    <span>Vendeurs</span>
+
+            {{-- Gestion des plats --}}
+            <li class="dropdown {{ request()->is('admin/dishes*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-utensils"></i><span>Gastronomie</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.vendors.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.vendors.index') }}">Liste des vendeurs</a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.vendors.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.vendors.create') }}">Ajouter un vendeur</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.dishes.index') }}">Tous les plats</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.dishes.create') }}">Ajouter un plat</a></li>
                 </ul>
             </li>
-            
-            {{-- Commandes & Transactions --}}
-            <li class="menu-header">Commandes & Transactions</li>
-            
-            <li class="dropdown {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="shopping-cart"></i>
-                    <span>Commandes</span>
+
+            {{-- Gestion des utilisateurs --}}
+            <li class="menu-header">Gestion des utilisateurs</li>
+
+            <li class="dropdown {{ request()->is('admin/users*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-users"></i><span>Utilisateurs</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.orders.index') }}">Toutes les commandes</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.users.index') }}">Tous les utilisateurs</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'artisan']) }}">Artisans</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'vendor']) }}">Vendeurs</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.create') }}">Ajouter un utilisateur</a></li>
                 </ul>
             </li>
-            
-            <li class="{{ request()->routeIs('admin.quotes.*') ? 'active' : '' }}">
+
+            {{-- Gestion des commandes --}}
+            <li class="menu-header">Transactions</li>
+
+            <li class="dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-shopping-cart"></i><span>Commandes</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
+                </ul>
+            </li>
+
+            <li class="{{ request()->is('admin/quotes*') ? 'active' : '' }}">
                 <a href="{{ route('admin.quotes.index') }}" class="nav-link">
-                    <i data-feather="file-text"></i>
-                    <span>Devis</span>
+                    <i class="fas fa-file-invoice-dollar"></i><span>Devis</span>
                 </a>
             </li>
-            
-            {{-- Utilisateurs --}}
-            <li class="menu-header">Utilisateurs</li>
-            
-            <li class="dropdown {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                    <i data-feather="user"></i>
-                    <span>Utilisateurs</span>
+
+            {{-- Gestion des événements --}}
+            <li class="menu-header">Événements culturels</li>
+
+            <li class="dropdown {{ request()->is('admin/events*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-calendar-alt"></i><span>Événements</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.users.index') }}">Tous les utilisateurs</a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.users.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.users.create') }}">Ajouter un utilisateur</a>
-                    </li>
+                    <li><a class="nav-link" href="{{ route('admin.events.index') }}">Tous les événements</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.events.create') }}">Créer un événement</a></li>
                 </ul>
             </li>
-            
-            <li class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+
+            {{-- Contenu & Avis --}}
+            <li class="menu-header">Contenu & Avis</li>
+
+            <li class="{{ request()->is('admin/reviews*') ? 'active' : '' }}">
                 <a href="{{ route('admin.reviews.index') }}" class="nav-link">
-                    <i data-feather="star"></i>
-                    <span>Avis</span>
+                    <i class="fas fa-star"></i><span>Avis & Évaluations</span>
                 </a>
             </li>
-            
-            {{-- Communication --}}
-            <li class="menu-header">Communication</li>
-            
-            <li class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
+
+            <li class="{{ request()->is('admin/contacts*') ? 'active' : '' }}">
                 <a href="{{ route('admin.contacts.index') }}" class="nav-link">
-                    <i data-feather="mail"></i>
-                    <span>Messages</span>
-                    @php $unreadContacts = App\Models\Contact::where('status', 'new')->count(); @endphp
+                    <i class="fas fa-envelope"></i><span>Messages</span>
+                    @php $unreadContacts = App\Models\Contact::where('read', false)->count(); @endphp
                     @if($unreadContacts > 0)
-                        <span class="badge badge-primary">{{ $unreadContacts }}</span>
+                        <span class="badge badge-danger">{{ $unreadContacts }}</span>
                     @endif
                 </a>
             </li>
-            
-            {{-- Paramètres --}}
-            <li class="menu-header">Paramètres</li>
-            
-            <li class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                <a href="{{ route('admin.settings') }}" class="nav-link">
-                    <i data-feather="settings"></i>
-                    <span>Paramètres</span>
+
+            {{-- Analytics --}}
+            <li class="menu-header">Analytics</li>
+
+            <li class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+                <a href="{{ route('admin.analytics') }}" class="nav-link">
+                    <i class="fas fa-chart-bar"></i><span>Analytics & Rapports</span>
                 </a>
             </li>
-            
+
+            {{-- Paramètres --}}
+            <li class="menu-header">Paramètres</li>
+
+            @if(auth()->user()->hasRole('super-admin'))
+            <li class="dropdown {{ request()->is('admin/settings*') ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-cog"></i><span>Paramètres système</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('admin.settings.general') }}">Général</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.settings.payment') }}">Paiements</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.settings.notifications') }}">Notifications</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.roles.index') }}">Rôles & Permissions</a></li>
+                </ul>
+            </li>
+            @else
+            <li class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                <a href="{{ route('admin.settings') }}" class="nav-link">
+                    <i class="fas fa-cog"></i><span>Paramètres</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- Vue site public --}}
             <li>
                 <a href="{{ url('/') }}" class="nav-link" target="_blank">
-                    <i data-feather="external-link"></i>
+                    <i class="fas fa-external-link-alt"></i>
                     <span>Voir le site</span>
                 </a>
             </li>

@@ -50,11 +50,13 @@ class Dish extends Model
     public function getCategoryLabelAttribute()
     {
         $categories = [
-            'main' => 'Plat principal',
-            'drink' => 'Boisson',
-            'snack' => 'Snack',
-            'dessert' => 'Dessert',
-            'sauce' => 'Sauce',
+            'plat principal' => 'Plat principal',
+            'entree'         => 'Entrée',
+            'accompagnement' => 'Accompagnement',
+            'dessert'        => 'Dessert',
+            'boisson'        => 'Boisson',
+            'sauce'          => 'Sauce',
+            'snack'          => 'Snack',
         ];
 
         return $categories[$this->category] ?? $this->category;

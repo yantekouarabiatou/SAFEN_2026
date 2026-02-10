@@ -20,7 +20,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+        background: linear-gradient(to bottom, rgba(204, 17, 17, 0.886), rgba(33, 132, 59, 0.9));
     }
 
     .event-hero-content {

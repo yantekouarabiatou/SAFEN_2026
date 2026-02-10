@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Inscription - AFRI-HERITAGE')
+@section('title', 'Inscription - TOTCHEMEGNON')
 
 @push('styles')
 <style>
@@ -425,7 +425,7 @@
                                     <div class="logo-badge">
                                         <i class="bi bi-flower1"></i>
                                     </div>
-                                    <h2 class="fw-bold mb-3">Rejoignez AFRI-HERITAGE</h2>
+                                    <h2 class="fw-bold mb-3">Rejoignez TOTCHEMEGNON</h2>
                                     <p class="text-white-75 mb-4">La plateforme qui valorise l'artisanat béninois</p>
                                 </div>
 
