@@ -32,7 +32,7 @@
                         <a href="{{ route('admin.analytics') }}" class="btn btn-outline-white btn-lg">
                             <i class="fas fa-chart-bar"></i> Voir les analytics détaillés
                         </a>
-                        <a href="{{ route('admin.users.index') }}" class="btn btn-white btn-lg">
+                        <a href="#" class="btn btn-white btn-lg">
                             <i class="fas fa-users-cog"></i> Gérer les utilisateurs
                         </a>
                     </div>
@@ -59,8 +59,7 @@
                                             <div class="alert-title">Artisans en attente</div>
                                             <div class="alert-text">
                                                 <strong>{{ $artisans_pending }}</strong> artisans en attente d'approbation.
-                                                <a href="{{ route('admin.artisans.index', ['status' => 'pending']) }}"
-                                                    class="btn btn-sm btn-warning ml-2">
+                                                <a href="#" class="btn btn-sm btn-warning ml-2">
                                                     Vérifier maintenant
                                                 </a>
                                             </div>
@@ -225,7 +224,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href="{{ route('admin.products.index', ['status' => 'pending']) }}"
+                            <a href=""{{-- <a href="{{ route('admin.products.index', ['status' => 'pending']) }}" --}}
                                 class="btn btn-warning btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-box-check"></i>
                                 <div class="mt-2">Approuver produits</div>
@@ -236,7 +235,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href="{{ route('admin.contacts.index') }}"
+                            <a href="#"
                                 class="btn btn-info btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-envelope"></i>
                                 <div class="mt-2">Voir les messages</div>
@@ -247,7 +246,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}"
+                            <a href="#"
                                 class="btn btn-danger btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-shopping-cart"></i>
                                 <div class="mt-2">Commandes en attente</div>
@@ -391,7 +390,7 @@
                 <div class="card-header">
                     <h4><i class="fas fa-shopping-cart"></i> Commandes récentes</h4>
                     <div class="card-header-action">
-                        <a href="{{ route('admin.orders.index') }}" class="btn btn-primary btn-sm">Voir toutes</a>
+                        <a href="#" class="btn btn-primary btn-sm">Voir toutes</a>
                     </div>
                 </div>
                 <div class="card-body p-0">

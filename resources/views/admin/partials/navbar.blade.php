@@ -23,7 +23,7 @@
             </li>
         </ul>
     </div>
-    
+
     <ul class="navbar-nav navbar-right">
         {{-- Sélecteur de langue dynamique --}}
         <li class="dropdown">
@@ -42,7 +42,7 @@
                 </a>
             </div>
         </li>
-        
+
         {{-- Messages dynamiques --}}
         <li class="dropdown dropdown-list-toggle">
             <a href="#" data-toggle="dropdown" class="nav-link nav-link-lg message-toggle">
@@ -58,7 +58,7 @@
                 <div class="dropdown-header">
                     {{ __('messages.messages') }}
                     <div class="float-right">
-                        <a href="{{ route('dashboard.messages') }}">{{ __('messages.see_all') }}</a>
+                        <a href="#">{{ __('messages.see_all') }}</a>
                     </div>
                 </div>
                 <div class="dropdown-list-content dropdown-list-message">
@@ -81,11 +81,11 @@
                     @endif
                 </div>
                 <div class="dropdown-footer text-center">
-                    <a href="{{ route('dashboard.messages') }}">{{ __('messages.see_all_messages') }} <i class="fas fa-chevron-right"></i></a>
+                    <a href="#">{{ __('messages.see_all_messages') }} <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
         </li>
-        
+
         {{-- User Menu --}}
         <li class="dropdown">
             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
@@ -106,14 +106,14 @@
                 <a href="{{ route('profile.edit') }}" class="dropdown-item has-icon">
                     <i class="far fa-user"></i> {{ __('messages.profile') }}
                 </a>
-                
+
                 @if(Auth::user()->hasRole('artisan') && Auth::user()->artisan)
                     <a href="{{ route('artisan.profile.edit', Auth::user()->artisan->id) }}" class="dropdown-item has-icon">
                         <i class="fas fa-hammer"></i> {{ __('messages.artisan_profile') }}
                     </a>
                 @endif
-                
-                <a href="{{ route('dashboard.settings') }}" class="dropdown-item has-icon">
+
+                <a href=" #" class="dropdown-item has-icon">
                     <i class="fas fa-cog"></i> {{ __('messages.settings') }}
                 </a>
                 <div class="dropdown-divider"></div>

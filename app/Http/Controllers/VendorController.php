@@ -5,46 +5,52 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use App\Models\Dish;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class VendorController extends Controller
 {
+    /**
+     * Liste des vendeurs avec filtres
+     */
     public function index(Request $request)
     {
-        $query = Vendor::query();
+        $query = Vendor::withCount('dishes')
+            ->withAvg('reviews', 'rating')
+            ->with('user');
 
         // Filtres
-        if ($request->has('type') && $request->type) {
+        if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        if ($request->has('city') && $request->city) {
+        if ($request->filled('city')) {
             $query->where('city', $request->city);
         }
 
-        if ($request->has('specialty') && $request->specialty) {
+        if ($request->filled('specialty')) {
             $query->whereJsonContains('specialties', $request->specialty);
         }
 
-        // Géolocalisation
+        // Géolocalisation (recherche par proximité)
         if ($request->has('lat') && $request->has('lng')) {
             $lat = $request->lat;
             $lng = $request->lng;
-            $radius = $request->radius ?? 5;
+            $radius = $request->radius ?? 20; // km
 
-            $query->select('*')
+            $query->select('vendors.*')
                 ->selectRaw(
-                    "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
+                    "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) *
+                      cos(radians(longitude) - radians(?)) + sin(radians(?)) *
+                      sin(radians(latitude)))) AS distance",
                     [$lat, $lng, $lat]
                 )
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->having('distance', '<', $radius)
+                ->having('distance', '<=', $radius)
                 ->orderBy('distance');
         }
 
         // Tri
-        $sort = $request->sort ?? 'rating';
+        $sort = $request->input('sort', 'rating');
         switch ($sort) {
             case 'name':
                 $query->orderBy('name');
@@ -52,66 +58,95 @@ class VendorController extends Controller
             case 'newest':
                 $query->orderBy('created_at', 'desc');
                 break;
+            case 'dishes':
+                $query->orderBy('dishes_count', 'desc');
+                break;
             case 'rating':
             default:
-                $query->orderBy('rating_avg', 'desc');
+                $query->orderByDesc('reviews_avg_rating');
                 break;
         }
 
-        $vendors = $query->paginate(20);
+        $vendors = $query->paginate(12)->withQueryString();
 
+        // Données pour les filtres
         $types = Vendor::distinct('type')->pluck('type');
         $cities = Vendor::distinct('city')->pluck('city');
 
         return view('vendors.index', compact('vendors', 'types', 'cities'));
     }
 
+    /**
+     * Affichage d'un vendeur spécifique
+     */
     public function show(Vendor $vendor)
     {
-        $vendor->incrementViews();
+        $vendor->load([
+            'user',
+            'dishes' => function ($query) {
+                $query->with(['images', 'reviews' => function ($q) {
+                    $q->select('id', 'reviewable_id', 'reviewable_type', 'rating');
+                }]);
+            }
+        ]);
 
-        // Charger les plats
-        $dishes = $vendor->dishes()->with('images')->paginate(12);
+        $dishes = $vendor->dishes()->paginate(12);
 
-        // Vendeurs similaires
-        $similarVendors = Vendor::where('type', $vendor->type)
+        // Plats paginés
+        $dishes = $vendor->dishes()->paginate(12);
+
+        // Vendeurs similaires (même ville + même type)
+        $similarVendors = Vendor::where('city', $vendor->city)
+            ->where('type', $vendor->type)
             ->where('id', '!=', $vendor->id)
-            ->where('city', $vendor->city)
+            ->withCount('dishes')
             ->limit(4)
             ->get();
 
-        return view('vendors.show', compact('vendor', 'dishes', 'similarVendors'));
+        // Statistiques rapides
+        $stats = [
+            'dish_count' => $vendor->dishes_count ?? $vendor->dishes()->count(),
+            'avg_rating' => $vendor->reviews_avg_rating ?? 0,
+            'review_count' => $vendor->reviews_count ?? 0,
+        ];
+
+        return view('admin.vendors.show', compact(
+            'vendor',
+            'dishes',
+            'similarVendors',
+            'stats'
+        ));
     }
 
+    /**
+     * Formulaire de création d'un vendeur
+     */
     public function create()
     {
         return view('vendors.create');
     }
 
+    /**
+     * Enregistrement d'un nouveau vendeur
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
-            'description' => 'nullable|string',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'neighborhood' => 'nullable|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'phone' => 'required|string',
-            'whatsapp' => 'nullable|string',
-            'email' => 'nullable|email',
-            'specialties' => 'nullable|array',
-            'opening_hours' => 'nullable|array'
+            'name'          => 'required|string|max:255',
+            'type'          => 'required|string|max:100',
+            'description'   => 'nullable|string',
+            'address'       => 'required|string|max:255',
+            'city'          => 'required|string|max:100',
+            'neighborhood'  => 'nullable|string|max:100',
+            'latitude'      => 'nullable|numeric|between:-90,90',
+            'longitude'     => 'nullable|numeric|between:-180,180',
+            'phone'         => 'required|string|max:20',
+            'whatsapp'      => 'nullable|string|max:20',
+            'opening_hours' => 'nullable|string|max:100',
         ]);
 
-        if (auth()->check()) {
-            $validated['user_id'] = auth()->id();
-        }
-
-        $validated['specialties'] = json_encode($validated['specialties'] ?? []);
-        $validated['opening_hours'] = json_encode($validated['opening_hours'] ?? []);
+        // Associer à l'utilisateur connecté
+        $validated['user_id'] = auth()->id();
 
         $vendor = Vendor::create($validated);
 
@@ -119,9 +154,16 @@ class VendorController extends Controller
             ->with('success', 'Votre profil vendeur a été créé avec succès !');
     }
 
+    /**
+     * Liste des plats d'un vendeur
+     */
     public function dishes(Vendor $vendor)
     {
-        $dishes = $vendor->dishes()->with('images')->paginate(24);
+        $dishes = $vendor->dishes()
+            ->with(['images', 'reviews'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->paginate(12);
 
         return view('vendors.dishes', compact('vendor', 'dishes'));
     }

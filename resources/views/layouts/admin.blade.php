@@ -697,7 +697,7 @@
                 const notificationId = $(this).data('notification-id');
 
                 $.ajax({
-                    url: '{{ route("notifications.markAsRead") }}',
+                    url: '#',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -757,7 +757,7 @@
             // Mettre à jour le statut en ligne
             function updateOnlineStatus() {
                 $.ajax({
-                    url: '{{ route("user.online") }}',
+                    url: '#',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}'
@@ -910,7 +910,7 @@
                 const notificationId = $(this).data('notification-id');
 
                 $.ajax({
-                    url: '{{ route("notifications.markAsRead") }}',
+                    url: '#',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -970,7 +970,7 @@
             // Mettre à jour le statut en ligne
             function updateOnlineStatus() {
                 $.ajax({
-                    url: '{{ route("user.online") }}',
+                    url: '#',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}'

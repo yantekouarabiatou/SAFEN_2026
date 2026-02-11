@@ -525,6 +525,47 @@
         background: linear-gradient(to right, var(--beige) 8%, #e0d4c0 18%, var(--beige) 33%);
         background-size: 1000px 100%;
     }
+
+    /* Nouveaux styles pour les vendeurs */
+    .vendors-info {
+        background: linear-gradient(135deg, rgba(0,150,57,0.08) 0%, rgba(252,209,22,0.08) 100%);
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 3px solid var(--benin-green);
+    }
+
+    .vendors-count {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--charcoal);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .vendors-count i {
+        color: var(--benin-green);
+        font-size: 1rem;
+    }
+
+    .price-range {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--benin-yellow) 0%, var(--terracotta) 100%);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        box-shadow: 0 2px 8px rgba(212,119,78,0.3);
+    }
+
+    .no-vendors {
+        color: #999;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
 </style>
 @endpush
 
@@ -567,7 +608,7 @@
     <div class="search-section">
         <form action="{{ route('gastronomie.index') }}" method="GET" id="searchForm">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0" style="border-radius: 50px 0 0 50px; border: 2px solid var(--beige); border-right: none;">
                             <i class="bi bi-search text-muted"></i>
@@ -580,7 +621,7 @@
                                style="border-radius: 0 50px 50px 0; border-left: none;">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <select name="region" class="form-select" onchange="this.form.submit()">
                         <option value="">📍 Toutes les régions</option>
                         @foreach($regions as $region)
@@ -591,8 +632,26 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>A-Z</option>
+                        <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Populaires</option>
+                        <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Récents</option>
+                        <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Prix croissant</option>
+                        <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Prix décroissant</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check" style="padding-top: 0.5rem;">
+                        <input class="form-check-input" type="checkbox" name="with_vendors" id="withVendors"
+                               {{ request('with_vendors') ? 'checked' : '' }} onchange="this.form.submit()">
+                        <label class="form-check-label" for="withVendors">
+                            Avec vendeurs
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-1">
                     <button type="submit" class="btn btn-benin-red w-100">
-                        <i class="bi bi-funnel me-2"></i>Filtrer
+                        <i class="bi bi-funnel"></i>
                     </button>
                 </div>
             </div>
@@ -625,19 +684,12 @@
                                     {{ $dish->name }}
                                 </a>
                             </h6>
-                           <!-- Local Name with Audio -->
                             @if($dish->name_local)
-                                <div class="local-name">
-                                    <i class="bi bi-translate"></i>
-                                    {{ $dish->name_local }}
-
-                                    <!-- Bouton qui déclenche la synthèse vocale -->
-                                    <button class="audio-btn"
-                                            onclick="speakText('{{ addslashes($dish->name_local) }}')"
-                                            title="Écouter la prononciation">
-                                        <i class="bi bi-volume-up-fill"></i>
-                                    </button>
-                                </div>
+                                <button class="audio-btn"
+                                        onclick="speakText('{{ addslashes($dish->name_local) }}')"
+                                        title="Écouter la prononciation">
+                                    <i class="bi bi-volume-up-fill"></i>
+                                </button>
                             @endif
                         </div>
 
@@ -658,6 +710,28 @@
                                 <i class="bi bi-geo-alt-fill"></i>{{ $dish->region }}
                             </span>
                         </div>
+
+                        <!-- Vendors Info -->
+                        @if($dish->hasVendors())
+                            <div class="vendors-info">
+                                <div class="vendors-count">
+                                    <i class="bi bi-shop"></i>
+                                    <span>{{ $dish->vendors->count() }} {{ Str::plural('vendeur', $dish->vendors->count()) }}</span>
+                                </div>
+                                @if($dish->getPriceRange())
+                                    <div class="price-range">
+                                        <i class="bi bi-cash me-1"></i>{{ $dish->getPriceRange() }}
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="vendors-info">
+                                <div class="no-vendors">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Aucun vendeur référencé
+                                </div>
+                            </div>
+                        @endif
 
                         <!-- Ingredients -->
                         @if($dish->ingredients && count($dish->ingredients) > 0)
@@ -721,72 +795,43 @@
 
 @push('scripts')
 <script>
-// Filtre par catégorie
+// (Garder tous les scripts existants)
 function filterByCategory(category) {
     const url = new URL(window.location.href);
-
     if (category) {
         url.searchParams.set('category', category);
     } else {
         url.searchParams.delete('category');
     }
-
     url.searchParams.delete('page');
     window.location.href = url.toString();
 }
 
-// Gestion de l'audio avec état visuel
-let currentAudio = null;
-let currentButton = null;
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
-function playAudio(button, audioUrl) {
-    // Si un audio est déjà en cours
-    if (currentAudio && !currentAudio.paused) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-
-        // Retirer l'état playing du bouton précédent
-        if (currentButton) {
-            currentButton.classList.remove('playing');
-            currentButton.querySelector('i').classList.remove('bi-pause-fill');
-            currentButton.querySelector('i').classList.add('bi-volume-up-fill');
+        const voices = window.speechSynthesis.getVoices();
+        const frenchVoice = voices.find(voice => voice.lang === 'fr-FR' || voice.lang === 'fr');
+        if (frenchVoice) {
+            utterance.voice = frenchVoice;
         }
 
-        // Si c'est le même bouton, on arrête ici
-        if (currentButton === button) {
-            currentAudio = null;
-            currentButton = null;
-            return;
-        }
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert("La synthèse vocale n'est pas disponible sur votre navigateur.");
     }
-
-    // Créer et jouer le nouvel audio
-    currentAudio = new Audio(audioUrl);
-    currentButton = button;
-
-    // Ajouter l'état playing
-    button.classList.add('playing');
-    button.querySelector('i').classList.remove('bi-volume-up-fill');
-    button.querySelector('i').classList.add('bi-pause-fill');
-
-    currentAudio.play().catch(e => {
-        console.error('Erreur de lecture audio:', e);
-        button.classList.remove('playing');
-        button.querySelector('i').classList.remove('bi-pause-fill');
-        button.querySelector('i').classList.add('bi-volume-up-fill');
-    });
-
-    // Quand l'audio se termine
-    currentAudio.addEventListener('ended', function() {
-        button.classList.remove('playing');
-        button.querySelector('i').classList.remove('bi-pause-fill');
-        button.querySelector('i').classList.add('bi-volume-up-fill');
-        currentAudio = null;
-        currentButton = null;
-    });
 }
 
-// Animation au scroll
+window.speechSynthesis.onvoiceschanged = () => {
+    console.log("Voix disponibles :", window.speechSynthesis.getVoices());
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const observerOptions = {
         threshold: 0.1,
@@ -814,57 +859,5 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 });
-
-    // Fonction de synthèse vocale (celle qui fonctionne bien)
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                // Arrêter toute lecture en cours
-                window.speechSynthesis.cancel();
-
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'fr-FR';
-                
-                // Optionnel : régler la voix, la vitesse, le ton
-                utterance.rate = 1.0;   // vitesse (0.5 à 2)
-                utterance.pitch = 1.0;  // ton (0 à 2)
-                utterance.volume = 1.0; // volume
-
-                // Trouver une voix française si possible
-                const voices = window.speechSynthesis.getVoices();
-                const frenchVoice = voices.find(voice => voice.lang === 'fr-FR' || voice.lang === 'fr');
-                if (frenchVoice) {
-                    utterance.voice = frenchVoice;
-                }
-
-                window.speechSynthesis.speak(utterance);
-
-                console.log("Synthèse vocale lancée pour :", text);
-            } else {
-                console.log("Synthèse vocale non supportée par ce navigateur");
-                alert("La synthèse vocale n'est pas disponible sur votre navigateur.");
-            }
-        }
-
-        // Optionnel : recharger les voix au cas où elles ne soient pas encore chargées
-        window.speechSynthesis.onvoiceschanged = () => {
-            // Les voix sont maintenant disponibles
-            console.log("Voix disponibles :", window.speechSynthesis.getVoices());
-        };        function toggleFavorite(button) {
-            const productId = button.dataset.productId;
-            const isActive = button.classList.contains('active');}
-
-// Auto-submit pour la recherche avec debounce
-const searchInput = document.querySelector('input[name="search"]');
-let searchTimeout;
-
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            // Optionnel: auto-submit après 500ms
-            // document.getElementById('searchForm').submit();
-        }, 500);
-    });
-}
 </script>
 @endpush

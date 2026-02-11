@@ -113,7 +113,7 @@ class ArtisanSeeder extends Seeder
                 'name'     => $data['name'],
                 'email'    => $email,
                 'password' => bcrypt('password123'),
-                'role'     => 'artisan',
+               // 'role'     => 'artisan',
             ]);
 
             // Numéro WhatsApp / téléphone béninois aléatoire mais réaliste
