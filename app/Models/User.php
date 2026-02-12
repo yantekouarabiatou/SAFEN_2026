@@ -67,8 +67,6 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
-        // Adaptez cette logique selon votre système de rôles
-        // Par exemple, si vous avez une colonne 'role' dans la table users
         return $this->role === 'admin' || $this->role === 'super_admin';
     }
 
@@ -180,6 +178,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(GuestOrder::class, 'user_id');
     }
-    
+
 
 }

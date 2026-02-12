@@ -18,46 +18,46 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-    
-    // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
-    Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
-    
-    // Artisans
-    Route::resource('artisans', ArtisanController::class);
-    Route::delete('artisans/photo/{photo}', [ArtisanController::class, 'deletePhoto'])->name('artisans.photo.delete');
-    
-    // Products
-    Route::resource('products', ProductController::class);
-    Route::delete('products/image/{image}', [ProductController::class, 'deleteImage'])->name('products.image.delete');
-    Route::post('products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
-    
-    // Dishes
-    Route::resource('dishes', DishController::class);
-    Route::delete('dishes/image/{image}', [DishController::class, 'deleteImage'])->name('dishes.image.delete');
-    
-    // Vendors
-    Route::resource('vendors', VendorController::class);
-    
-    // Orders
-    Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
-    Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
-    
-    // Quotes
-    Route::resource('quotes', QuoteController::class)->only(['index', 'show', 'destroy']);
-    Route::patch('quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.status');
-    
-    // Users
-    Route::resource('users', UserController::class);
-    
-    // Reviews
-    Route::resource('reviews', ReviewController::class)->only(['index', 'show', 'destroy']);
-    Route::post('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
-    Route::post('reviews/{review}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
-    
-    // Contacts/Messages
-    Route::resource('contacts', ContactController::class)->only(['index', 'show', 'destroy']);
-    Route::patch('contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('contacts.status');
-});
+// Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+
+//     // Dashboard
+//     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+//     Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
+//     Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
+
+//     // Artisans
+//     Route::resource('artisans', ArtisanController::class);
+//     Route::delete('artisans/photo/{photo}', [ArtisanController::class, 'deletePhoto'])->name('artisans.photo.delete');
+
+//     // Products
+//     Route::resource('products', ProductController::class);
+//     Route::delete('products/image/{image}', [ProductController::class, 'deleteImage'])->name('products.image.delete');
+//     Route::post('products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
+
+//     // Dishes
+//     Route::resource('dishes', DishController::class);
+//     Route::delete('dishes/image/{image}', [DishController::class, 'deleteImage'])->name('dishes.image.delete');
+
+//     // Vendors
+//     Route::resource('vendors', VendorController::class);
+
+//     // Orders
+//     Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
+//     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+//     // Quotes
+//     Route::resource('quotes', QuoteController::class)->only(['index', 'show', 'destroy']);
+//     Route::patch('quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.status');
+
+//     // Users
+//     Route::resource('users', UserController::class);
+
+//     // Reviews
+//     Route::resource('reviews', ReviewController::class)->only(['index', 'show', 'destroy']);
+//     Route::post('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+//     Route::post('reviews/{review}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
+
+//     // Contacts/Messages
+//     Route::resource('contacts', ContactController::class)->only(['index', 'show', 'destroy']);
+//     Route::patch('contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('contacts.status');
+// });

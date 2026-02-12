@@ -21,9 +21,11 @@ use App\Http\Controllers\{
     QuoteController,
     ReviewController,
     MessageController,
+    NotificationController,
     ProfileController,
 };
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\{
     RegisteredUserController,
     AuthenticatedSessionController
@@ -141,6 +143,14 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | ROUTES NÉCESSITANT UNE AUTHENTIFICATION
@@ -246,13 +256,17 @@ Route::middleware('auth')->group(function () {
     // Route::prefix('artisan')->name('artisan.')->controller(ArtisanProfileController::class)->group(function () {...});
 
     // NotificationController n'existe pas
-    // Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
-    // Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
     // UserController n'existe pas
     // Route::post('/user/online', [UserController::class, 'updateOnlineStatus'])->name('user.online');
     */
 });
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class);
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -261,34 +275,36 @@ Route::middleware('auth')->group(function () {
 */
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth', 'can:access-admin'])
+    ->middleware(['auth']) // ← seulement auth, pas de can:...
     ->group(function () {
-
-        Route::get('/', fn() => redirect()->route('admin.dashboard'))->name('index');
-
-        // Dashboard et analytics
-        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/analytics', [App\Http\Controllers\Admin\DashboardController::class, 'analytics'])->name('analytics');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Ressources
-        Route::resource('artisans', App\Http\Controllers\ArtisanController::class);
-        Route::resource('vendors', App\Http\Controllers\VendorController::class)->except(['index', 'show']);
+        Route::resource('artisans', ArtisanController::class);
+        Route::resource('products', ProductController::class);
+        Route::resource('vendors', VendorController::class)->except(['index', 'show']);
+        //Route::resource('dishes', DishController::class); // si vous avez un contrôleur
+        //Route::resource('users', UserController::class);
+        Route::resource('orders', OrderController::class);
+        Route::resource('quotes', QuoteController::class);
+        Route::resource('events', CulturalEventController::class);
+        Route::resource('reviews', ReviewController::class);
+        Route::resource('contacts', ContactController::class);
 
-        // Actions spécifiques (approbations, etc.)
-        Route::post('/artisans/{artisan}/verify', [App\Http\Controllers\ArtisanController::class, 'verify'])->name('artisans.verify');
-        Route::post('/products/{product}/feature', [App\Http\Controllers\ProductController::class, 'feature'])->name('products.feature');
-        Route::post('/reviews/{review}/approve', [App\Http\Controllers\ReviewController::class, 'approve'])->name('reviews.approve');
-        Route::get('/artisans/pending', [App\Http\Controllers\ArtisanController::class, 'pendingList'])->name('artisans.pending');
-        Route::post('/artisans/{artisan}/approve', [App\Http\Controllers\ArtisanController::class, 'approve'])->name('artisans.approve');
-        Route::post('/artisans/{artisan}/reject', [App\Http\Controllers\ArtisanController::class, 'reject'])->name('artisans.reject');
+        // Analytics
+        Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
 
-        // Super-admin uniquement
-        Route::middleware('can:super-admin')->group(function () {
-            Route::get('/super-dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'superAdminDashboard'])->name('super-dashboard');
-            // Route::resource('roles', RoleController::class); // décommentez quand le contrôleur existe
-        });
+        // Paramètres (pour super-admin)
+        // Route::prefix('settings')->name('settings.')->group(function () {
+        //     Route::get('/general', [SettingsController::class, 'general'])->name('general');
+        //     Route::get('/payment', [SettingsController::class, 'payment'])->name('payment');
+        //     Route::get('/notifications', [SettingsController::class, 'notifications'])->name('notifications');
+        // });
+
+        // Rôles & permissions (si contrôleur existe)
+        //Route::resource('roles', RoleController::class);
     });
-
+    Route::get('notifications',[NotificationController::class,'index'])->name('notifications.index');
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX, services)
@@ -327,4 +343,4 @@ Route::get('/debug-role', function() {
 })->middleware('auth');
 // Inclusion des fichiers supplémentaires – à décommenter une fois les contrôleurs créés
  require __DIR__ . '/auth.php';
- require __DIR__ . '/admin.php';
+ //require __DIR__ . '/admin.php';

@@ -21,11 +21,14 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
+    /**
+     * Affiche le tableau de bord principal.
+     */
     public function index()
     {
         $user = Auth::user();
 
-        // Logs de debug
+        // Logs de debug (optionnels, à retirer en production)
         Log::info('Accès au dashboard', [
             'user_id' => $user->id,
             'email'   => $user->email,
@@ -33,77 +36,75 @@ class DashboardController extends Controller
             'roles'   => $user->getRoleNames()->toArray(),
         ]);
 
-        Log::info('Dashboard debug', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'roles_array' => $user->getRoleNames()->toArray(),
-            'has_super_admin' => $user->hasRole('super-admin'),
-            'has_admin' => $user->hasRole('admin'),
-            'has_any_admin' => $user->hasAnyRole(['admin', 'super-admin']),
-        ]);
-
-        // Statistiques communes (disponibles pour tous)
+        // Statistiques communes (tous les rôles)
         $commonStats = $this->getCommonStats();
 
-        // Données spécifiques au rôle (incluant listes et graphiques)
+        // Données spécifiques au rôle
         $roleSpecificData = $this->getRoleSpecificData($user);
 
-        // Fusion complète pour la vue
+        // Fusion des statistiques
         $stats = array_merge($commonStats, $roleSpecificData);
 
-        // Variables supplémentaires pour la vue (listes, graphiques)
+        // Données additionnelles pour la vue
         $viewData = [
-            'stats'           => $stats,
-            'user'            => $user,
-            // Valeurs par défaut si non définies pour le rôle
-            'pendingArtisans' => $roleSpecificData['pendingArtisans'] ?? collect([]),
-            'pendingProducts' => $roleSpecificData['pendingProducts'] ?? collect([]),
-            'unreadContacts'  => $roleSpecificData['unreadContacts'] ?? collect([]),
-            'recentOrders'    => $roleSpecificData['recentOrders'] ?? collect([]),
-            'registrationsChart' => $roleSpecificData['registrationsChart'] ?? collect([]),
-            'salesChart'      => $roleSpecificData['salesChart'] ?? collect([]),
+            'stats'              => $stats,
+            'user'              => $user,
+            // Sécurisation : valeurs par défaut si non définies
+            'pendingArtisans'   => $roleSpecificData['pendingArtisans']   ?? collect([]),
+            'pendingProducts'   => $roleSpecificData['pendingProducts']   ?? collect([]),
+            'unreadContacts'    => $roleSpecificData['unreadContacts']    ?? collect([]),
+            'recentOrders'      => $roleSpecificData['recentOrders']      ?? collect([]),
+            'registrationsChart'=> $roleSpecificData['registrationsChart']?? collect([]),
+            'salesChart'        => $roleSpecificData['salesChart']        ?? collect([]),
         ];
 
         return view('admin.dashboard.index', $viewData);
     }
 
-    /**
-     * Statistiques communes à tous les rôles
-     */
+    /* ------------------------------------------------------------------
+       STATISTIQUES COMMUNES (accessibles à tous les utilisateurs connectés)
+    ------------------------------------------------------------------ */
     protected function getCommonStats(): array
     {
+        // Ces stats peuvent être affichées sur le dashboard de n'importe quel rôle
         return [
-            'total_orders'       => GuestOrder::count() + Order::count(), // inclut les deux types si besoin
-            'pending_orders'     => GuestOrder::where('order_status', 'pending')->count(),
-            'completed_orders'   => GuestOrder::where('order_status', 'completed')->count() ,
-            'total_revenue'      => GuestOrder::where('order_status', 'completed')->sum('total_amount'),
-            'unread_messages'    => Contact::where('status', 'read')->count(),
-            'total_reviews'      => Review::count(),
+            'total_orders'     => GuestOrder::count(),
+            'pending_orders'   => GuestOrder::where('order_status', 'pending')->count() + GuestOrder::where('order_status', 'pending')->count(),
+            'completed_orders' => GuestOrder::where('order_status', 'completed')->count() + GuestOrder::where('order_status', 'completed')->count(),
+            'total_revenue'    => GuestOrder::where('order_status', 'completed')->sum('total_amount') + GuestOrder::where('order_status', 'completed')->sum('total_amount'),
+            'unread_messages'  => Contact::where('status', 'unread')->count(),
+            'total_reviews'    => Review::count(),
         ];
     }
 
-    /**
-     * Données spécifiques selon le rôle
-     */
+    /* ------------------------------------------------------------------
+       STATISTIQUES PAR RÔLE
+    ------------------------------------------------------------------ */
     protected function getRoleSpecificData(User $user): array
     {
-        $data = [];
-
         if ($user->hasRole('super-admin')) {
-            $data = $this->getSuperAdminStats();
-        } elseif ($user->hasRole('admin')) {
-            $data = $this->getAdminStats();
-        } elseif ($user->hasRole('artisan')) {
-            $data = $this->getArtisanStats($user);
-        } elseif ($user->hasRole('vendor')) {
-            $data = $this->getVendorStats($user);
-        } else {
-            $data = $this->getClientStats($user);
+            return $this->getSuperAdminStats();
         }
 
-        return $data;
+        if ($user->hasRole('admin')) {
+            return $this->getAdminStats();
+        }
+
+        if ($user->hasRole('artisan')) {
+            return $this->getArtisanStats($user);
+        }
+
+        if ($user->hasRole('vendor')) {
+            return $this->getVendorStats($user);
+        }
+
+        // Par défaut : client ou tout autre rôle
+        return $this->getClientStats($user);
     }
 
+    /* ------------------------------------------------------------------
+       SUPER ADMIN & ADMIN (statistiques globales)
+    ------------------------------------------------------------------ */
     protected function getSuperAdminStats(): array
     {
         return [
@@ -119,9 +120,9 @@ class DashboardController extends Controller
             'total_events'       => CulturalEvent::count(),
             'pending_quotes'     => Quote::where('status', 'pending')->count(),
 
-            // Listes pour affichage
-            'pendingArtisans'    => Artisan::where('status', 'pending')->with(['user'])->latest()->take(8)->get(),
-            'pendingProducts'    => Product::where('status', 'pending')->with(['artisan'])->latest()->take(8)->get(),
+            // Listes pour affichage rapide
+            'pendingArtisans'    => Artisan::where('status', 'pending')->with('user')->latest()->take(8)->get(),
+            'pendingProducts'    => Product::where('status', 'pending')->with('artisan')->latest()->take(8)->get(),
             'unreadContacts'     => Contact::where('read', false)->latest()->take(8)->get(),
             'recentOrders'       => Order::with('user')->latest()->take(10)->get(),
 
@@ -133,6 +134,8 @@ class DashboardController extends Controller
 
     protected function getAdminStats(): array
     {
+        // L'admin voit les mêmes stats que le super-admin, sauf peut-être quelques éléments sensibles
+        // Ici on reprend les mêmes, mais vous pouvez filtrer si nécessaire
         return [
             'total_users'       => User::count(),
             'total_artisans'    => Artisan::where('status', 'approved')->count(),
@@ -150,9 +153,42 @@ class DashboardController extends Controller
         ];
     }
 
-    // ────────────────────────────────────────────────
-    // Vendeur (Restaurant)
-    // ────────────────────────────────────────────────
+    /* ------------------------------------------------------------------
+       ARTISAN
+    ------------------------------------------------------------------ */
+    protected function getArtisanStats(User $user): array
+    {
+        $artisan = $user->artisan;
+
+        if (!$artisan) {
+            return [
+                'no_profile' => true,
+                'message'    => 'Vous devez d\'abord créer votre profil artisan.',
+            ];
+        }
+
+        return [
+            'products_count'      => $artisan->products()->count(),
+            'products_pending'    => $artisan->products()->where('status', 'pending')->count(),
+            'orders_count'        => $artisan->orders()->count(),
+            'pending_orders'      => $artisan->orders()->where('status', 'pending')->count(),
+            'reviews_count'       => $artisan->reviews()->count(),
+            'average_rating'      => round($artisan->reviews()->avg('rating'), 1) ?? 0,
+            'total_revenue'       => $artisan->orders()->where('status', 'completed')->sum('total_amount'),
+            'monthly_revenue'     => $artisan->orders()
+                                    ->where('status', 'completed')
+                                    ->whereMonth('created_at', now()->month)
+                                    ->sum('total_amount'),
+
+            'recentProducts'      => $artisan->products()->latest()->take(6)->get(),
+            'recentOrders'        => $artisan->orders()->with('user')->latest()->take(6)->get(),
+            'recentReviews'       => $artisan->reviews()->with('user')->latest()->take(6)->get(),
+        ];
+    }
+
+    /* ------------------------------------------------------------------
+       VENDEUR (Gastronomie)
+    ------------------------------------------------------------------ */
     protected function getVendorStats(User $user): array
     {
         $vendor = $user->vendor;
@@ -160,29 +196,29 @@ class DashboardController extends Controller
         if (!$vendor) {
             return [
                 'no_profile' => true,
-                'message'    => 'Veuillez créer votre profil vendeur pour accéder à votre espace.',
+                'message'    => 'Vous devez d\'abord créer votre profil vendeur.',
             ];
         }
 
         return [
             'dishes_count'      => $vendor->dishes()->count(),
-            'orders_count'      => Order::whereHas('items.dish', fn($q) => $q->where('vendor_id', $vendor->id))->count(),
-            'rating'            => $vendor->reviews()->avg('rating') ?? 0,
-            'total_revenue'     => Order::where('order_status', 'completed')
-                ->whereHas('items.dish', fn($q) => $q->where('vendor_id', $vendor->id))
-                ->sum('total_amount'),
-            'monthly_revenue'   => Order::where('order_status', 'completed')
-                ->whereHas('items.dish', fn($q) => $q->where('vendor_id', $vendor->id))
-                ->whereMonth('created_at', now()->month)
-                ->sum('total_amount'),
+            'orders_count'      => $vendor->orders()->count(),
+            'pending_orders'    => $vendor->orders()->where('status', 'pending')->count(),
+            'rating'            => round($vendor->reviews()->avg('rating'), 1) ?? 0,
+            'total_revenue'     => $vendor->orders()->where('status', 'completed')->sum('total_amount'),
+            'monthly_revenue'   => $vendor->orders()
+                                    ->where('status', 'completed')
+                                    ->whereMonth('created_at', now()->month)
+                                    ->sum('total_amount'),
 
             'recentDishes'      => $vendor->dishes()->latest()->take(6)->get(),
+            'recentOrders'      => $vendor->orders()->with('user')->latest()->take(6)->get(),
         ];
     }
 
-    // ────────────────────────────────────────────────
-    // Client (utilisateur normal)
-    // ────────────────────────────────────────────────
+    /* ------------------------------------------------------------------
+       CLIENT
+    ------------------------------------------------------------------ */
     protected function getClientStats(User $user): array
     {
         $recentViewsIds = session()->get('recent_views', []);
@@ -190,15 +226,17 @@ class DashboardController extends Controller
         return [
             'favorites_count'   => $user->favorites()->count(),
             'orders_count'      => $user->orders()->count(),
+            'pending_orders'    => $user->orders()->where('order_status', 'pending')->count(),
             'reviews_count'     => $user->reviews()->count(),
             'recentViews'       => Product::whereIn('id', $recentViewsIds)->with('images')->take(6)->get(),
             'favorites'         => $user->favorites()->with('favoritable')->latest()->take(6)->get(),
+            'recentOrders'      => $user->orders()->latest()->take(6)->get(),
         ];
     }
 
-    // ────────────────────────────────────────────────
-    // Helpers pour les graphiques
-    // ────────────────────────────────────────────────
+    /* ------------------------------------------------------------------
+       GRAPHIQUES (Helpers)
+    ------------------------------------------------------------------ */
     protected function getRegistrationsChart(int $days = 30)
     {
         $data = User::where('created_at', '>=', now()->subDays($days))
@@ -212,7 +250,7 @@ class DashboardController extends Controller
 
     protected function getSalesChart(int $days = 30)
     {
-        $data = Order::where('order_status', 'completed')
+        $data = Order::where('status', 'completed')
             ->where('created_at', '>=', now()->subDays($days))
             ->select(
                 DB::raw('DATE(created_at) as date'),
@@ -227,12 +265,12 @@ class DashboardController extends Controller
     }
 
     /**
-     * Remplit les dates manquantes dans les graphiques
+     * Remplit les dates manquantes dans les graphiques.
      */
     protected function fillMissingDates($collection, int $days = 30, string $valueField = 'total'): \Illuminate\Support\Collection
     {
-        $start = now()->subDays($days)->format('Y-m-d');
-        $dates = collect(range(0, $days - 1))->map(fn($i) => now()->subDays($days - 1 - $i)->format('Y-m-d'));
+        $dates = collect(range(0, $days - 1))
+            ->map(fn($i) => now()->subDays($days - 1 - $i)->format('Y-m-d'));
 
         $dataByDate = $collection->keyBy('date');
 
@@ -245,21 +283,4 @@ class DashboardController extends Controller
             return $item;
         });
     }
-
-    protected function getArtisanStats(User $user): array
-    {
-        $data = $this->getArtisanStatsOriginal($user); // ton code original
-
-        // Ajouter des valeurs par défaut pour éviter undefined dans la vue
-        return array_merge([
-            'pendingArtisans' => collect([]),
-            'pendingProducts' => collect([]),
-            'unreadContacts'  => collect([]),
-            'recentOrders'    => collect([]),
-            'registrationsChart' => collect([]),
-            'salesChart'      => collect([]),
-        ], $data);
-    }
-
-    // Même chose pour vendor et client si besoin
 }

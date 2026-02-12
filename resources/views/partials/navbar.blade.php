@@ -98,26 +98,25 @@
                         <button class="btn btn-outline-benin-green dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i>
                             {{ Auth::user()->name }}
-                            @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('super-admin'))
-                                <span class="badge bg-danger ms-1">Admin</span>
+                            @if(Auth::user()->hasRole('admin'))
+                                <span class="badge bg-benin-red ms-1">Admin</span>
                             @elseif(Auth::user()->hasRole('artisan'))
-                                <span class="badge bg-success ms-1">Artisan</span>
-                            @elseif(Auth::user()->hasRole('vendor'))
-                                <span class="badge bg-info ms-1">Vendeur</span>
+                                <span class="badge bg-benin-green ms-1">Artisan</span>
                             @endif
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-2"></i>
-                                    Tableau de bord
-                                </a>
-                            </li>
+                            @auth
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-speedometer2 me-2"></i>
+                                        Mon espace
+                                    </a>
+                                </li>
+                            @endauth
                             <li>
                                 <a class="dropdown-item" href="{{ route('profile.edit') }}">
                                     <i class="bi bi-person me-2"></i>
-                                    Profil
-                                </a>
+                                    Profil</a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>

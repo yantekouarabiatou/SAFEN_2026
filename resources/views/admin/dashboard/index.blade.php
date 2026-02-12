@@ -32,7 +32,7 @@
                         <a href="{{ route('admin.analytics') }}" class="btn btn-outline-white btn-lg">
                             <i class="fas fa-chart-bar"></i> Voir les analytics détaillés
                         </a>
-                        <a href="#" class="btn btn-white btn-lg">
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-white btn-lg">
                             <i class="fas fa-users-cog"></i> Gérer les utilisateurs
                         </a>
                     </div>
@@ -59,7 +59,8 @@
                                             <div class="alert-title">Artisans en attente</div>
                                             <div class="alert-text">
                                                 <strong>{{ $artisans_pending }}</strong> artisans en attente d'approbation.
-                                                <a href="#" class="btn btn-sm btn-warning ml-2">
+                                                <a href="{{ route('admin.artisans.index', ['status' => 'pending']) }}"
+                                                    class="btn btn-sm btn-warning ml-2">
                                                     Vérifier maintenant
                                                 </a>
                                             </div>
@@ -224,7 +225,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href=""{{-- <a href="{{ route('admin.products.index', ['status' => 'pending']) }}" --}}
+                            <a href="{{ route('admin.products.index', ['status' => 'pending']) }}"
                                 class="btn btn-warning btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-box-check"></i>
                                 <div class="mt-2">Approuver produits</div>
@@ -235,7 +236,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href="#"
+                            <a href="{{ route('admin.contacts.index') }}"
                                 class="btn btn-info btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-envelope"></i>
                                 <div class="mt-2">Voir les messages</div>
@@ -246,7 +247,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <a href="#"
+                            <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}"
                                 class="btn btn-danger btn-icon icon-left btn-lg btn-block mb-3">
                                 <i class="fas fa-shopping-cart"></i>
                                 <div class="mt-2">Commandes en attente</div>
@@ -321,10 +322,14 @@
                                                 <a href="{{ route('admin.artisans.show', $artisan) }}" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('admin.artisans.approve', $artisan) }}"
-                                                    class="btn btn-sm btn-success">
-                                                    <i class="fas fa-check"></i> Approuver
-                                                </a>
+                                                {{-- Formulaire POST pour approbation --}}
+                                                <form action="{{ route('admin.artisans.approve', $artisan) }}" method="POST"
+                                                      style="display: inline-block;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-check"></i> Approuver
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -368,7 +373,7 @@
                                             <td>{{ Str::limit($contact->subject, 30) }}</td>
                                             <td>{{ $contact->created_at->format('d/m/Y H:i') }}</td>
                                             <td>
-                                                <a href="{{ route('admin.contacts.show', $contact) }}" class="btn btn-sm btn-info">
+                                                <a href="{{ route('admin.contacts.index', $contact->id) }}" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             </td>
@@ -390,7 +395,7 @@
                 <div class="card-header">
                     <h4><i class="fas fa-shopping-cart"></i> Commandes récentes</h4>
                     <div class="card-header-action">
-                        <a href="#" class="btn btn-primary btn-sm">Voir toutes</a>
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-primary btn-sm">Voir toutes</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -409,8 +414,8 @@
                             <tbody>
                                 @foreach($recentOrders as $order)
                                     <tr>
-                                        <td>#{{ $order->order_number }}</td>
-                                        <td>{{ $order->user->name }}</td>
+                                        <td>#{{ $order->order_number ?? $order->id }}</td>
+                                        <td>{{ $order->user->name ?? 'Invité' }}</td>
                                         <td>{{ number_format($order->total_amount, 0, ',', ' ') }} FCFA</td>
                                         <td>
                                             @if($order->order_status == 'pending')
