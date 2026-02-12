@@ -366,4 +366,70 @@ class ArtisanController extends Controller
                 return null;
         }
     }
+
+    public function edit(Artisan $artisan)
+    {
+        // Vérifier que l'utilisateur a le droit de modifier ce profil
+        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+            abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
+        }
+
+        return view('artisans.edit', compact('artisan'));
+    }
+
+    public function update(Request $request, Artisan $artisan)
+    {
+        // Vérifier que l'utilisateur a le droit de modifier ce profil
+        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+            abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
+        }
+
+        $validated = $request->validate([
+            'business_name' => 'required|string|max:255',
+            'craft' => 'required|string',
+            'bio' => 'nullable|string',
+            'years_experience' => 'nullable|integer|min:0',
+            'city' => 'required|string',
+            'neighborhood' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'whatsapp' => 'required|string',
+            'phone' => 'nullable|string',
+            'languages_spoken' => 'nullable|array',
+            'pricing_info' => 'nullable|string',
+        ]);
+
+        $validated['languages_spoken'] = json_encode($validated['languages_spoken'] ?? []);
+
+        $artisan->update($validated);
+
+        // Traitement des nouvelles photos
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $path = $photo->store('artisans/portfolio', 'public');
+
+                $artisan->photos()->create([
+                    'photo_url' => $path,
+                    'caption' => $request->input("captions.$index"),
+                    'order' => $artisan->photos()->count() + $index,
+                ]);
+            }
+        }
+
+        return redirect()->route('artisans.show', $artisan)
+            ->with('success', 'Votre profil a été mis à jour avec succès !');
+    }
+
+    public function destroy(Artisan $artisan)
+    {
+        // Vérifier que l'utilisateur a le droit de supprimer ce profil
+        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+            abort(403, 'Vous n\'êtes pas autorisé à supprimer ce profil.');
+        }
+
+        $artisan->delete();
+
+        return redirect()->route('dashboard.artisan')
+            ->with('success', 'Votre profil artisan a été supprimé.');
+    }
 }

@@ -65,7 +65,11 @@ class RegisteredUserController extends Controller
                 ->with('success', 'Bienvenue ! Complétez votre profil artisan pour commencer.');
         }
 
+<<<<<<< HEAD
         return redirect()->route('home')
+=======
+        return redirect()->route('dashboard')
+>>>>>>> ee8d02cecf0d181a1dd4e4e168c975f03b1d1d41
             ->with('success', 'Bienvenue sur TOTCHEMEGNON !');
     }
 }

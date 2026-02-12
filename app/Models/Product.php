@@ -108,7 +108,7 @@ class Product extends Model
 
     public function getFullUrlAttribute()
     {
-        return Storage::url($this->image_url);
+        return $this->image_url ? Storage::url($this->image_url) : null;
     }
 
 

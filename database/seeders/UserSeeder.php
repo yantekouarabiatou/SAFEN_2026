@@ -12,8 +12,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // S’assurer que les rôles existent
-        $this->ensureRolesExist();
+        // Admin user
+        User::updateOrCreate(
+            ['email' => 'admin@afriheritage.bj'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'phone' => '+22961234567',
+            ]
+        );
 
         // Super Admin
         $superAdmin = User::firstOrCreate(
@@ -55,43 +63,30 @@ class UserSeeder extends Seeder
 
         // Artisans
         for ($i = 1; $i <= 5; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => "artisan{$i}@safen.bj"],
+            User::updateOrCreate(
+                ['email' => "artisan$i@example.com"],
                 [
-                    'name'     => "Artisan {$i}",
-                    'password' => Hash::make('artisan123'),
-                    'phone'    => '+2296' . rand(1000000, 9999999),
-                    'city'     => ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey-Calavi', 'Djougou'][$i-1] ?? 'Cotonou',
-                ]
-            );
-
-            $user->assignRole('artisan');
-
-            Artisan::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'business_name' => "Atelier de " . $user->name,
-                    'craft'         => $crafts[($i-1) % count($crafts)], // boucle si besoin
-                    'city'          => $user->city,
-                    'whatsapp'      => $user->phone,
-                    'bio'           => "Artisan passionné de {$crafts[($i-1) % count($crafts)]} basé à {$user->city}.",
+                    'name' => "Artisan $i",
+                    'password' => Hash::make('password'),
+                    'role' => 'artisan',
+                    'phone' => '+2296' . rand(1000000, 9999999),
+                    'city' => ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'][$i-1],
                 ]
             );
         }
 
-        // Vendors (optionnel)
-        for ($i = 1; $i <= 3; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => "vendor{$i}@safen.bj"],
+        // Sample clients
+        for ($i = 1; $i <= 10; $i++) {
+            User::updateOrCreate(
+                ['email' => "client$i@example.com"],
                 [
-                    'name'     => "Vendeur {$i}",
-                    'password' => Hash::make('vendor123'),
-                    'phone'    => '+2296' . rand(1000000, 9999999),
-                    'city'     => 'Cotonou',
+                    'name' => "Client $i",
+                    'password' => Hash::make('password'),
+                    'role' => 'client',
+                    'phone' => '+2296' . rand(1000000, 9999999),
+                    'city' => 'Cotonou',
                 ]
             );
-
-            $user->assignRole('vendor');
         }
 
         // Clients
