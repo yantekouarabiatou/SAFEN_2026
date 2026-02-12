@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <title>@yield('title', 'Administration') - SAFEN Admin</title>
+    <title>@yield('title', 'Administration') - TOTCHEMEGNON Admin</title>
     
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
@@ -93,7 +93,7 @@
             {{-- Footer --}}
             <footer class="main-footer">
                 <div class="footer-left">
-                    &copy; {{ date('Y') }} <a href="{{ url('/') }}">SAFEN</a> - Saveurs et Artisanat du Fon et des Ethnies du Nord
+                    &copy; {{ date('Y') }} <a href="{{ url('/') }}">TOTCHEMEGNON</a> - Saveurs, Artisanat et Ethnies du Bénin
                 </div>
                 <div class="footer-right">
                     Version 1.0

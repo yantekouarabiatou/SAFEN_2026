@@ -73,6 +73,6 @@ class RegisteredUserController extends Controller
         }
 
         return redirect()->route('dashboard')
-            ->with('success', 'Bienvenue sur SAFEN !');
+            ->with('success', 'Bienvenue sur TOTCHEMEGNON !');
     }
 }

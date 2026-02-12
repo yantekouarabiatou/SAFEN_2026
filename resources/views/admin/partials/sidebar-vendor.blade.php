@@ -2,7 +2,7 @@
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
             <a href="{{ route('dashboard.vendor') }}">
-                <span class="logo-name">SAFEN</span>
+                <span class="logo-name">TOTCHEMEGNON</span>
             </a>
         </div>
         <ul class="sidebar-menu">

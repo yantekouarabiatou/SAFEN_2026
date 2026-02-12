@@ -27,7 +27,9 @@ class DashboardController extends Controller
             'total_vendors' => Vendor::count(),
             'total_orders' => Order::count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'total_revenue' => Order::where('status', 'completed')->sum('total_amount'),
+            // 'total_revenue' => Order::where('status', 'completed')->sum('total_amount'),
+            // Option B - Si vous avez une colonne 'amount'
+            'total_revenue' => Order::where('status', 'completed')->sum('total'),
             'new_contacts' => Contact::where('status', 'new')->count(),
             'total_reviews' => Review::count(),
         ];
@@ -44,17 +46,16 @@ class DashboardController extends Controller
             ->get();
 
         // Produits populaires
-        $popularProducts = Product::withCount('orderItems')
-            ->orderBy('order_items_count', 'desc')
+        // ✅ NOUVEAU CODE - Utilise order_count
+        $popularProducts = Product::orderBy('order_count', 'desc')
             ->take(5)
             ->get();
-
         // Graphique des ventes (7 derniers jours)
         $salesChart = Order::where('status', 'completed')
             ->where('created_at', '>=', now()->subDays(7))
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_amount) as total'),
+                DB::raw('SUM(total) as total'),
                 DB::raw('COUNT(*) as count')
             )
             ->groupBy('date')

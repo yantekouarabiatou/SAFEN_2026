@@ -253,14 +253,21 @@ class DishSeeder extends Seeder
         ];
 
         foreach ($dishes as $item) {
-            $dish = Dish::create($item['data']);
+            $dish = Dish::updateOrCreate(
+                ['slug' => $item['data']['slug']],
+                $item['data']
+            );
 
             foreach ($item['images'] as $index => $image) {
-                DishImage::create([
-                    'dish_id'   => $dish->id,
-                    'image_url' => "dishes/{$image}",
-                    'order'     => $index + 1,
-                ]);
+                DishImage::updateOrCreate(
+                    [
+                        'dish_id' => $dish->id,
+                        'image_url' => "dishes/{$image}"
+                    ],
+                    [
+                        'order' => $index + 1,
+                    ]
+                );
             }
 
             $this->command->info("🍽️ Plat seedé : {$dish->name}");

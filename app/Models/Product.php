@@ -106,8 +106,8 @@ class Product extends Model
         return $categories[$this->category] ?? $this->category;
     }
 
-     public function getFullUrlAttribute()
+    public function getFullUrlAttribute()
     {
-        return Storage::url($this->image_url);
+        return $this->image_url ? Storage::url($this->image_url) : null;
     }
 }
