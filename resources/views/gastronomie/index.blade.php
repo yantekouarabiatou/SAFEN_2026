@@ -446,30 +446,74 @@
         margin-bottom: 1rem;
     }
 
-    /* Pagination */
+    /* Pagination - ULTRA SPÉCIFIQUE pour forcer Bootstrap */
+    nav[role="navigation"] .pagination,
     .pagination {
-        margin-top: 3rem;
+        margin-top: 3rem !important;
+        gap: 0 !important;
     }
 
+    nav[role="navigation"] .pagination .page-link,
+    .pagination > .page-item > .page-link,
     .pagination .page-link {
-        border-radius: 50px;
-        margin: 0 0.25rem;
-        border: 2px solid var(--beige);
-        color: var(--charcoal);
-        font-weight: 600;
-        transition: all 0.3s ease;
+        border-radius: 8px !important;
+        margin: 0 3px !important;
+        border: 1px solid var(--beige) !important;
+        color: var(--charcoal) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        padding: 6px 12px !important;
+        min-width: unset !important;
+        width: auto !important;
+        height: auto !important;
+        line-height: 1.5 !important;
+        display: inline-block !important;
+        text-align: center !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
     }
 
+    nav[role="navigation"] .pagination .page-link:hover,
+    .pagination > .page-item > .page-link:hover,
     .pagination .page-link:hover {
-        background: var(--benin-red);
-        border-color: var(--benin-red);
-        color: white;
-        transform: translateY(-2px);
+        background: var(--benin-red) !important;
+        border-color: var(--benin-red) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        text-decoration: none !important;
     }
 
+    nav[role="navigation"] .pagination .page-item.active .page-link,
+    .pagination > .page-item.active > .page-link,
     .pagination .page-item.active .page-link {
-        background: var(--benin-red);
-        border-color: var(--benin-red);
+        background: var(--benin-red) !important;
+        border-color: var(--benin-red) !important;
+        color: white !important;
+        z-index: 1 !important;
+    }
+
+    nav[role="navigation"] .pagination .page-item.disabled .page-link,
+    .pagination > .page-item.disabled > .page-link,
+    .pagination .page-item.disabled .page-link {
+        opacity: 0.5 !important;
+        background: #f8f9fa !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Forcer la taille des page-item */
+    nav[role="navigation"] .pagination .page-item,
+    .pagination > .page-item,
+    .pagination .page-item {
+        margin: 0 !important;
+        display: inline-block !important;
+    }
+
+    /* S'assurer que les svg/icônes dans les boutons suivent aussi */
+    .pagination .page-link svg,
+    .pagination .page-link i {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 14px !important;
     }
 
     /* Responsive */
@@ -775,8 +819,8 @@
 
         <!-- Pagination -->
         @if($dishes->hasPages())
-            <div class="d-flex justify-content-center">
-                {{ $dishes->withQueryString()->links() }}
+            <div class="pagination-container mt-5">
+                {{ $dishes->withQueryString()->links('pagination::bootstrap-5') }}
             </div>
         @endif
     @else
@@ -858,6 +902,70 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.dish-card').forEach(card => {
         observer.observe(card);
     });
+
+    // FORCER LES STYLES DE PAGINATION
+    function fixPagination() {
+        const paginationLinks = document.querySelectorAll('.pagination .page-link');
+        paginationLinks.forEach(link => {
+            // Remplacer le texte "Previous" et "Next" par des icônes
+            if (link.textContent.trim() === 'Previous' || link.textContent.trim() === '‹ Previous' || link.textContent.includes('Précédent')) {
+                link.innerHTML = '<i class="bi bi-chevron-left"></i>';
+            }
+            if (link.textContent.trim() === 'Next' || link.textContent.trim() === 'Next ›' || link.textContent.includes('Suivant')) {
+                link.innerHTML = '<i class="bi bi-chevron-right"></i>';
+            }
+
+            link.style.cssText = `
+                padding: 8px 12px !important;
+                font-size: 14px !important;
+                border-radius: 8px !important;
+                margin: 0 3px !important;
+                border: 1px solid var(--beige) !important;
+                color: var(--charcoal) !important;
+                font-weight: 600 !important;
+                min-width: 36px !important;
+                width: auto !important;
+                height: 36px !important;
+                line-height: 1.2 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            `;
+        });
+
+        const activeLinks = document.querySelectorAll('.pagination .page-item.active .page-link');
+        activeLinks.forEach(link => {
+            link.style.cssText = `
+                padding: 8px 12px !important;
+                font-size: 14px !important;
+                border-radius: 8px !important;
+                margin: 0 3px !important;
+                background: var(--benin-red) !important;
+                border-color: var(--benin-red) !important;
+                color: white !important;
+                font-weight: 600 !important;
+                min-width: 36px !important;
+                width: auto !important;
+                height: 36px !important;
+                line-height: 1.2 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            `;
+        });
+
+        const disabledLinks = document.querySelectorAll('.pagination .page-item.disabled .page-link');
+        disabledLinks.forEach(link => {
+            link.style.opacity = '0.4';
+            link.style.cursor = 'not-allowed';
+        });
+    }
+
+    // Appliquer immédiatement
+    fixPagination();
+
+    // Réappliquer après 100ms au cas où
+    setTimeout(fixPagination, 100);
 });
 </script>
 @endpush

@@ -8,72 +8,87 @@ use Illuminate\Http\Request;
 
 class GastronomieController extends Controller
 {
+
     public function index(Request $request)
     {
-        $query = Dish::with(['images', 'vendors']);
+        // Builder de base avec relations essentielles (évite N+1)
+        $query = Dish::query()
+            ->with(['images' => fn($q) => $q->orderBy('order')]) // images triées
+            ->withCount('vendors') // nombre de vendeurs (utile pour filtres et affichage)
+            ->withMin('vendors', 'dish_vendor.price') // prix minimum
+            ->withMax('vendors', 'dish_vendor.price'); // prix maximum
 
-        // Filtre par catégorie
-        if ($request->filled('category')) {
-            $query->byCategory($request->category);
-        }
-
-        // Filtre par région
-        if ($request->filled('region')) {
-            $query->byRegion($request->region);
-        }
-
-        // Recherche textuelle
+        // 1. Recherche textuelle (plus performante avec index si possible)
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                  ->orWhere('name_local', 'like', "%$search%")
-                  ->orWhere('description', 'like', "%$search%")
-                  ->orWhereJsonContains('ingredients', $search);
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('name_local', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereJsonContains('ingredients', $search);
             });
         }
 
-        // Filtre par disponibilité de vendeurs
+        // 2. Filtre par catégorie
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // 3. Filtre par région
+        if ($request->filled('region')) {
+            $query->where('region', $request->region);
+        }
+
+        // 4. Filtre "avec vendeurs"
         if ($request->boolean('with_vendors')) {
             $query->has('vendors');
         }
 
-        // Filtre par prix
-        if ($request->filled('max_price')) {
-            $query->whereHas('vendors', function($q) use ($request) {
-                $q->where('dish_vendor.price', '<=', $request->max_price);
+        // 5. Filtre par prix maximum
+        if ($request->filled('max_price') && is_numeric($request->max_price)) {
+            $maxPrice = (float) $request->max_price;
+            $query->whereHas('vendors', function ($q) use ($maxPrice) {
+                $q->where('dish_vendor.price', '<=', $maxPrice);
             });
         }
 
-        // Tri
-        switch ($request->input('sort', 'name')) {
+        // 6. Tri (switch plus robuste)
+        $sort = $request->input('sort', 'name');
+
+        switch ($sort) {
             case 'popular':
-                $query->popular();
+                $query->orderBy('views', 'desc');
                 break;
+
             case 'newest':
                 $query->latest();
                 break;
+
             case 'price_low':
-                $query->withAvailableVendors()
-                    ->leftJoin('dish_vendor', 'dishes.id', '=', 'dish_vendor.dish_id')
-                    ->select('dishes.*')
-                    ->orderBy('dish_vendor.price', 'asc');
+                $query->orderBy('vendors_min_dish_vendor_price', 'asc');
                 break;
+
             case 'price_high':
-                $query->withAvailableVendors()
-                    ->leftJoin('dish_vendor', 'dishes.id', '=', 'dish_vendor.dish_id')
-                    ->select('dishes.*')
-                    ->orderBy('dish_vendor.price', 'desc');
+                $query->orderBy('vendors_max_dish_vendor_price', 'desc');
                 break;
+
+            case 'name':
             default:
                 $query->orderBy('name');
+                break;
         }
 
-        $dishes = $query->paginate(12)->withQueryString();
+        // Pagination + conservation des paramètres GET
+        $dishes = $query->paginate(10)->withQueryString();
 
-        // Données pour les filtres
-        $categories = array_keys(Dish::$categoryLabels);
-        $regions = Dish::distinct('region')->pluck('region')->filter();
+        // Données pour les filtres (optimisé : pas de requêtes inutiles)
+        $categories = array_keys(Dish::$categoryLabels ?? []);
+        $regions = Dish::whereNotNull('region')
+            ->distinct()
+            ->orderBy('region')
+            ->pluck('region')
+            ->filter()
+            ->values();
 
         return view('gastronomie.index', compact('dishes', 'categories', 'regions'));
     }
@@ -93,15 +108,15 @@ class GastronomieController extends Controller
         $vendors = $dish->getNearbyVendors($userLat, $userLng, 50); // 50km de rayon
 
         // Plats similaires (même catégorie ou même région)
-        $similarDishes = Dish::where(function($query) use ($dish) {
+        $similarDishes = Dish::where(function ($query) use ($dish) {
             $query->where('category', $dish->category)
-                  ->orWhere('region', $dish->region);
+                ->orWhere('region', $dish->region);
         })
-        ->where('id', '!=', $dish->id)
-        ->with('images')
-        ->inRandomOrder()
-        ->limit(4)
-        ->get();
+            ->where('id', '!=', $dish->id)
+            ->with('images')
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
 
         // Plats précédent et suivant
         $previousDish = Dish::where('id', '<', $dish->id)

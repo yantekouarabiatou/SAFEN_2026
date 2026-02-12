@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     CheckoutController,
     OrderController,
     FavoriteController,
+    GastronomieController as ControllersGastronomieController,
     QuoteController,
     ReviewController,
     MessageController,
@@ -26,6 +27,7 @@ use App\Http\Controllers\{
 };
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Auth\{
     RegisteredUserController,
     AuthenticatedSessionController
@@ -68,7 +70,7 @@ Route::get('/evenements/{event}', [CulturalEventController::class, 'show'])->nam
 
 // ===== Gastronomie =====
 Route::prefix('gastronomie')->name('gastronomie.')->group(function () {
-    Route::get('/', [GastronomieController::class, 'index'])->name('index');
+    Route::get('/', [ControllersGastronomieController::class, 'index'])->name('index');
     Route::get('/{dish}', [GastronomieController::class, 'show'])->name('show');
 });
 
@@ -236,8 +238,6 @@ Route::middleware('auth')->group(function () {
     // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-    Route::resource('vendors', VendorController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-
     // ===== ROUTES ADMIN (approuver, rejeter, etc.) =====
     Route::middleware(['auth', 'role_or_permission:admin|super-admin'])->group(function () {
         Route::post('/admin/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('admin.artisans.verify');
@@ -263,10 +263,6 @@ Route::middleware('auth')->group(function () {
     // Route::post('/user/online', [UserController::class, 'updateOnlineStatus'])->name('user.online');
     */
 });
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-});
-
 
 /*
 |--------------------------------------------------------------------------
@@ -305,6 +301,18 @@ Route::prefix('admin')
         //Route::resource('roles', RoleController::class);
     });
     Route::get('notifications',[NotificationController::class,'index'])->name('notifications.index');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class);
+    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
+    Route::resource('vendors', AdminVendorController::class);
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
+
+    // Détacher un plat du vendeur
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
+
+});
+
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX, services)

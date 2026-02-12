@@ -136,11 +136,16 @@
 
                                     // Déterminer le rôle affiché
                                     $displayRole = 'Utilisateur';
-                                    if ($user->hasRole('super-admin')) $displayRole = 'Super Administrateur';
-                                    elseif ($user->hasRole('admin')) $displayRole = 'Administrateur';
-                                    elseif ($user->hasRole('artisan')) $displayRole = 'Artisan';
-                                    elseif ($user->hasRole('vendor')) $displayRole = 'Vendeur';
-                                    elseif ($user->hasRole('client')) $displayRole = 'Client';
+                                    if ($user->hasRole('super-admin'))
+                                        $displayRole = 'Super Administrateur';
+                                    elseif ($user->hasRole('admin'))
+                                        $displayRole = 'Administrateur';
+                                    elseif ($user->hasRole('artisan'))
+                                        $displayRole = 'Artisan';
+                                    elseif ($user->hasRole('vendor'))
+                                        $displayRole = 'Vendeur';
+                                    elseif ($user->hasRole('client'))
+                                        $displayRole = 'Client';
 
                                     // Couleur avatar
                                     $colors = [
@@ -197,115 +202,115 @@
 
                         {{-- Dropdown menu --}}
                         @auth
-                        <div class="dropdown-menu dropdown-menu-right pullDown"
-                            style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; min-width: 260px; overflow: hidden;">
-                            <div class="dropdown-header" style="background: linear-gradient(135deg, #4a70b7, #2c5282); color: white; padding: 20px;">
-                                <div class="d-flex align-items-center">
-                                    <div class="mr-3">
-                                        @if($user->avatar)
-                                            <img alt="image" src="{{ $user->avatar_url }}"
-                                                style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3);">
-                                        @else
-                                            <div class="d-flex align-items-center justify-content-center"
-                                                style="background: {{ $selectedColor['bg'] }}; color: white; width: 54px; height: 54px;
-                                                border-radius: 50%; font-weight: 600; font-size: 18px; border: 3px solid rgba(255,255,255,0.3);">
-                                                {{ $initiales }}
+                            <div class="dropdown-menu dropdown-menu-right pullDown"
+                                style="border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; min-width: 260px; overflow: hidden;">
+                                <div class="dropdown-header" style="background: linear-gradient(135deg, #4a70b7, #2c5282); color: white; padding: 20px;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3">
+                                            @if($user->avatar)
+                                                <img alt="image" src="{{ $user->avatar_url }}"
+                                                    style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3);">
+                                            @else
+                                                <div class="d-flex align-items-center justify-content-center"
+                                                    style="background: {{ $selectedColor['bg'] }}; color: white; width: 54px; height: 54px;
+                                                    border-radius: 50%; font-weight: 600; font-size: 18px; border: 3px solid rgba(255,255,255,0.3);">
+                                                    {{ $initiales }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 16px; font-weight: 600; margin-bottom: 2px;">
+                                                {{ $user->name }}
                                             </div>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 2px;">
-                                            {{ $user->name }}
-                                        </div>
-                                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 6px;">
-                                            {{ $user->email }}
-                                        </div>
-                                        <div style="font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.2);
-                                            padding: 3px 10px; border-radius: 20px; display: inline-block;">
-                                            {{ $displayRole }}
+                                            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 6px;">
+                                                {{ $user->email }}
+                                            </div>
+                                            <div style="font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.2);
+                                                padding: 3px 10px; border-radius: 20px; display: inline-block;">
+                                                {{ $displayRole }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="dropdown-body" style="padding: 10px 0;">
-                                <a href="#" class="dropdown-item has-icon d-flex align-items-center py-2">
-                                    <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                        style="width: 32px; height: 32px; background: #ebf5ff; border-radius: 8px;">
-                                        <i class="far fa-user text-primary" style="font-size: 14px;"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600; color: #2d3748;">Mon profil</div>
-                                        <small class="text-muted d-block">Voir mes informations</small>
-                                    </div>
-                                </a>
-
-                                <a href="{{ route('notifications.index') }}" class="dropdown-item has-icon d-flex align-items-center py-2">
-                                    <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                        style="width: 32px; height: 32px; background: #fff5f5; border-radius: 8px;">
-                                        <i class="far fa-bell text-danger" style="font-size: 14px;"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600; color: #2d3748;">Notifications</div>
-                                        <small class="text-muted d-block">
-                                            {{ $unreadCount > 0 ? $unreadCount . ' nouvelles' : 'À jour' }}
-                                        </small>
-                                    </div>
-                                </a>
-
-                                @can('voir analytics')
-                                <a href="{{ route('admin.analytics') }}" class="dropdown-item has-icon d-flex align-items-center py-2">
-                                    <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                        style="width: 32px; height: 32px; background: #fffbeb; border-radius: 8px;">
-                                        <i class="fas fa-chart-bar text-warning" style="font-size: 14px;"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600; color: #2d3748;">Analytiques</div>
-                                        <small class="text-muted d-block">Rapports et statistiques</small>
-                                    </div>
-                                </a>
-                                @endcan
-
-                                @if($user->hasRole('artisan') && $user->artisan)
-                                <a href="{{ route('artisan.profile.edit', $user->artisan->id) }}" class="dropdown-item has-icon d-flex align-items-center py-2">
-                                    <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                        style="width: 32px; height: 32px; background: #e6f7e6; border-radius: 8px;">
-                                        <i class="fas fa-palette text-success" style="font-size: 14px;"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600; color: #2d3748;">Profil artisan</div>
-                                        <small class="text-muted d-block">Gérer ma boutique</small>
-                                    </div>
-                                </a>
-                                @endif
-
-                                @if($user->hasRole('vendor') && $user->vendor)
-                                <a href="{{ route('vendor.profile.edit', $user->vendor->id) }}" class="dropdown-item has-icon d-flex align-items-center py-2">
-                                    <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                        style="width: 32px; height: 32px; background: #fff0d9; border-radius: 8px;">
-                                        <i class="fas fa-store text-orange" style="font-size: 14px;"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600; color: #2d3748;">Profil vendeur</div>
-                                        <small class="text-muted d-block">Gérer mon restaurant</small>
-                                    </div>
-                                </a>
-                                @endif
-
-                                <div class="dropdown-divider my-2"></div>
-
-                                <form method="POST" action="{{ route('logout') }}" id="logout-form-nav">
-                                    @csrf
-                                    <a href="#" class="dropdown-item has-icon d-flex align-items-center py-2 text-danger"
-                                        onclick="event.preventDefault(); document.getElementById('logout-form-nav').submit();">
+                                <div class="dropdown-body" style="padding: 10px 0;">
+                                    <a href="#" class="dropdown-item has-icon d-flex align-items-center py-2">
                                         <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
-                                            style="width: 32px; height: 32px; background: #fef2f2; border-radius: 8px;">
-                                            <i class="fas fa-sign-out-alt" style="font-size: 14px;"></i>
+                                            style="width: 32px; height: 32px; background: #ebf5ff; border-radius: 8px;">
+                                            <i class="far fa-user text-primary" style="font-size: 14px;"></i>
                                         </div>
-                                        <div style="font-weight: 600;">Déconnexion</div>
+                                        <div>
+                                            <div style="font-weight: 600; color: #2d3748;">Mon profil</div>
+                                            <small class="text-muted d-block">Voir mes informations</small>
+                                        </div>
                                     </a>
-                                </form>
+
+                                    <a href="{{ route('notifications.index') }}" class="dropdown-item has-icon d-flex align-items-center py-2">
+                                        <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
+                                            style="width: 32px; height: 32px; background: #fff5f5; border-radius: 8px;">
+                                            <i class="far fa-bell text-danger" style="font-size: 14px;"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600; color: #2d3748;">Notifications</div>
+                                            <small class="text-muted d-block">
+                                                {{ $unreadCount > 0 ? $unreadCount . ' nouvelles' : 'À jour' }}
+                                            </small>
+                                        </div>
+                                    </a>
+
+                                    @can('voir analytics')
+                                        <a href="{{ route('admin.analytics') }}" class="dropdown-item has-icon d-flex align-items-center py-2">
+                                            <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px; background: #fffbeb; border-radius: 8px;">
+                                                <i class="fas fa-chart-bar text-warning" style="font-size: 14px;"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; color: #2d3748;">Analytiques</div>
+                                                <small class="text-muted d-block">Rapports et statistiques</small>
+                                            </div>
+                                        </a>
+                                    @endcan
+
+                                    @if($user->hasRole('artisan') && $user->artisan)
+                                        <a href="{{ route('artisan.profile.edit', $user->artisan->id) }}" class="dropdown-item has-icon d-flex align-items-center py-2">
+                                            <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px; background: #e6f7e6; border-radius: 8px;">
+                                                <i class="fas fa-palette text-success" style="font-size: 14px;"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; color: #2d3748;">Profil artisan</div>
+                                                <small class="text-muted d-block">Gérer ma boutique</small>
+                                            </div>
+                                        </a>
+                                    @endif
+
+                                    @if($user->hasRole('vendor') && $user->vendor)
+                                        <a href="{{ route('vendor.profile.edit', $user->vendor->id) }}" class="dropdown-item has-icon d-flex align-items-center py-2">
+                                            <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px; background: #fff0d9; border-radius: 8px;">
+                                                <i class="fas fa-store text-orange" style="font-size: 14px;"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; color: #2d3748;">Profil vendeur</div>
+                                                <small class="text-muted d-block">Gérer mon restaurant</small>
+                                            </div>
+                                        </a>
+                                    @endif
+
+                                    <div class="dropdown-divider my-2"></div>
+
+                                    <form method="POST" action="{{ route('logout') }}" id="logout-form-nav">
+                                        @csrf
+                                        <a href="#" class="dropdown-item has-icon d-flex align-items-center py-2 text-danger"
+                                            onclick="event.preventDefault(); document.getElementById('logout-form-nav').submit();">
+                                            <div class="icon-wrapper mr-3 d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px; background: #fef2f2; border-radius: 8px;">
+                                                <i class="fas fa-sign-out-alt" style="font-size: 14px;"></i>
+                                            </div>
+                                            <div style="font-weight: 600;">Déconnexion</div>
+                                        </a>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
                         @endauth
                     </li>
                 </ul>
@@ -336,212 +341,212 @@
 
                         {{-- ========== ADMIN / GESTION GLOBALE ========== --}}
                         @canany(['gérer artisans', 'voir produits', 'voir utilisateurs', 'voir commandes', 'voir événements', 'voir analytics'])
-                        <li class="menu-header">GESTION GLOBALE</li>
+                            <li class="menu-header">GESTION GLOBALE</li>
 
-                        {{-- Artisans --}}
-                        @canany(['voir artisans', 'gérer artisans'])
-                        <li class="dropdown {{ request()->is('admin/artisans*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-palette"></i>
-                                <span>Artisans</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir artisans')
-                                <li><a class="nav-link" href="{{ route('admin.artisans.index') }}">Tous les artisans</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'pending']) }}">En attente</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'approved']) }}">Approuvés</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'rejected']) }}">Rejetés</a></li>
-                                @endcan
-                                @can('créer artisans')
-                                <li><a class="nav-link" href="{{ route('admin.artisans.create') }}">Ajouter un artisan</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Artisans --}}
+                            @canany(['voir artisans', 'gérer artisans'])
+                                <li class="dropdown {{ request()->is('admin/artisans*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-palette"></i>
+                                        <span>Artisans</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir artisans')
+                                            <li><a class="nav-link" href="{{ route('admin.artisans.index') }}">Tous les artisans</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'pending']) }}">En attente</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'approved']) }}">Approuvés</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.artisans.index', ['status' => 'rejected']) }}">Rejetés</a></li>
+                                        @endcan
+                                        @can('créer artisans')
+                                            <li><a class="nav-link" href="{{ route('admin.artisans.create') }}">Ajouter un artisan</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Produits --}}
-                        @canany(['voir produits', 'gérer produits'])
-                        <li class="dropdown {{ request()->is('admin/products*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-shopping-bag"></i>
-                                <span>Produits</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir produits')
-                                <li><a class="nav-link" href="{{ route('admin.products.index') }}">Tous les produits</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'pending']) }}">En attente</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'active']) }}">Actifs</a></li>
-                                @endcan
-                                @can('créer produits')
-                                <li><a class="nav-link" href="{{ route('admin.products.create') }}">Ajouter un produit</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Produits --}}
+                            @canany(['voir produits', 'gérer produits'])
+                                <li class="dropdown {{ request()->is('admin/products*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-shopping-bag"></i>
+                                        <span>Produits</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir produits')
+                                            <li><a class="nav-link" href="{{ route('admin.products.index') }}">Tous les produits</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'pending']) }}">En attente</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.products.index', ['status' => 'active']) }}">Actifs</a></li>
+                                        @endcan
+                                        @can('créer produits')
+                                            <li><a class="nav-link" href="{{ route('admin.products.create') }}">Ajouter un produit</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Vendeurs --}}
-                        @canany(['voir vendeurs', 'gérer vendeurs'])
-                        <li class="dropdown {{ request()->is('admin/vendors*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-store"></i>
-                                <span>Vendeurs</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir vendeurs')
-                                <li><a class="nav-link" href="{{ route('admin.vendors.index') }}">Tous les vendeurs</a></li>
-                                @endcan
-                                @can('créer vendeurs')
-                                <li><a class="nav-link" href="{{ route('admin.vendors.create') }}">Ajouter un vendeur</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Vendeurs --}}
+                            @canany(['voir vendeurs', 'gérer vendeurs'])
+                                <li class="dropdown {{ request()->is('admin/vendors*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-store"></i>
+                                        <span>Vendeurs</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir vendeurs')
+                                            <li><a class="nav-link" href="{{ route('admin.vendors.index') }}">Tous les vendeurs</a></li>
+                                        @endcan
+                                        @can('créer vendeurs')
+                                            <li><a class="nav-link" href="{{ route('admin.vendors.create') }}">Ajouter un vendeur</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Gastronomie / Plats --}}
-                        @canany(['voir plats', 'gérer plats'])
-                        <li class="dropdown {{ request()->is('admin/dishes*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-utensils"></i>
-                                <span>Gastronomie</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir plats')
-                                <li><a class="nav-link" href="{{ route('admin.dishes.index') }}">Tous les plats</a></li>
-                                @endcan
-                                @can('créer plats')
-                                <li><a class="nav-link" href="{{ route('admin.dishes.create') }}">Ajouter un plat</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Gastronomie / Plats --}}
+                            @canany(['voir plats', 'gérer plats'])
+                                <li class="dropdown {{ request()->is('admin/dishes*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-utensils"></i>
+                                        <span>Gastronomie</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir plats')
+                                            <li><a class="nav-link" href="{{ route('admin.dishes.index') }}">Tous les plats</a></li>
+                                        @endcan
+                                        @can('créer plats')
+                                            <li><a class="nav-link" href="{{ route('admin.dishes.create') }}">Ajouter un plat</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Utilisateurs --}}
-                        @canany(['voir utilisateurs', 'gérer utilisateurs'])
-                        <li class="menu-header">GESTION DES UTILISATEURS</li>
-                        <li class="dropdown {{ request()->is('admin/users*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-users"></i>
-                                <span>Utilisateurs</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir utilisateurs')
-                                <li><a class="nav-link" href="{{ route('admin.users.index') }}">Tous les utilisateurs</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'artisan']) }}">Artisans</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'vendor']) }}">Vendeurs</a></li>
-                                @endcan
-                                @can('créer utilisateurs')
-                                <li><a class="nav-link" href="{{ route('admin.users.create') }}">Ajouter un utilisateur</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Utilisateurs --}}
+                            @canany(['voir utilisateurs', 'gérer utilisateurs'])
+                                <li class="menu-header">GESTION DES UTILISATEURS</li>
+                                <li class="dropdown {{ request()->is('admin/users*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-users"></i>
+                                        <span>Utilisateurs</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir utilisateurs')
+                                            <li><a class="nav-link" href="{{ route('admin.users.index') }}">Tous les utilisateurs</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'artisan']) }}">Artisans</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.users.index', ['role' => 'vendor']) }}">Vendeurs</a></li>
+                                        @endcan
+                                        @can('créer utilisateurs')
+                                            <li><a class="nav-link" href="{{ route('admin.users.create') }}">Ajouter un utilisateur</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Commandes --}}
-                        @canany(['voir commandes', 'gérer commandes'])
-                        <li class="menu-header">TRANSACTIONS</li>
-                        <li class="dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Commandes</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir commandes')
-                                <li><a class="nav-link" href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Commandes --}}
+                            @canany(['voir commandes', 'gérer commandes'])
+                                <li class="menu-header">TRANSACTIONS</li>
+                                <li class="dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        <span>Commandes</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir commandes')
+                                            <li><a class="nav-link" href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Devis --}}
-                        @canany(['voir devis', 'gérer devis'])
-                        <li class="{{ request()->is('admin/quotes*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.quotes.index') }}" class="nav-link">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                                <span>Devis</span>
-                            </a>
-                        </li>
-                        @endcanany
+                            {{-- Devis --}}
+                            @canany(['voir devis', 'gérer devis'])
+                                <li class="{{ request()->is('admin/quotes*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.quotes.index') }}" class="nav-link">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <span>Devis</span>
+                                    </a>
+                                </li>
+                            @endcanany
 
-                        {{-- Événements culturels --}}
-                        @canany(['voir événements', 'gérer événements'])
-                        <li class="menu-header">CULTURE</li>
-                        <li class="dropdown {{ request()->is('admin/events*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Événements</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('voir événements')
-                                <li><a class="nav-link" href="{{ route('admin.events.index') }}">Tous les événements</a></li>
-                                @endcan
-                                @can('créer événements')
-                                <li><a class="nav-link" href="{{ route('admin.events.create') }}">Créer un événement</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Événements culturels --}}
+                            @canany(['voir événements', 'gérer événements'])
+                                <li class="menu-header">CULTURE</li>
+                                <li class="dropdown {{ request()->is('admin/events*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Événements</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('voir événements')
+                                            <li><a class="nav-link" href="{{ route('admin.events.index') }}">Tous les événements</a></li>
+                                        @endcan
+                                        @can('créer événements')
+                                            <li><a class="nav-link" href="{{ route('admin.events.create') }}">Créer un événement</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
 
-                        {{-- Avis --}}
-                        @canany(['voir avis', 'gérer avis'])
-                        <li class="menu-header">CONTENU</li>
-                        <li class="{{ request()->is('admin/reviews*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.reviews.index') }}" class="nav-link">
-                                <i class="fas fa-star"></i>
-                                <span>Avis & évaluations</span>
-                            </a>
-                        </li>
-                        @endcanany
+                            {{-- Avis --}}
+                            @canany(['voir avis', 'gérer avis'])
+                                <li class="menu-header">CONTENU</li>
+                                <li class="{{ request()->is('admin/reviews*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.reviews.index') }}" class="nav-link">
+                                        <i class="fas fa-star"></i>
+                                        <span>Avis & évaluations</span>
+                                    </a>
+                                </li>
+                            @endcanany
 
-                        {{-- Messages --}}
-                        @canany(['voir messages', 'gérer messages'])
-                        <li class="{{ request()->is('admin/contacts*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.contacts.index') }}" class="nav-link">
-                                <i class="fas fa-envelope"></i>
-                                <span>Messages</span>
-                                @php
-                                    $unreadMessages = \App\Models\Contact::where('read', false)->count();
-                                @endphp
-                                @if($unreadMessages > 0)
-                                    <span class="badge badge-danger">{{ $unreadMessages }}</span>
-                                @endif
-                            </a>
-                        </li>
-                        @endcanany
+                            {{-- Messages --}}
+                            @canany(['voir messages', 'gérer messages'])
+                                <li class="{{ request()->is('admin/contacts*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.contacts.index') }}" class="nav-link">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>Messages</span>
+                                        @php
+                                            $unreadMessages = \App\Models\Contact::where('read', false)->count();
+                                        @endphp
+                                        @if($unreadMessages > 0)
+                                            <span class="badge badge-danger">{{ $unreadMessages }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endcanany
 
-                        {{-- Analytics --}}
-                        @can('voir analytics')
-                        <li class="menu-header">ANALYTICS</li>
-                        <li class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
-                            <a href="{{ route('admin.analytics') }}" class="nav-link">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Rapports & statistiques</span>
-                            </a>
-                        </li>
-                        @endcan
+                            {{-- Analytics --}}
+                            @can('voir analytics')
+                                <li class="menu-header">ANALYTICS</li>
+                                <li class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.analytics') }}" class="nav-link">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span>Rapports & statistiques</span>
+                                    </a>
+                                </li>
+                            @endcan
 
-                        {{-- Paramètres --}}
-                        @canany(['gérer paramètres généraux', 'gérer rôles et permissions'])
-                        <li class="menu-header">PARAMÈTRES</li>
-                        <li class="dropdown {{ request()->is('admin/settings*') ? 'active' : '' }}">
-                            <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-cog"></i>
-                                <span>Configuration</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                @can('gérer paramètres généraux')
-                                <li><a class="nav-link" href="{{ route('admin.settings.general') }}">Général</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.settings.payment') }}">Paiements</a></li>
-                                <li><a class="nav-link" href="{{ route('admin.settings.notifications') }}">Notifications</a></li>
-                                @endcan
-                                @can('gérer rôles et permissions')
-                                <li><a class="nav-link" href="{{ route('admin.roles.index') }}">Rôles & permissions</a></li>
-                                @endcan
-                            </ul>
-                        </li>
-                        @endcanany
+                            {{-- Paramètres --}}
+                            @canany(['gérer paramètres généraux', 'gérer rôles et permissions'])
+                                <li class="menu-header">PARAMÈTRES</li>
+                                <li class="dropdown {{ request()->is('admin/settings*') ? 'active' : '' }}">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Configuration</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('gérer paramètres généraux')
+                                            <li><a class="nav-link" href="{{ route('admin.settings.general') }}">Général</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.settings.payment') }}">Paiements</a></li>
+                                            <li><a class="nav-link" href="{{ route('admin.settings.notifications') }}">Notifications</a></li>
+                                        @endcan
+                                        @can('gérer rôles et permissions')
+                                            <li><a class="nav-link" href="{{ route('admin.roles.index') }}">Rôles & permissions</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcanany
                         @endcanany {{-- Fin bloc admin --}}
 
                         {{-- ========== ESPACE ARTISAN ========== --}}
@@ -608,18 +613,18 @@
 
                         <li class="menu-header">MON COMPTE</li>
                         @if(auth()->user()->artisan)
-                        <li class="{{ request()->routeIs('artisan.profile.edit') ? 'active' : '' }}">
-                            <a href="{{ route('artisan.profile.edit', auth()->user()->artisan->id) }}" class="nav-link">
-                                <i data-feather="user"></i>
-                                <span>Mon profil</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('artisans.show', auth()->user()->artisan->id) }}" class="nav-link" target="_blank">
-                                <i data-feather="external-link"></i>
-                                <span>Voir profil public</span>
-                            </a>
-                        </li>
+                            <li class="{{ request()->routeIs('artisan.profile.edit') ? 'active' : '' }}">
+                                <a href="{{ route('artisan.profile.edit', auth()->user()->artisan->id) }}" class="nav-link">
+                                    <i data-feather="user"></i>
+                                    <span>Mon profil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('artisans.show', auth()->user()->artisan->id) }}" class="nav-link" target="_blank">
+                                    <i data-feather="external-link"></i>
+                                    <span>Voir profil public</span>
+                                </a>
+                            </li>
                         @endif
                         <li class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                             <a href="{{ route('profile.edit') }}" class="nav-link">
@@ -669,12 +674,12 @@
 
                         <li class="menu-header">MON COMPTE</li>
                         @if(auth()->user()->vendor)
-                        <li class="{{ request()->routeIs('vendor.profile.edit') ? 'active' : '' }}">
-                            <a href="{{ route('vendor.profile.edit', auth()->user()->vendor->id) }}" class="nav-link">
-                                <i data-feather="user"></i>
-                                <span>Mon profil</span>
-                            </a>
-                        </li>
+                            <li class="{{ request()->routeIs('vendor.profile.edit') ? 'active' : '' }}">
+                                <a href="{{ route('vendor.profile.edit', auth()->user()->vendor->id) }}" class="nav-link">
+                                    <i data-feather="user"></i>
+                                    <span>Mon profil</span>
+                                </a>
+                            </li>
                         @endif
                         <li class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                             <a href="{{ route('profile.edit') }}" class="nav-link">
@@ -772,11 +777,11 @@
                             <h6 class="font-medium m-b-10">Thème</h6>
                             <div class="selectgroup layout-color w-50">
                                 <label class="selectgroup-item">
-                                    <input type="radio" name="theme" value="light" class="selectgroup-input-radio select-layout" {{ session('theme','light') == 'light' ? 'checked' : '' }}>
+                                    <input type="radio" name="theme" value="light" class="selectgroup-input-radio select-layout" {{ session('theme', 'light') == 'light' ? 'checked' : '' }}>
                                     <span class="selectgroup-button">Clair</span>
                                 </label>
                                 <label class="selectgroup-item">
-                                    <input type="radio" name="theme" value="dark" class="selectgroup-input-radio select-layout" {{ session('theme','light') == 'dark' ? 'checked' : '' }}>
+                                    <input type="radio" name="theme" value="dark" class="selectgroup-input-radio select-layout" {{ session('theme', 'light') == 'dark' ? 'checked' : '' }}>
                                     <span class="selectgroup-button">Sombre</span>
                                 </label>
                             </div>
@@ -803,7 +808,18 @@
     </div>
 
     {{-- ========== SCRIPTS ========== --}}
+
     <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+    <!-- Select2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Dropzone -->
+<link rel="stylesheet" href="https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone.css" />
+<script src="https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone-min.js"></script>
+
+<!-- SweetAlert2 (pour messages) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if(request()->routeIs('admin.dashboard') || request()->routeIs('dashboard*'))
         <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
         <script src="{{ asset('admin-assets/js/page/index.js') }}"></script>

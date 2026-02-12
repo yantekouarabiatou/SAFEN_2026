@@ -81,7 +81,7 @@
         /* Contenu principal */
         .vendor-main {
             padding: 4rem 0;
-            background: var(--gray-light);
+            background: #f8f9fa;
         }
 
         .vendor-info-card {
@@ -160,6 +160,7 @@
         }
 
         .dish-card {
+            background: white;
             border: none;
             border-radius: 20px;
             overflow: hidden;
@@ -170,12 +171,13 @@
 
         .dish-card:hover {
             transform: translateY(-12px);
-            box-shadow: 0 20px 45px rgba(199, 22, 22, 0.562);
+            box-shadow: 0 20px 45px rgba(0, 150, 57, 0.25);
         }
 
         .dish-image {
             height: 240px;
             overflow: hidden;
+            position: relative;
         }
 
         .dish-image img {
@@ -202,6 +204,10 @@
             z-index: 10;
         }
 
+        .card-body {
+            padding: 1.5rem;
+        }
+
         .dish-title {
             font-size: 1.4rem;
             font-weight: 800;
@@ -209,11 +215,27 @@
             color: var(--charcoal);
         }
 
+        .dish-title a {
+            color: var(--charcoal);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .dish-title a:hover {
+            color: var(--benin-green);
+        }
+
         .dish-description {
             color: #555;
             font-size: 0.98rem;
             line-height: 1.6;
             margin-bottom: 1rem;
+        }
+
+        .card-footer {
+            background: white;
+            border: none;
+            padding: 0 1.5rem 1.5rem;
         }
 
         .btn-benin {
@@ -224,12 +246,16 @@
             padding: 0.9rem 1.8rem;
             border-radius: 50px;
             transition: all 0.3s ease;
+            width: 100%;
+            display: block;
+            text-align: center;
         }
 
         .btn-benin:hover {
             background: var(--dark-green);
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0,150,57,0.4);
+            color: white;
         }
     </style>
 @endpush
@@ -251,7 +277,7 @@
                     <i class="bi bi-geo-alt-fill"></i> {{ $vendor->city }}
                 </span>
                 @if($vendor->verified)
-                    <span class="vendor-verified">
+                    <span class="vendor-badge vendor-verified">
                         <i class="bi bi-check-circle-fill"></i> Vérifié
                     </span>
                 @endif
@@ -260,7 +286,7 @@
     </div>
 
     <div class="container vendor-main">
-        <div class="vendor-card">
+        <div class="vendor-info-card">
             <!-- À propos -->
             @if($vendor->description)
                 <div class="mb-5">
@@ -311,8 +337,8 @@
             @else
                 <div class="dish-grid">
                     @foreach($dishes as $dish)
-                        <div class="card dish-card">
-                            <div class="dish-image position-relative">
+                        <div class="dish-card">
+                            <div class="dish-image">
                                 @if($dish->images->first())
                                     <img src="{{ asset($dish->images->first()->image_url) }}" alt="{{ $dish->name }}">
                                 @else
@@ -328,17 +354,17 @@
 
                             <div class="card-body">
                                 <h5 class="dish-title">
-                                    <a href="{{ route('gastronomie.show', $dish) }}" class="text-decoration-none text-light">
+                                    <a href="{{ route('gastronomie.show', $dish) }}">
                                         {{ $dish->name }}
                                     </a>
                                 </h5>
-                                <p class="dish-description ">
+                                <p class="dish-description">
                                     {{ Str::limit($dish->description ?? 'Aucune description disponible', 90) }}
                                 </p>
                             </div>
 
-                            <div class="card-footer bg-white border-0 pt-0">
-                                <a href="{{ route('gastronomie.show', $dish) }}" class="btn btn-benin w-100">
+                            <div class="card-footer">
+                                <a href="{{ route('gastronomie.show', $dish) }}" class="btn btn-benin">
                                     Voir le plat
                                 </a>
                             </div>

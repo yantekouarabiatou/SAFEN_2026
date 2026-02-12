@@ -117,15 +117,6 @@ class VendorController extends Controller
             'stats'
         ));
     }
-
-    /**
-     * Formulaire de création d'un vendeur
-     */
-    public function create()
-    {
-        return view('vendors.create');
-    }
-
     /**
      * Enregistrement d'un nouveau vendeur
      */
