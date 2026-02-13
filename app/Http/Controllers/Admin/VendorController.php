@@ -139,14 +139,14 @@ class VendorController extends Controller
      */
     public function quickStore(Request $request)
     {
-        $vendor = Auth::user()->vendor;
+        $vendor = Auth::user();
 
-        if (!$vendor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aucun profil vendeur trouvé.'
-            ], 403);
-        }
+        // if (!$vendor) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Aucun profil vendeur trouvé.'
+        //     ], 403);
+        // }
 
         // Validation des données du plat
         $validated = $request->validate([
@@ -156,7 +156,7 @@ class VendorController extends Controller
             'ethnic_origin' => 'nullable|string|max:100',
             'region'        => 'nullable|string|max:100',
             'ingredients'   => 'required|string',
-            'description'   => 'nullable|string',
+            'cultural_description'   => 'nullable|string',
             'price'         => 'required|numeric|min:0',
             'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -172,7 +172,7 @@ class VendorController extends Controller
                 'ethnic_origin' => $validated['ethnic_origin'] ?? null,
                 'region'        => $validated['region'] ?? null,
                 'ingredients'   => array_map('trim', explode(',', $validated['ingredients'])),
-                'description'   => $validated['description'] ?? null,
+                'cultural_description'   => $validated['description'] ?? null,
                 'views'         => 0,
             ]);
 
@@ -226,14 +226,14 @@ class VendorController extends Controller
 
     public function detach(Dish $dish)
     {
-        $vendor = Auth::user()->vendor;
+        $vendor = Auth::user();
 
-        if (!$vendor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aucun profil vendeur associé.'
-            ], 403);
-        }
+        // if (!$vendor) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Aucun profil vendeur associé.'
+        //     ], 403);
+        // }
 
         // Vérifier que le plat est bien lié à ce vendeur
         if (!$vendor->dishes()->where('dish_id', $dish->id)->exists()) {

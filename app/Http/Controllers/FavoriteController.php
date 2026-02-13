@@ -54,4 +54,40 @@ class FavoriteController extends Controller
             'count' => auth()->user()->favorites()->count(),
         ]);
     }
+
+    public function toggle(Request $request)
+{
+    $request->validate([
+        'favoritable_id' => 'required',
+        'favoritable_type' => 'required|in:App\\Models\\Product,App\\Models\\Artisan', // adaptez selon vos modèles
+    ]);
+
+    $user = auth()->user();
+    $existing = $user->favorites()
+        ->where('favoritable_id', $request->favoritable_id)
+        ->where('favoritable_type', $request->favoritable_type)
+        ->first();
+
+    if ($existing) {
+        // Supprimer le favori
+        $existing->delete();
+        $message = 'Produit retiré des favoris';
+        $added = false;
+    } else {
+        // Ajouter le favori
+        $user->favorites()->create([
+            'favoritable_id' => $request->favoritable_id,
+            'favoritable_type' => $request->favoritable_type,
+        ]);
+        $message = 'Produit ajouté aux favoris';
+        $added = true;
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => $message,
+        'added' => $added,
+        'count' => $user->favorites()->count(),
+    ]);
+}
 }

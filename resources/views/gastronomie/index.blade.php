@@ -961,6 +961,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function toggleFavorite(favoritableId, favoritableType) {
+    fetch('/favorites/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            favoritable_id: favoritableId,
+            favoritable_type: favoritableType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mettre à jour l'interface (icône, compteur)
+            console.log(data.message);
+        }
+    });
+}
+
     // Appliquer immédiatement
     fixPagination();
 

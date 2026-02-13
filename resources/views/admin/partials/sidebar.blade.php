@@ -58,10 +58,10 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li class="{{ request()->routeIs('admin.dishes.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.dishes.index') }}">Liste des plats</a>
+                        <a class="nav-link" href="#">Liste des plats</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.dishes.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.dishes.create') }}">Ajouter un plat</a>
+                        <a class="nav-link" href="#">Ajouter un plat</a>
                     </li>
                 </ul>
             </li>
@@ -74,10 +74,10 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li class="{{ request()->routeIs('admin.vendors.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.vendors.index') }}">Liste des vendeurs</a>
+                        <a class="nav-link" href="#">Liste des vendeurs</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.vendors.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.vendors.create') }}">Ajouter un vendeur</a>
+                        <a class="nav-link" href="#">Ajouter un vendeur</a>
                     </li>
                 </ul>
             </li>
@@ -92,13 +92,13 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li class="{{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.orders.index') }}">Toutes les commandes</a>
+                        <a class="nav-link" href="#">Toutes les commandes</a>
                     </li>
                     <li>
-                        <a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a>
+                        <a class="nav-link" href="{{ route('orders.index', ['status' => 'pending']) }}">En attente</a>
                     </li>
                     <li>
-                        <a class="nav-link" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a>
+                        <a class="nav-link" href="{{ route('orders.index', ['status' => 'completed']) }}">Complétées</a>
                     </li>
                 </ul>
             </li>
@@ -153,7 +153,7 @@
             <li class="menu-header">Paramètres</li>
 
             <li class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                <a href="{{ route('admin.settings') }}" class="nav-link">
+                <a href="#" class="nav-link">
                     <i data-feather="settings"></i>
                     <span>Paramètres</span>
                 </a>

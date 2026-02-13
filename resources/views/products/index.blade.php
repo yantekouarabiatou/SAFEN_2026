@@ -681,8 +681,9 @@
                             </div>
 
                             <!-- Favorite Button -->
-                            <button class="favorite-btn" data-product-id="{{ $product->id }}" onclick="toggleFavorite(this)">
-                                <i class="bi bi-heart"></i>
+                            <button class="favorite-btn {{ $product->isFavorited ? 'active' : '' }}"
+                                data-product-id="{{ $product->id }}" onclick="toggleFavorite(this)">
+                                <i class="bi bi-heart{{ $product->isFavorited ? '-fill' : '' }}"></i>
                             </button>
 
                             <!-- Quick View -->
@@ -707,16 +708,15 @@
                                 </h6>
                             </div>
 
-                          <!-- Local Name with Audio -->
+                            <!-- Local Name with Audio -->
                             @if($product->name_local)
                                 <div class="local-name">
                                     <i class="bi bi-translate"></i>
                                     {{ $product->name_local }}
 
                                     <!-- Bouton qui déclenche la synthèse vocale -->
-                                    <button class="audio-btn"
-                                            onclick="speakText('{{ addslashes($product->name_local) }}')"
-                                            title="Écouter la prononciation">
+                                    <button class="audio-btn" onclick="speakText('{{ addslashes($product->name_local) }}')"
+                                        title="Écouter la prononciation">
                                         <i class="bi bi-volume-up-fill"></i>
                                     </button>
                                 </div>
@@ -741,10 +741,11 @@
                                             class="artisan-avatar">
                                     @else
                                         <!-- Initiales -->
-                                        <div class="avatar-initials" style="width: 32px; height: 32px; border-radius: 50%;
-                                                                        background: var(--benin-green); color: white;
-                                                                        display: flex; align-items: center; justify-content: center;
-                                                                        font-weight: bold; font-size: 1rem; border: 2px solid white;">
+                                        <div class="avatar-initials"
+                                            style="width: 32px; height: 32px; border-radius: 50%;
+                                                                                                                background: var(--benin-green); color: white;
+                                                                                                                display: flex; align-items: center; justify-content: center;
+                                                                                                                font-weight: bold; font-size: 1rem; border: 2px solid white;">
                                             {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
                                         (str_word_count($product->artisan->user->name ?? '') > 1
                                             ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1))
@@ -808,7 +809,7 @@
             window.location.href = "{{ route('products.index') }}";
         }
 
-          // Fonction de synthèse vocale (celle qui fonctionne bien)
+        // Fonction de synthèse vocale (celle qui fonctionne bien)
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 // Arrêter toute lecture en cours
@@ -842,7 +843,8 @@
         window.speechSynthesis.onvoiceschanged = () => {
             // Les voix sont maintenant disponibles
             console.log("Voix disponibles :", window.speechSynthesis.getVoices());
-        };        function toggleFavorite(button) {
+        };
+        function toggleFavorite(button) {
             const productId = button.dataset.productId;
             const isActive = button.classList.contains('active');
 
@@ -852,13 +854,14 @@
 
             fetch('/favorites/toggle', {
                 method: 'POST',
-                    headers: {
+                headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
-                    product_id: productId
+                    favoritable_id: productId,
+                    favoritable_type: 'product'
                 })
             })
                 .then(response => response.json())
@@ -868,8 +871,7 @@
                     }
                 });
         }
-
-       // Fonction pour ajouter au panier
+        // Fonction pour ajouter au panier
         function addToCart(productId, quantity = 1) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -940,7 +942,7 @@
                     alert('Erreur: ' + error.message);
                 });
         }
-           // Fonction pour mettre à jour le compteur du panier
+        // Fonction pour mettre à jour le compteur du panier
         function updateCartCount(count) {
             const cartCounters = document.querySelectorAll('.cart-count');
             cartCounters.forEach(counter => {
@@ -956,11 +958,11 @@
             toast.setAttribute('role', 'alert');
             toast.style.zIndex = '9999';
             toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
 
             document.body.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);
@@ -1008,4 +1010,3 @@
         });
     </script>
 @endpush
-

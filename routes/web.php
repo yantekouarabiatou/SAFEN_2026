@@ -149,7 +149,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 });
 
 
@@ -162,7 +161,7 @@ Route::middleware('auth')->group(function () {
 
     // ===== Déconnexion =====
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
+      
     // ===== PROFIL UTILISATEUR (ProfileController - créé par Breeze) =====
     Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'show')->name('show');
@@ -247,7 +246,31 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('admin.artisans.approve');
         Route::post('/admin/artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('admin.artisans.reject');
     });
+    Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Client\DashboardController::class, 'index'])->name('dashboard');
 
+        // Commandes
+        Route::resource('orders', OrderController::class)->only(['index', 'show']);
+        Route::get('/orders/tracking', [OrderController::class, 'tracking'])->name('orders.tracking');
+        Route::resource('orders', OrderController::class)->only(['index', 'show']);
+    Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        // Devis
+        Route::resource('quotes',QuoteController::class)->except(['destroy']);
+
+        // Favoris
+        Route::resource('favorites', FavoriteController::class)->only(['index', 'destroy']);
+        Route::post('/favorites/toggle/{product}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+
+        // Messages / contacts
+        Route::resource('messages', MessageController::class)->only(['index', 'show', 'store']);
+        Route::get('/contacts/create/{artisan?}', [ContactController::class, 'create'])->name('contacts.create');
+        Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
+        Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
+
+        // Profil
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    });
     /* ===== COMMENTÉ : Contrôleurs manquants =====
     // DashboardController n'existe pas
     // Route::prefix('dashboard')->name('dashboard.')->controller(DashboardController::class)->group(function () {...});
@@ -300,7 +323,7 @@ Route::prefix('admin')
         // Rôles & permissions (si contrôleur existe)
         //Route::resource('roles', RoleController::class);
     });
-    Route::get('notifications',[NotificationController::class,'index'])->name('notifications.index');
+Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
@@ -310,9 +333,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Détacher un plat du vendeur
     Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
-
 });
 
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class);
+    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
+    Route::resource('vendors', AdminVendorController::class);
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
+
+    // Détacher un plat du vendeur
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
+});
+Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
+    // ...
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+});
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX, services)
@@ -338,7 +374,7 @@ Route::fallback(function () {
     return redirect()->route('home');
 });
 
-Route::get('/debug-role', function() {
+Route::get('/debug-role', function () {
     $user = auth()->user();
     if (!$user) return 'Non connecté';
     return [
@@ -350,5 +386,5 @@ Route::get('/debug-role', function() {
     ];
 })->middleware('auth');
 // Inclusion des fichiers supplémentaires – à décommenter une fois les contrôleurs créés
- require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
  //require __DIR__ . '/admin.php';

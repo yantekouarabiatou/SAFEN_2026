@@ -62,13 +62,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
-    Route::resource('vendors', AdminVendorController::class);
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
 
-    // Détacher un plat du vendeur
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
-
-});

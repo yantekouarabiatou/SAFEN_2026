@@ -45,6 +45,16 @@ class ProductController extends Controller
             })
             ->paginate(16);
 
+        $user = auth()->user();
+        $favoritedProductIds = $user ? $user->favorites()
+            ->where('favoritable_type', 'App\\Models\\Product')
+            ->pluck('favoritable_id')
+            ->toArray() : [];
+
+        $products->getCollection()->transform(function ($product) use ($favoritedProductIds) {
+            $product->isFavorited = in_array($product->id, $favoritedProductIds);
+            return $product;
+        });
         $categories = Product::select('category')->distinct()->pluck('category');
         $ethnicOrigins = Product::select('ethnic_origin')->distinct()->pluck('ethnic_origin');
         $allMaterials = Product::whereNotNull('materials')->get()

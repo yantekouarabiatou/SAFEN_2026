@@ -67,6 +67,8 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
+        // Adaptez cette logique selon votre système de rôles
+        // Par exemple, si vous avez une colonne 'role' dans la table users
         return $this->role === 'admin' || $this->role === 'super_admin';
     }
 
@@ -150,5 +152,39 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class);
     }
+
+     public function dishes()
+    {
+        return $this->hasMany(Dish::class);
+    }
+
+    // Dans User.php
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->whereNull('read_at');
+    }
+
+    public function recentMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->latest()
+            ->with('sender');
+    }
+
+    public function isOnline()
+    {
+        return $this->last_seen && $this->last_seen->diffInMinutes(now()) < 5;
+    }
+
+    public function cartTotal()
+    {
+        return $this->cartItems()->sum('total');
+    }
+    public function orders()
+    {
+        return $this->hasMany(GuestOrder::class, 'user_id');
+    }
+
 
 }

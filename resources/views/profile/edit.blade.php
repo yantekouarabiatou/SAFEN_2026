@@ -12,7 +12,7 @@
                     <div class="card-body py-3">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0 bg-transparent">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Tableau de bord</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Tableau de bord</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('artisan.profile.show', $artisan->id) }}">Mon Profil Artisan</a></li>
                                 <li class="breadcrumb-item active">Modifier</li>
                             </ol>

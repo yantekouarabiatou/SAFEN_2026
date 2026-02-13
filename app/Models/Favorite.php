@@ -24,4 +24,13 @@ class Favorite extends Model
     {
         return $this->morphTo();
     }
+
+    public function getIsFavoritedAttribute()
+    {
+        if (!auth()->check()) return false;
+        return auth()->user()->favorites()
+            ->where('favoritable_id', $this->id)
+            ->where('favoritable_type', self::class)
+            ->exists();
+    }
 }

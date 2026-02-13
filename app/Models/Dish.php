@@ -50,6 +50,11 @@ class Dish extends Model
         return $this->hasMany(DishImage::class)->orderBy('order');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function vendors()
     {
         return $this->belongsToMany(Vendor::class, 'dish_vendor')
@@ -113,7 +118,7 @@ class Dish extends Model
     // Scopes
     public function scopeWithAvailableVendors($query)
     {
-        return $query->with(['vendors' => function($q) {
+        return $query->with(['vendors' => function ($q) {
             $q->wherePivot('available', true);
         }]);
     }

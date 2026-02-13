@@ -147,7 +147,8 @@
         <div class="container position-relative">
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb text-white">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white">{{ __('messages.home') }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}"
+                            class="text-white">{{ __('messages.home') }}</a></li>
                     <li class="breadcrumb-item active text-white">{{ __('Liste des Artisans') }}</li>
                 </ol>
             </nav>
@@ -263,8 +264,7 @@
                         @forelse($artisans as $artisan)
                             <div class="artisan-card">
                                 <!-- Image -->
-                                <div class=""
-                                    style="">
+                                <div class="" style="">
                                     <a href="{{ route('artisans.show', $artisan) }}">
                                         <img src="{{ $artisan->photos->first()?->full_url ?? asset('images/default-artisan.jpg') }}"
                                             alt="{{ $artisan->user->name }}" class="img-fluid w-100"
@@ -362,139 +362,160 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Valeur par défaut
-    let currentView = localStorage.getItem('artisansView') || 'grid';
-
-    function changeView(view) {
-        currentView = view;
-        localStorage.setItem('artisansView', view);
-
-        // Mise à jour boutons
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.remove('active', 'btn-primary');
-            btn.classList.add('btn-outline-secondary');
-        });
-
-        const activeBtn = document.querySelector(`.view-btn[data-view="${view}"]`);
-        if (activeBtn) {
-            activeBtn.classList.remove('btn-outline-secondary');
-            activeBtn.classList.add('active', 'btn-primary');
-        }
-
-        // Gestion des vues grid/list
-        const viewWrapper = document.querySelector('.view-wrapper');
-        const artisanCards = document.querySelectorAll('.artisan-card');
-
-        if (view === 'grid') {
-            viewWrapper.classList.remove('artisan-list');
-            viewWrapper.classList.add('artisan-grid');
-
-            artisanCards.forEach(card => {
-                card.classList.remove('d-flex', 'mb-3');
-                const imageDiv = card.querySelector('div:first-child');
-                const contentDiv = card.querySelector('div.p-4');
-
-                if (imageDiv) {
-                    imageDiv.classList.remove('flex-shrink-0');
-                    imageDiv.style.width = '';
-                }
-                if (contentDiv) {
-                    contentDiv.classList.remove('flex-grow-1');
-                }
-            });
-        } else if (view === 'list') {
-            viewWrapper.classList.remove('artisan-grid');
-            viewWrapper.classList.add('artisan-list');
-
-            artisanCards.forEach(card => {
-                card.classList.add('d-flex', 'mb-3');
-                const imageDiv = card.querySelector('div:first-child');
-                const contentDiv = card.querySelector('div.p-4');
-
-                if (imageDiv) {
-                    imageDiv.classList.add('flex-shrink-0');
-                    imageDiv.style.width = '240px';
-                }
-                if (contentDiv) {
-                    contentDiv.classList.add('flex-grow-1');
-                }
-            });
-        }
-
-        // Affichage des contenus
-        document.querySelectorAll('[data-view-content]').forEach(el => {
-            el.style.display = (el.dataset.viewContent === view) ? 'block' : 'none';
-        });
-
-        // Chargement carte si nécessaire
-        if (view === 'map' && typeof google !== 'undefined' && !window.artisansMapInitialized) {
-            initArtisansMap();
-            window.artisansMapInitialized = true;
-        }
-    }
-
-    // Appliquer au chargement
-    document.addEventListener('DOMContentLoaded', () => {
-        changeView(currentView);
-    });
-</script>
-
-<!-- Carte Google Maps -->
-@if($artisans->count() > 0)
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initArtisansMap" async defer></script>
     <script>
-        let map;
-        let markers = [];
+        // Valeur par défaut
+        let currentView = localStorage.getItem('artisansView') || 'grid';
 
-        function initArtisansMap() {
-            const center = { lat: 9.3077, lng: 2.3158 }; // Centre Bénin
+        function changeView(view) {
+            currentView = view;
+            localStorage.setItem('artisansView', view);
 
-            map = new google.maps.Map(document.getElementById('artisans-map'), {
-                center: center,
-                zoom: 7,
-                styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+            // Mise à jour boutons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-secondary');
             });
 
-            @foreach($artisans as $artisan)
-                @if($artisan->latitude && $artisan->longitude)
-                    addMarker({
-                        lat: {{ $artisan->latitude }},
-                        lng: {{ $artisan->longitude }},
-                        title: "{{ addslashes($artisan->user->name) }}",
-                        craft: "{{ addslashes($artisan->craft_label) }}",
-                        city: "{{ addslashes($artisan->city) }}",
-                        id: {{ $artisan->id }},
-                        distance: {{ $artisan->distance ?? 'null' }}
-                    });
-                @endif
-            @endforeach
+            const activeBtn = document.querySelector(`.view-btn[data-view="${view}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('btn-outline-secondary');
+                activeBtn.classList.add('active', 'btn-primary');
+            }
+
+            // Gestion des vues grid/list
+            const viewWrapper = document.querySelector('.view-wrapper');
+            const artisanCards = document.querySelectorAll('.artisan-card');
+
+            if (view === 'grid') {
+                viewWrapper.classList.remove('artisan-list');
+                viewWrapper.classList.add('artisan-grid');
+
+                artisanCards.forEach(card => {
+                    card.classList.remove('d-flex', 'mb-3');
+                    const imageDiv = card.querySelector('div:first-child');
+                    const contentDiv = card.querySelector('div.p-4');
+
+                    if (imageDiv) {
+                        imageDiv.classList.remove('flex-shrink-0');
+                        imageDiv.style.width = '';
+                    }
+                    if (contentDiv) {
+                        contentDiv.classList.remove('flex-grow-1');
+                    }
+                });
+            } else if (view === 'list') {
+                viewWrapper.classList.remove('artisan-grid');
+                viewWrapper.classList.add('artisan-list');
+
+                artisanCards.forEach(card => {
+                    card.classList.add('d-flex', 'mb-3');
+                    const imageDiv = card.querySelector('div:first-child');
+                    const contentDiv = card.querySelector('div.p-4');
+
+                    if (imageDiv) {
+                        imageDiv.classList.add('flex-shrink-0');
+                        imageDiv.style.width = '240px';
+                    }
+                    if (contentDiv) {
+                        contentDiv.classList.add('flex-grow-1');
+                    }
+                });
+            }
+
+            // Affichage des contenus
+            document.querySelectorAll('[data-view-content]').forEach(el => {
+                el.style.display = (el.dataset.viewContent === view) ? 'block' : 'none';
+            });
+
+            // Chargement carte si nécessaire
+            if (view === 'map' && typeof google !== 'undefined' && !window.artisansMapInitialized) {
+                initArtisansMap();
+                window.artisansMapInitialized = true;
+            }
         }
 
-        function addMarker(data) {
-            const marker = new google.maps.Marker({
-                position: { lat: data.lat, lng: data.lng },
-                map: map,
-                title: data.title
-            });
-
-            const info = new google.maps.InfoWindow({
-                content: `
-                    <div class="p-2" style="min-width:220px;">
-                        <h6 class="fw-bold mb-1">${data.title}</h6>
-                        <p class="small mb-1"><strong>${data.craft}</strong></p>
-                        <p class="small mb-2">${data.city}</p>
-                        ${data.distance ? `<p class="small mb-2 text-success"><strong>${data.distance.toFixed(1)} km</strong></p>` : ''}
-                        <a href="/artisans/${data.id}" class="btn btn-sm btn-benin-green w-100 mt-2">
-                            {{ __('artisans.view_profile') }}
-                        </a>
-                    </div>
-                `
-            });
-
-            marker.addListener('click', () => info.open(map, marker));
-            markers.push(marker);
-        }
+        // Appliquer au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            changeView(currentView);
+        });
     </script>
-@endif
+
+    <!-- Carte Google Maps -->
+    @if($artisans->count() > 0)
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initArtisansMap"
+            async defer></script>
+        <script>
+            let map;
+            let markers = [];
+
+            function initArtisansMap() {
+                const center = { lat: 9.3077, lng: 2.3158 }; // Centre Bénin
+
+                map = new google.maps.Map(document.getElementById('artisans-map'), {
+                    center: center,
+                    zoom: 7,
+                    styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+                });
+
+                @foreach($artisans as $artisan)
+                    @if($artisan->latitude && $artisan->longitude)
+                        addMarker({
+                            lat: {{ $artisan->latitude }},
+                            lng: {{ $artisan->longitude }},
+                            title: "{{ addslashes($artisan->user->name) }}",
+                            craft: "{{ addslashes($artisan->craft_label) }}",
+                            city: "{{ addslashes($artisan->city) }}",
+                            id: {{ $artisan->id }},
+                            distance: {{ $artisan->distance ?? 'null' }}
+                                    });
+                    @endif
+                @endforeach
+                }
+            function toggleFavorite(favoritableId, favoritableType) {
+                fetch('/favorites/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        favoritable_id: favoritableId,
+                        favoritable_type: favoritableType
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mettre à jour l'interface (icône, compteur)
+                            console.log(data.message);
+                        }
+                    });
+            }
+            function addMarker(data) {
+                const marker = new google.maps.Marker({
+                    position: { lat: data.lat, lng: data.lng },
+                    map: map,
+                    title: data.title
+                });
+
+                const info = new google.maps.InfoWindow({
+                    content: `
+                            <div class="p-2" style="min-width:220px;">
+                                <h6 class="fw-bold mb-1">${data.title}</h6>
+                                <p class="small mb-1"><strong>${data.craft}</strong></p>
+                                <p class="small mb-2">${data.city}</p>
+                                ${data.distance ? `<p class="small mb-2 text-success"><strong>${data.distance.toFixed(1)} km</strong></p>` : ''}
+                                <a href="/artisans/${data.id}" class="btn btn-sm btn-benin-green w-100 mt-2">
+                                    {{ __('artisans.view_profile') }}
+                                </a>
+                            </div>
+                        `
+                });
+
+                marker.addListener('click', () => info.open(map, marker));
+                markers.push(marker);
+            }
+        </script>
+    @endif
 @endpush
