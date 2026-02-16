@@ -884,7 +884,7 @@
                         <p class="text-muted mb-3">
                             Votre avis aide notre communauté à grandir et permet aux artisans de s'améliorer.
                         </p>
-                        <a href="{{ route('artisans.index') }}" class="btn btn-benin-green">
+                        <a href="{{ route('artisans.vue') }}" class="btn btn-benin-green">
                             <i class="bi bi-star me-2"></i>Laisser un avis
                         </a>
                     </div>

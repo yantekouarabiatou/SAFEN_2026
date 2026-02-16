@@ -14,7 +14,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "realrashid/sweet-alert": "*",
-        "spatie/laravel-permission": "*"
+        "spatie/laravel-permission": "*",
+        "yajra/laravel-datatables-oracle": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

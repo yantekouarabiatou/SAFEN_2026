@@ -1,87 +1,582 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
     <title>@yield('title', 'Administration') - TOTCHEMEGNON Admin</title>
-    
+
     <!-- General CSS Files -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
+
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
+
     <!-- Custom style CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
-    <link rel='shortcut icon' type='image/x-icon' href='{{ asset('admin-assets/img/favicon.ico') }}' />
-    
+
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
-    
+
     <!-- SweetAlert CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/sweetalert/sweetalert.css') }}">
-    
+
     <!-- iziToast CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/izitoast/css/iziToast.min.css') }}">
-    
+
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
-    
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
+
+    <!-- Styles pushés depuis les vues -->
     @stack('styles')
-    
+
+    <!-- Couleurs Bénin & Navbar Professionnelle -->
     <style>
         :root {
             --benin-green: #008751;
             --benin-yellow: #FCD116;
             --benin-red: #E8112D;
+            --benin-dark: #006d40;
+            --navbar-height: 70px;
         }
-        
-        .bg-benin-green { background-color: var(--benin-green) !important; }
-        .text-benin-green { color: var(--benin-green) !important; }
-        .btn-benin-green { 
-            background-color: var(--benin-green); 
-            border-color: var(--benin-green); 
-            color: white; 
+
+        /* === Couleurs Bénin === */
+        .bg-benin-green {
+            background-color: var(--benin-green) !important;
         }
-        .btn-benin-green:hover { 
-            background-color: #006741; 
-            border-color: #006741; 
+        .text-benin-green {
+            color: var(--benin-green) !important;
+        }
+        .btn-benin-green {
+            background-color: var(--benin-green);
+            border-color: var(--benin-green);
             color: white;
         }
-        
+        .btn-benin-green:hover {
+            background-color: var(--benin-dark);
+            border-color: var(--benin-dark);
+        }
+
         .sidebar-brand a {
             color: var(--benin-green) !important;
         }
-        
+
         .main-sidebar .sidebar-menu li.active a {
+            background-color: var(--benin-green) !important;
+            color: white !important;
+        }
+
+        .badge-benin-green {
             background-color: var(--benin-green);
+            color: white;
+        }
+
+        /* === NAVBAR PROFESSIONNELLE === */
+        .main-navbar {
+            height: var(--navbar-height);
+            padding: 0 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        /* Disposition générale */
+        .main-navbar .form-inline {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .main-navbar .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-navbar .navbar-nav.navbar-right {
+            margin-left: auto;
+            gap: 15px;
+        }
+
+        /* Boutons d'action navbar (sidebar, fullscreen) */
+        .nav-link-lg {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link-lg:hover {
+            background-color: rgba(0, 135, 81, 0.1);
+        }
+
+        .nav-link-lg i {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Barre de recherche améliorée */
+        .search-element {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-element input {
+            height: 42px;
+            padding: 0 45px 0 18px;
+            border-radius: 21px;
+            border: 1px solid #e4e6ef;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .search-element input:focus {
+            background-color: white;
+            border-color: var(--benin-green);
+            box-shadow: 0 0 0 3px rgba(0, 135, 81, 0.1);
+        }
+
+        .search-element .btn {
+            position: absolute;
+            right: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            border: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .search-element .btn:hover {
+            background-color: var(--benin-green);
+            color: white;
+        }
+
+        /* Dropdowns notifications & messages */
+        .dropdown-list-toggle {
+            position: relative;
+        }
+
+        .dropdown-list-toggle .nav-link {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dropdown-list-toggle .nav-link:hover {
+            background-color: rgba(0, 135, 81, 0.1);
+        }
+
+        /* Badge de compteur */
+        .badge-sm {
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            top: 3px !important;
+            right: 3px !important;
+        }
+
+        /* Menu utilisateur amélioré */
+        .nav-link-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px 6px 6px !important;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            min-height: 52px;
+        }
+
+        .nav-link-user:hover {
+            background-color: rgba(0, 135, 81, 0.05);
+        }
+
+        .nav-link-user .rounded-circle,
+        .nav-link-user .avatar-initial {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e4e6ef;
+            flex-shrink: 0;
+        }
+
+        .nav-link-user .d-lg-inline-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.3;
+            max-width: 150px;
+        }
+
+        .nav-link-user .d-lg-inline-block small {
+            font-size: 11px;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+
+        /* Avatar avec initiales */
+        .avatar-initial {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Dropdown menu amélioré */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            border-radius: 12px;
+            padding: 8px;
+            margin-top: 8px !important;
+            min-width: 260px;
+        }
+
+        .dropdown-menu.dropdown-menu-right {
+            right: 0;
+            left: auto;
+        }
+
+        .dropdown-title {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0, 135, 81, 0.08);
+            color: var(--benin-green);
+        }
+
+        .dropdown-item.has-icon i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(232, 17, 45, 0.08);
+            color: #dc3545;
+        }
+
+        .dropdown-divider {
+            margin: 8px 0;
+            border-color: #e4e6ef;
+        }
+
+        /* Dropdown liste (messages/notifications) */
+        .dropdown-list {
+            min-width: 340px;
+        }
+
+        .dropdown-header {
+            padding: 14px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid #e4e6ef;
+            background-color: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .dropdown-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e4e6ef;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .dropdown-footer a {
+            color: var(--benin-green);
+            font-weight: 500;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .dropdown-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .dropdown-list-content {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        /* Scroll personnalisé */
+        .dropdown-list-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .main-navbar {
+                padding: 0 15px;
+            }
+
+            .search-element {
+                max-width: 250px;
+            }
+
+            .nav-link-user .d-lg-inline-block {
+                display: none !important;
+            }
+
+            .navbar-right {
+                gap: 8px !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .main-navbar {
+                height: 60px;
+            }
+
+            .nav-link-lg {
+                width: 38px;
+                height: 38px;
+            }
+
+            .nav-link-user .avatar-initial,
+            .nav-link-user .rounded-circle {
+                width: 36px;
+                height: 36px;
+            }
+
+            .dropdown-list {
+                min-width: 300px;
+            }
+        }
+
+        /* Animation des icônes */
+        @keyframes bellRing {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
+        }
+
+        .notification-toggle:hover i {
+            animation: bellRing 0.5s ease-in-out;
+        }
+
+        /* État actif */
+        .navbar-nav li.active .nav-link {
+            background-color: rgba(0, 135, 81, 0.1);
+            color: var(--benin-green);
         }
         
-        .badge-benin { background-color: var(--benin-green); color: white; }
     </style>
 </head>
 
-<body>
+<body class="layout-1">
     <div class="loader"></div>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
             <div class="navbar-bg"></div>
-            
-            {{-- Navbar --}}
-            @include('admin.partials.navbar')
-            
-            {{-- Sidebar - Selon le rôle de l'utilisateur --}}
-            @if(auth()->user()->hasRole('admin'))
+
+            <!-- Navbar Professionnelle Optimisée -->
+            <nav class="navbar navbar-expand-lg main-navbar sticky">
+                <!-- Section Gauche: Actions + Recherche -->
+                <div class="form-inline mr-auto">
+                    <ul class="navbar-nav mr-3">
+                        <!-- Bouton Sidebar -->
+                        <li>
+                            <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn" title="Menu">
+                                <i data-feather="align-justify"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Bouton Plein écran -->
+                        <li>
+                            <a href="#" class="nav-link nav-link-lg fullscreen-btn" title="Plein écran">
+                                <i data-feather="maximize"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Barre de recherche -->
+                    <div class="d-none d-md-block">
+                        <form class="form-inline">
+                            <div class="search-element">
+                                <input class="form-control" type="search" placeholder="Rechercher..." aria-label="Search">
+                                <button class="btn" type="submit">
+                                    <i data-feather="search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Section Droite: Notifications + Profil -->
+                <ul class="navbar-nav navbar-right">
+                    <!-- Messages -->
+                    <li class="dropdown dropdown-list-toggle">
+                        <a href="#" data-toggle="dropdown" class="nav-link message-toggle" title="Messages">
+                            <i data-feather="mail"></i>
+                            <span class="badge badge-pill badge-danger badge-sm position-absolute" style="display:none;" id="msg-count">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right">
+                            <div class="dropdown-header">
+                                <i data-feather="mail" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                Messages
+                            </div>
+                            <div class="dropdown-list-content dropdown-list-message" id="messages-list">
+                                <div class="text-center py-4">
+                                    <p class="text-muted mb-0">Chargement...</p>
+                                </div>
+                            </div>
+                            <div class="dropdown-footer text-center">
+                                <a href="#">Voir tous les messages</a>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Notifications -->
+                    <li class="dropdown dropdown-list-toggle">
+                        <a href="#" data-toggle="dropdown" class="nav-link notification-toggle" title="Notifications">
+                            <i data-feather="bell"></i>
+                            <span class="badge badge-pill badge-danger badge-sm position-absolute" style="display:none;" id="notif-count">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right">
+                            <div class="dropdown-header">
+                                <i data-feather="bell" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                                Notifications
+                            </div>
+                            <div class="dropdown-list-content dropdown-list-icons" id="notifications-list">
+                                <div class="text-center py-4">
+                                    <p class="text-muted mb-0">Chargement...</p>
+                                </div>
+                            </div>
+                            <div class="dropdown-footer text-center">
+                                <a href="#">Voir toutes les notifications</a>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Menu utilisateur -->
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-user">
+                            @php
+                                $user = auth()->user();
+                                $initials = strtoupper(substr($user->prenom ?? 'U', 0, 1) . substr($user->nom ?? '', 0, 1));
+                                $bgColor = substr(md5($user->email), 0, 6);
+                            @endphp
+
+                            @if($user->profile_photo_url ?? false)
+                                <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
+                            @else
+                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor,0,6) }}, #{{ substr($bgColor,2,6) }});">
+                                    {{ $initials }}
+                                </div>
+                            @endif
+
+                            <div class="d-none d-lg-inline-block">
+                                <strong>{{ $user->prenom ?? '' }} {{ $user->nom ?? 'Utilisateur' }}</strong>
+                                <small class="d-block text-muted">
+                                    {{ ucfirst($user->roles->first()->name ?? 'Membre') }}
+                                </small>
+                            </div>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <div class="dropdown-title border-bottom pb-3 mb-2">
+                                <strong>{{ $user->prenom ?? '' }} {{ $user->nom ?? 'Utilisateur' }}</strong>
+                                <small class="d-block text-muted mt-1" style="font-size: 12px;">{{ $user->email }}</small>
+                            </div>
+
+                            <a href="#" class="dropdown-item has-icon">
+                                <i data-feather="user"></i> Mon profil
+                            </a>
+                            <a href="#" class="dropdown-item has-icon">
+                                <i data-feather="settings"></i> Paramètres
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+
+                            <a href="{{ url('/') }}" class="dropdown-item has-icon" target="_blank">
+                                <i data-feather="external-link"></i> Voir le site public
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+
+                            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                                @csrf
+                                <button type="submit" class="dropdown-item has-icon text-danger" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i data-feather="log-out"></i> Déconnexion
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar conditionnelle -->
+            @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin'))
                 @include('admin.partials.sidebar')
             @elseif(auth()->user()->hasRole('artisan'))
                 @include('admin.partials.sidebar-artisan')
             @elseif(auth()->user()->hasRole('vendor'))
                 @include('admin.partials.sidebar-vendor')
             @else
-                @include('admin.partials.sidebar-client')
+                @include('admin.partials.sidebar')
             @endif
-            
-            {{-- Main Content --}}
+
+            <!-- Main Content -->
             <div class="main-content">
                 <section class="section">
                     <div class="section-body">
@@ -89,11 +584,11 @@
                     </div>
                 </section>
             </div>
-            
-            {{-- Footer --}}
+
+            <!-- Footer -->
             <footer class="main-footer">
                 <div class="footer-left">
-                    &copy; {{ date('Y') }} <a href="{{ url('/') }}">TOTCHEMEGNON</a> - Saveurs, Artisanat et Ethnies du Bénin
+                    © {{ date('Y') }} <a href="{{ url('/') }}">TOTCHEMEGNON</a> - Saveurs, Artisanat et Ethnies du Bénin
                 </div>
                 <div class="footer-right">
                     Version 1.0
@@ -101,50 +596,93 @@
             </footer>
         </div>
     </div>
-    
+
     <!-- General JS Scripts -->
     <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
-    
+
     <!-- JS Libraries -->
     <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
     <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('admin-assets/bundles/izitoast/js/iziToast.min.js') }}"></script>
     <script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
-    
-    <!-- Template JS File -->
-    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
-    <!-- Custom JS File -->
-    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
-    
+
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
     <script>
-        // CSRF Token for AJAX
+        feather.replace();
+
+        // Remplacer les icônes après chargement des dropdowns
+        $(document).on('shown.bs.dropdown', function() {
+            feather.replace();
+        });
+    </script>
+
+    <!-- Template JS -->
+    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
+
+    <!-- CSRF global pour AJAX -->
+    <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
         });
-        
-        // Success notification
+
+        // Notifications iziToast globales
         @if(session('success'))
             iziToast.success({
                 title: 'Succès',
                 message: '{{ session('success') }}',
-                position: 'topRight'
+                position: 'topRight',
+                timeout: 5000
             });
         @endif
-        
-        // Error notification
+
         @if(session('error'))
             iziToast.error({
                 title: 'Erreur',
                 message: '{{ session('error') }}',
-                position: 'topRight'
+                position: 'topRight',
+                timeout: 6000
             });
         @endif
+
+        // Amélioration plein écran
+        $(document).ready(function() {
+            $('.fullscreen-btn').on('click', function(e) {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    $(this).find('i').attr('data-feather', 'minimize');
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        $(this).find('i').attr('data-feather', 'maximize');
+                    }
+                }
+                feather.replace();
+            });
+
+            // Afficher badge si nombre > 0
+            function updateBadge(id, count) {
+                const badge = $(id);
+                if (count > 0) {
+                    badge.text(count > 99 ? '99+' : count).show();
+                } else {
+                    badge.hide();
+                }
+            }
+
+            // Exemple: updateBadge('#msg-count', 5);
+            // Exemple: updateBadge('#notif-count', 12);
+        });
     </script>
-    
+
+    <!-- Scripts pushés depuis les vues -->
     @stack('scripts')
 </body>
 </html>

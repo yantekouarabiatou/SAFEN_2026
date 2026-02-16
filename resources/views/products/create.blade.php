@@ -6,8 +6,8 @@
 <div class="section-header">
     <h1>Ajouter un produit</h1>
     <div class="section-header-breadcrumb">
-        <div class="breadcrumb-item active"><a href="{{ route('dashboard.artisan') }}">Dashboard</a></div>
-        <div class="breadcrumb-item"><a href="{{ route('dashboard.artisan.products') }}">Mes Produits</a></div>
+        <div class="breadcrumb-item active"><a href="{{ route('admin.dashboard') }}">Dashboard</a></div>
+        <div class="breadcrumb-item"><a href="{{ route('admin.products.index') }}">Mes Produits</a></div>
         <div class="breadcrumb-item">Ajouter</div>
     </div>
 </div>
@@ -39,7 +39,7 @@
                         @endif
 
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="name">Nom du produit <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" 
@@ -221,7 +221,7 @@
                         </div>
                     </div>
                     <div class="card-footer text-right">
-                        <a href="{{ route('dashboard.artisan.products') }}" class="btn btn-secondary">
+                        <a href="#" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Annuler
                         </a>
                         <button type="submit" class="btn btn-primary">

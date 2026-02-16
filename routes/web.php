@@ -161,7 +161,7 @@ Route::middleware('auth')->group(function () {
 
     // ===== Déconnexion =====
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-      
+
     // ===== PROFIL UTILISATEUR (ProfileController - créé par Breeze) =====
     Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'show')->name('show');
@@ -253,9 +253,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::get('/orders/tracking', [OrderController::class, 'tracking'])->name('orders.tracking');
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
-    Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         // Devis
-        Route::resource('quotes',QuoteController::class)->except(['destroy']);
+        Route::resource('quotes', QuoteController::class)->except(['destroy']);
 
         // Favoris
         Route::resource('favorites', FavoriteController::class)->only(['index', 'destroy']);
@@ -322,6 +322,10 @@ Route::prefix('admin')
 
         // Rôles & permissions (si contrôleur existe)
         //Route::resource('roles', RoleController::class);
+
+        Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
+        Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
+        Route::post('orders/{order}/reject', [App\Http\Controllers\Admin\OrderController::class, 'rejectOrder'])->name('orders.reject');
     });
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Ajouter un vendeur')
+@section('title', 'Modifier le vendeur - ' . $vendor->name)
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
@@ -62,17 +62,18 @@
 
 @section('content')
     <div class="section-header">
-        <h1><i data-feather="user-plus"></i> Ajouter un vendeur</h1>
+        <h1><i data-feather="edit"></i> Modifier {{ $vendor->name }}</h1>
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></div>
             <div class="breadcrumb-item"><a href="{{ route('admin.vendors.index') }}">Vendeurs</a></div>
-            <div class="breadcrumb-item active">Ajouter</div>
+            <div class="breadcrumb-item active">Modifier</div>
         </div>
     </div>
 
     <div class="section-body">
-        <form action="{{ route('admin.vendors.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.vendors.update', $vendor) }}" method="POST" enctype="multipart/form-data">
             @csrf
+            @method('PUT')
 
             <div class="row">
                 <!-- Informations vendeur -->
@@ -86,7 +87,7 @@
                                 <div class="col-md-6">
                                     <label>Nom du vendeur <span class="text-danger">*</span></label>
                                     <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                        value="{{ old('name') }}" required>
+                                        value="{{ old('name', $vendor->name) }}" required>
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -95,14 +96,14 @@
                                     <select name="type" class="form-control select2 @error('type') is-invalid @enderror"
                                         required>
                                         <option value=""></option>
-                                        <option value="restaurant" {{ old('type') == 'restaurant' ? 'selected' : '' }}>
+                                        <option value="restaurant" {{ old('type', $vendor->type) == 'restaurant' ? 'selected' : '' }}>
                                             Restaurant</option>
-                                        <option value="maquis" {{ old('type') == 'maquis' ? 'selected' : '' }}>Maquis</option>
-                                        <option value="street_vendor" {{ old('type') == 'street_vendor' ? 'selected' : '' }}>
+                                        <option value="maquis" {{ old('type', $vendor->type) == 'maquis' ? 'selected' : '' }}>Maquis</option>
+                                        <option value="street_vendor" {{ old('type', $vendor->type) == 'street_vendor' ? 'selected' : '' }}>
                                             Vendeur de rue</option>
-                                        <option value="market_stand" {{ old('type') == 'market_stand' ? 'selected' : '' }}>
+                                        <option value="market_stand" {{ old('type', $vendor->type) == 'market_stand' ? 'selected' : '' }}>
                                             Étal de marché</option>
-                                        <option value="home_cook" {{ old('type') == 'home_cook' ? 'selected' : '' }}>
+                                        <option value="home_cook" {{ old('type', $vendor->type) == 'home_cook' ? 'selected' : '' }}>
                                             Cuisinière à domicile</option>
                                     </select>
                                     @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -114,7 +115,7 @@
                                         class="form-control select2 @error('user_id') is-invalid @enderror" required>
                                         <option value="">-- Sélectionner un utilisateur --</option>
                                         @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                            <option value="{{ $user->id }}" {{ old('user_id', $vendor->user_id) == $user->id ? 'selected' : '' }}>
                                                 {{ $user->prenom }} {{ $user->name }} ({{ $user->email }})
                                             </option>
                                         @endforeach
@@ -128,7 +129,7 @@
                                 <div class="col-md-6">
                                     <label>Ville</label>
                                     <input type="text" name="city" class="form-control @error('city') is-invalid @enderror"
-                                        value="{{ old('city') }}">
+                                        value="{{ old('city', $vendor->city) }}">
                                     @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -136,7 +137,7 @@
                                     <label>Téléphone</label>
                                     <input type="text" name="phone"
                                         class="form-control @error('phone') is-invalid @enderror"
-                                        value="{{ old('phone') }}">
+                                        value="{{ old('phone', $vendor->phone) }}">
                                     @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -144,7 +145,7 @@
                                     <label>WhatsApp</label>
                                     <input type="text" name="whatsapp"
                                         class="form-control @error('whatsapp') is-invalid @enderror"
-                                        value="{{ old('whatsapp') }}">
+                                        value="{{ old('whatsapp', $vendor->whatsapp) }}">
                                     @error('whatsapp') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -152,7 +153,7 @@
                                     <label>Adresse complète</label>
                                     <input type="text" name="address"
                                         class="form-control @error('address') is-invalid @enderror"
-                                        value="{{ old('address') }}">
+                                        value="{{ old('address', $vendor->address) }}">
                                     @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -160,6 +161,12 @@
                                     <label>Logo / Photo</label>
                                     <input type="file" name="logo"
                                         class="form-control-file @error('logo') is-invalid @enderror" accept="image/*">
+                                    @if($vendor->logo)
+                                        <div class="mt-2">
+                                            <img src="{{ Storage::url($vendor->logo) }}" alt="Logo actuel" style="max-height: 80px;">
+                                            <small class="text-muted">Logo actuel (laisser vide pour conserver)</small>
+                                        </div>
+                                    @endif
                                     @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -167,7 +174,7 @@
                                     <label>Description</label>
                                     <textarea name="description"
                                         class="form-control @error('description') is-invalid @enderror"
-                                        rows="4">{{ old('description') }}</textarea>
+                                        rows="4">{{ old('description', $vendor->description) }}</textarea>
                                     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -183,10 +190,19 @@
                         </div>
                         <div class="card-body">
                             <p class="text-muted small mb-3">
-                                Ajoutez les plats que ce vendeur propose. Chaque plat sera créé et associé.
+                                Modifiez les plats existants ou ajoutez-en de nouveaux.
                             </p>
 
-                            <div id="dishes-container" class="mb-4"></div>
+                            <div id="dishes-container" class="mb-4">
+                                @foreach($vendor->dishes as $index => $dish)
+                                    @include('admin.vendors._dish_row', [
+                                        'index' => $index,
+                                        'dish' => $dish,
+                                        'categories' => $categories,
+                                        'old' => old("dishes.$index"),
+                                    ])
+                                @endforeach
+                            </div>
 
                             <button type="button" class="btn btn-add-dish btn-block" id="add-dish-btn">
                                 <i data-feather="plus-circle"></i> Ajouter un plat
@@ -202,7 +218,7 @@
                     <div class="card">
                         <div class="card-body text-right">
                             <button type="submit" class="btn btn-benin-green btn-lg px-5">
-                                <i data-feather="save"></i> Créer le vendeur
+                                <i data-feather="save"></i> Mettre à jour
                             </button>
                             <a href="{{ route('admin.vendors.index') }}" class="btn btn-secondary btn-lg px-5 ml-2">
                                 <i data-feather="x"></i> Annuler
@@ -220,130 +236,86 @@
     <script src="https://unpkg.com/dropzone@6.0.0-beta.2/dist/dropzone-min.js"></script>
 
     <script>
-        // Index de départ : si old('dishes') existe, on reprend le bon nombre
-        let dishIndex = {{ old('dishes') ? count(old('dishes')) : 0 }};
+        // Index de départ : nombre de plats existants
+        let dishIndex = {{ $vendor->dishes->count() }};
 
-        // Récupérer les anciennes valeurs (JSON sécurisé)
-        const oldDishes = @json(old('dishes', []));
-        const categories = @json($categories);
-
-        // Fonction qui génère une ligne de plat avec old() pour restaurer les valeurs
+        // Fonction qui génère une ligne de plat (vide) pour un nouveau plat
         function dishRow(index) {
-            const dish = oldDishes[index] || {};
-
-            // Générer les options de catégories
+            const categories = @json($categories);
             let categoryOptions = '<option value=""></option>';
             Object.keys(categories).forEach(function (value) {
-                const selected = dish.category === value ? 'selected' : '';
-                categoryOptions += `<option value="${value}" ${selected}>${categories[value]}</option>`;
+                categoryOptions += `<option value="${value}">${categories[value]}</option>`;
             });
 
             return `
-                    <div class="card mb-4 dish-row shadow-sm" data-index="${index}">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <!-- Nom -->
-                                <div class="col-md-6">
-                                    <label>Nom du plat <span class="text-danger">*</span></label>
-                                    <input type="text" name="dishes[${index}][name]" class="form-control" 
-                                           value="${dish.name || ''}" required>
-                                </div>
-
-                                <!-- Nom local -->
-                                <div class="col-md-6">
-                                    <label>Nom local (optionnel)</label>
-                                    <input type="text" name="dishes[${index}][name_local]" class="form-control" 
-                                           value="${dish.name_local || ''}">
-                                </div>
-
-                                <!-- Catégorie -->
-                                <div class="col-md-4">
-                                    <label>Catégorie <span class="text-danger">*</span></label>
-                                    <select name="dishes[${index}][category]" class="form-control select2-dish" required>
-                                        ${categoryOptions}
-                                    </select>
-                                </div>
-
-                                <!-- Origine ethnique -->
-                                <div class="col-md-4">
-                                    <label>Origine ethnique</label>
-                                    <input type="text" name="dishes[${index}][ethnic_origin]" class="form-control" 
-                                           value="${dish.ethnic_origin || ''}">
-                                </div>
-
-                                <!-- Région -->
-                                <div class="col-md-4">
-                                    <label>Région</label>
-                                    <input type="text" name="dishes[${index}][region]" class="form-control" 
-                                           value="${dish.region || ''}">
-                                </div>
-
-                                <!-- Prix -->
-                                <div class="col-md-4">
-                                    <label>Prix (FCFA) <span class="text-danger">*</span></label>
-                                    <input type="number" name="dishes[${index}][price]" class="form-control" 
-                                           value="${dish.price || ''}" min="0" step="100" required>
-                                </div>
-
-                                <!-- Disponible -->
-                                <div class="col-md-4">
-                                    <label>Disponible</label>
-                                    <select name="dishes[${index}][available]" class="form-control">
-                                        <option value="1" ${(!dish.hasOwnProperty('available') || dish.available != '0') ? 'selected' : ''}>Oui</option>
-                                        <option value="0" ${dish.available == '0' ? 'selected' : ''}>Non</option>
-                                    </select>
-                                </div>
-
-                                <!-- Notes -->
-                                <div class="col-md-4">
-                                    <label>Notes (optionnel)</label>
-                                    <input type="text" name="dishes[${index}][notes]" class="form-control" 
-                                           value="${dish.notes || ''}">
-                                </div>
-
-                                <!-- Ingrédients -->
-                                <div class="col-12">
-                                    <label>Ingrédients (séparés par virgule)</label>
-                                    <input type="text" name="dishes[${index}][ingredients]" class="form-control" 
-                                           placeholder="Ex: igname, sauce tomate, poisson"
-                                           value="${dish.ingredients || ''}">
-                                </div>
-
-                                <!-- Description -->
-                                <div class="col-12">
-                                    <label>Description</label>
-                                    <textarea name="dishes[${index}][description]" class="form-control" rows="2">${dish.description || ''}</textarea>
-                                </div>
-
-                                <!-- Images -->
-                                <div class="col-12">
-                                    <label>Images du plat</label>
-                                    <div class="dropzone dish-dropzone" id="dropzone-${index}"></div>
-                                    <input type="hidden" name="dishes[${index}][images]" class="dish-images-hidden" 
-                                           value="${dish.images || ''}">
-                                </div>
-
-                                <!-- Supprimer -->
-                                <div class="col-12 text-right mt-3">
-                                    <button type="button" class="btn btn-danger btn-sm remove-dish-btn">
-                                        <i data-feather="trash-2"></i> Supprimer ce plat
-                                    </button>
-                                </div>
+                <div class="card mb-4 dish-row shadow-sm" data-index="${index}">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Nom du plat <span class="text-danger">*</span></label>
+                                <input type="text" name="dishes[${index}][name]" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Nom local (optionnel)</label>
+                                <input type="text" name="dishes[${index}][name_local]" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Catégorie <span class="text-danger">*</span></label>
+                                <select name="dishes[${index}][category]" class="form-control select2-dish" required>
+                                    ${categoryOptions}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Origine ethnique</label>
+                                <input type="text" name="dishes[${index}][ethnic_origin]" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Région</label>
+                                <input type="text" name="dishes[${index}][region]" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Prix (FCFA) <span class="text-danger">*</span></label>
+                                <input type="number" name="dishes[${index}][price]" class="form-control" min="0" step="100" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Disponible</label>
+                                <select name="dishes[${index}][available]" class="form-control">
+                                    <option value="1">Oui</option>
+                                    <option value="0">Non</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Notes (optionnel)</label>
+                                <input type="text" name="dishes[${index}][notes]" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label>Ingrédients (séparés par virgule)</label>
+                                <input type="text" name="dishes[${index}][ingredients]" class="form-control" placeholder="Ex: igname, sauce tomate, poisson">
+                            </div>
+                            <div class="col-12">
+                                <label>Description</label>
+                                <textarea name="dishes[${index}][description]" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label>Images du plat</label>
+                                <div class="dropzone dish-dropzone" id="dropzone-${index}"></div>
+                                <input type="hidden" name="dishes[${index}][images]" class="dish-images-hidden">
+                            </div>
+                            <div class="col-12 text-right mt-3">
+                                <button type="button" class="btn btn-danger btn-sm remove-dish-btn" data-new="true">
+                                    <i data-feather="trash-2"></i> Supprimer ce plat
+                                </button>
                             </div>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
         }
 
-        // Fonction pour initialiser Dropzone sur un plat
+        // Fonction pour initialiser Dropzone sur un plat (nouveau)
         function initDropzone(index) {
             const dropzoneElement = document.querySelector(`#dropzone-${index}`);
-            if (!dropzoneElement) return;
-
-            // Vérifier si Dropzone n'est pas déjà initialisé
-            if (dropzoneElement.dropzone) {
-                return dropzoneElement.dropzone;
-            }
+            if (!dropzoneElement || dropzoneElement.dropzone) return;
 
             const dz = new Dropzone(`#dropzone-${index}`, {
                 url: "/dummy-upload", // À remplacer par une vraie route si besoin
@@ -353,21 +325,15 @@
                 addRemoveLinks: true,
                 dictDefaultMessage: "Glissez les images ici ou cliquez",
                 dictRemoveFile: "Supprimer",
-                dictCancelUpload: "Annuler",
-                autoProcessQueue: false, // Ne pas uploader automatiquement
+                autoProcessQueue: false,
                 init: function () {
                     this.on("addedfile", function (file) {
-                        // Stocker le fichier localement (simulation)
                         let hiddenInput = document.querySelector(`input[name="dishes[${index}][images]"]`);
                         let paths = hiddenInput.value ? hiddenInput.value.split(',') : [];
-
-                        // Utiliser le nom du fichier comme référence
                         paths.push(file.name);
                         hiddenInput.value = paths.join(',');
                     });
-
                     this.on("removedfile", function (file) {
-                        // Retirer le fichier de la liste
                         let hiddenInput = document.querySelector(`input[name="dishes[${index}][images]"]`);
                         let paths = hiddenInput.value ? hiddenInput.value.split(',') : [];
                         paths = paths.filter(p => p !== file.name);
@@ -375,8 +341,6 @@
                     });
                 }
             });
-
-            return dz;
         }
 
         $(document).ready(function () {
@@ -387,33 +351,16 @@
                 width: '100%'
             });
 
-            // Restaurer les plats existants en cas d'erreur de validation
-            if (oldDishes.length > 0) {
-                oldDishes.forEach(function (dish, index) {
-                    $('#dishes-container').append(dishRow(index));
-
-                    // Initialiser Select2 sur le select catégorie
-                    $(`select[name="dishes[${index}][category]"]`).select2({
-                        placeholder: "-- Choisir catégorie --",
-                        allowClear: true,
-                        width: '100%'
-                    });
-
-                    // Initialiser Dropzone
-                    initDropzone(index);
-
-                    // Rafraîchir les icônes Feather
-                    feather.replace();
-                });
-
-                dishIndex = oldDishes.length;
-            }
+            // Initialiser Select2 pour les selects de catégorie dans les plats existants
+            $('.select2-dish').select2({
+                placeholder: "-- Choisir catégorie --",
+                allowClear: true,
+                width: '100%'
+            });
 
             // Ajouter un nouveau plat
             $('#add-dish-btn').click(function () {
                 const currentIndex = dishIndex;
-
-                // Ajouter le HTML du plat
                 $('#dishes-container').append(dishRow(currentIndex));
 
                 // Initialiser Select2 sur le nouveau select catégorie
@@ -423,37 +370,53 @@
                     width: '100%'
                 });
 
-                // Initialiser Dropzone pour ce plat
                 initDropzone(currentIndex);
-
-                // Rafraîchir les icônes Feather
                 feather.replace();
-
-                // Incrémenter l'index
                 dishIndex++;
 
-                // Scroller vers le nouveau plat
                 $('html, body').animate({
                     scrollTop: $(`[data-index="${currentIndex}"]`).offset().top - 100
                 }, 500);
             });
 
-            // Supprimer un plat
+            // Supprimer un plat (existant ou nouveau)
             $('#dishes-container').on('click', '.remove-dish-btn', function () {
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce plat ?')) {
-                    $(this).closest('.dish-row').remove();
+                const $btn = $(this);
+                const $row = $btn.closest('.dish-row');
+                const isNew = $btn.data('new') === true;
+                const dishId = $row.find('input[name$="[id]"]').val();
 
-                    // Si aucun plat restant, réinitialiser l'index
-                    if ($('#dishes-container').children().length === 0) {
-                        dishIndex = 0;
-                    }
+                if (isNew) {
+                    // Nouveau plat : suppression simple
+                    $row.remove();
+                } else {
+                    // Plat existant : appel AJAX
+                    Swal.fire({
+                        title: 'Supprimer ce plat ?',
+                        text: "Cette action est irréversible.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: 'var(--benin-red)',
+                        confirmButtonText: 'Oui, supprimer',
+                        cancelButtonText: 'Annuler'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '{{ route("admin.dishes.destroy", ":id") }}'.replace(':id', dishId),
+                                type: 'DELETE',
+                                data: { _token: '{{ csrf_token() }}' },
+                                success: function () {
+                                    $row.remove();
+                                    Swal.fire('Supprimé', 'Le plat a été supprimé.', 'success');
+                                },
+                                error: function () {
+                                    Swal.fire('Erreur', 'Impossible de supprimer ce plat.', 'error');
+                                }
+                            });
+                        }
+                    });
                 }
             });
-
-            // Si aucun plat → ajouter un par défaut
-            if ($('#dishes-container').children().length === 0) {
-                $('#add-dish-btn').trigger('click');
-            }
         });
     </script>
 @endpush

@@ -15,20 +15,25 @@ return new class extends Migration
             $table->string('audio_url')->nullable();
             $table->string('ethnic_origin')->nullable();
             $table->string('region')->nullable();
+            
+            // CORRECTION : Utiliser les mêmes valeurs que dans le modèle
             $table->enum('category', [
-                'Plat principal',
-                'Entrée',
-                'Accompagnement',
-                'Dessert',
-                'Boisson',
-                'Sauce',
-                'Snack',
+                'plat_principal',
+                'entree',
+                'accompagnement',
+                'dessert',
+                'boisson',
+                'sauce',
+                'snack',
             ])->nullable();
-             $table->json('ingredients')->nullable();
-            $table->text('recipe')->nullable();
+            
+            $table->json('ingredients')->nullable();
+            $table->text('preparation')->nullable(); // Était 'recipe' dans votre migration
+            $table->text('description')->nullable(); // Ajouté (existe dans le modèle)
+            $table->text('history')->nullable(); // Ajouté (existe dans le modèle)
             $table->json('nutritional_info')->nullable();
-            $table->text('cultural_description')->nullable();
             $table->text('occasions')->nullable();
+            $table->json('restaurants')->nullable(); // Ajouté (existe dans le modèle)
             $table->string('season')->nullable();
             $table->string('slug')->unique();
             $table->integer('views')->default(0);
@@ -38,9 +43,6 @@ return new class extends Migration
 
     public function down()
     {
-      Schema::table('categories', function (Blueprint $table) {
-            $table->dropColumn('category');
-            $table->enum('category', ['plat principal', 'drink', 'snack', 'dessert', 'sauce'])->after('id');
-        });
-         }
+        Schema::dropIfExists('dishes');
+    }
 };

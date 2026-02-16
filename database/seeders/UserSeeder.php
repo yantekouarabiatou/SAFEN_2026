@@ -12,18 +12,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin user
-        User::updateOrCreate(
-            ['email' => 'admin@afriheritage.bj'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'phone' => '+22961234567',
-            ]
-        );
+        // 1. Créer / Vérifier les rôles AVANT tout
+        $this->createRoles();
 
-        // Super Admin
+        // 2. Super Admin
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
@@ -35,7 +27,7 @@ class UserSeeder extends Seeder
         );
         $superAdmin->assignRole('super-admin');
 
-        // Admin classique
+        // 3. Admin classique
         $admin = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
@@ -47,59 +39,50 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('admin');
 
-        // Liste des métiers VALIDES selon ton enum
+        // 4. Artisans (avec profil Artisan)
         $crafts = [
-            'tisserand',
-            'bijoutier',
-            'sculpteur',
-            'potier',
-            'couturier',
-            'forgeron',
-            'menuisier',
-            'tanneur',
-            'coiffeur',
-            'autre',
+            'tisserand', 'bijoutier', 'sculpteur', 'potier', 'couturier',
+            'forgeron', 'menuisier', 'tanneur', 'coiffeur', 'autre',
         ];
 
-        // Artisans
-        for ($i = 1; $i <= 5; $i++) {
-            User::updateOrCreate(
+        foreach (range(1, 5) as $i) {
+            $user = User::firstOrCreate(
                 ['email' => "artisan$i@example.com"],
                 [
-                    'name' => "Artisan $i",
+                    'name'     => "Artisan $i",
                     'password' => Hash::make('password'),
-                    'role' => 'artisan',
-                    'phone' => '+2296' . rand(1000000, 9999999),
-                    'city' => ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'][$i-1],
+                    'phone'    => '+2296' . rand(1000000, 9999999),
+                    'city'     => ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'][array_rand(['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'])],
+                ]
+            );
+
+            $user->assignRole('artisan');
+
+            // Créer le profil artisan associé
+            Artisan::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'business_name' => "Atelier de " . $user->name,
+                    'craft'         => $crafts[array_rand($crafts)],
+                    'city'          => $user->city,
+                    'status'        => 'approved', // ou 'pending' selon ta logique
                 ]
             );
         }
 
-        // Sample clients
-        for ($i = 1; $i <= 10; $i++) {
-            User::updateOrCreate(
-                ['email' => "client$i@example.com"],
+        // 5. Clients simples
+        foreach (range(1, 10) as $i) {
+            $user = User::firstOrCreate(
+                ['email' => "client$i@safen.bj"],
                 [
-                    'name' => "Client $i",
-                    'password' => Hash::make('password'),
-                    'role' => 'client',
-                    'phone' => '+2296' . rand(1000000, 9999999),
-                    'city' => 'Cotonou',
-                ]
-            );
-        }
-
-        // Clients
-        for ($i = 1; $i <= 15; $i++) {
-            User::firstOrCreate(
-                ['email' => "client{$i}@safen.bj"],
-                [
-                    'name'     => "Client {$i}",
+                    'name'     => "Client $i",
                     'password' => Hash::make('client123'),
                     'phone'    => '+2296' . rand(1000000, 9999999),
                     'city'     => ['Cotonou', 'Porto-Novo', 'Parakou'][rand(0, 2)],
                 ]
-            )->assignRole('client');
+            );
+
+            $user->assignRole('client');
         }
 
         $this->command->info('Utilisateurs créés : ' . User::count());
@@ -107,14 +90,24 @@ class UserSeeder extends Seeder
         $this->command->info('Rôles assignés avec succès.');
     }
 
-    private function ensureRolesExist(): void
+    /**
+     * Créer tous les rôles nécessaires si ils n'existent pas
+     */
+    private function createRoles(): void
     {
-        $roles = ['super-admin', 'admin', 'artisan', 'vendor', 'client'];
+        $roles = [
+            'super-admin',
+            'admin',
+            'artisan',
+            'vendor',
+            'client',
+            // Ajoute ici tous les rôles que tu utilises dans ton projet
+        ];
 
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName]);
         }
 
-        $this->command->info('Rôles de base vérifiés/créés.');
+        $this->command->info('Rôles de base vérifiés/créés (' . count($roles) . ').');
     }
 }

@@ -548,6 +548,35 @@
                 padding: 1.5rem;
             }
         }
+
+        /* Select2 customisation Bénin */
+        .select2-container--default .select2-selection--single {
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            height: 42px;
+            padding: 0 1rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            color: #444;
+            font-weight: 500;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--benin-green);
+            color: white;
+        }
+
+        .select2-dropdown {
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
     </style>
 @endpush
 
@@ -742,10 +771,7 @@
                                     @else
                                         <!-- Initiales -->
                                         <div class="avatar-initials"
-                                            style="width: 32px; height: 32px; border-radius: 50%;
-                                                                                                                background: var(--benin-green); color: white;
-                                                                                                                display: flex; align-items: center; justify-content: center;
-                                                                                                                font-weight: bold; font-size: 1rem; border: 2px solid white;">
+                                            style="width: 32px; height: 32px; border-radius: 50%; background: var(--benin-green); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; border: 2px solid white;">
                                             {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
                                         (str_word_count($product->artisan->user->name ?? '') > 1
                                             ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1))
@@ -958,11 +984,11 @@
             toast.setAttribute('role', 'alert');
             toast.style.zIndex = '9999';
             toast.innerHTML = `
-                        <div class="d-flex">
-                            <div class="toast-body">${message}</div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    `;
+                                <div class="d-flex">
+                                    <div class="toast-body">${message}</div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                </div>
+                            `;
 
             document.body.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);
@@ -979,6 +1005,29 @@
                 document.getElementById('product-filters').submit();
             });
         });
+
+        // Initialiser Select2 sur tous les filtres
+        $('.select2-filter').select2({
+            placeholder: function () {
+                return $(this).data('placeholder') || "Sélectionner...";
+            },
+            allowClear: true,
+            width: '100%',
+            minimumResultsForSearch: 10, // active la recherche dès 10+ options
+            dropdownCssClass: "select2-benin-dropdown"
+        });
+
+        // Soumettre le formulaire quand un select change
+        $('.select2-filter').on('change', function () {
+            $('#product-filters').submit();
+        });
+
+        // Optionnel : améliorer le look du dropdown Select2
+        $('.select2-benin-dropdown').css({
+            'border-radius': '12px',
+            'box-shadow': '0 8px 25px rgba(0,0,0,0.15)'
+        });
+
 
         // Animation au scroll
         document.addEventListener('DOMContentLoaded', function () {
@@ -1010,3 +1059,189 @@
         });
     </script>
 @endpush
+
+@section('content')
+    <!-- Hero -->
+    <div class="hero-products">
+        <div class="container">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb"
+                    style="background: rgba(255,255,255,0.1); padding: 0.75rem 1rem; border-radius: 50px;">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}" style="color: white;">Accueil</a></li>
+                    <li class="breadcrumb-item active" style="color: white;">Arts & Artisanat</li>
+                </ol>
+            </nav>
+
+            <div class="text-center">
+                <h1 class="mb-3">Arts & Artisanat</h1>
+                <p class="lead" style="max-width: 700px; margin: 0 auto;">
+                    Découvrez des objets artisanaux authentiques créés par nos artisans béninois
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Filtres avec Select2 -->
+        <div class="filter-section">
+            <form action="{{ route('products.index') }}" method="GET" id="product-filters">
+                <div class="row g-3">
+                    <!-- Recherche -->
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0" style="border-radius: 50px 0 0 50px;">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0"
+                                placeholder="Rechercher un produit, artisan..." value="{{ request('search') }}"
+                                style="border-radius: 0 50px 50px 0;">
+                        </div>
+                    </div>
+
+                    <!-- Catégorie (Select2) -->
+                    <div class="col-md-2">
+                        <select name="category" class="form-control select2-filter" data-placeholder="Catégorie">
+                            <option value=""></option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
+                                    {{ \App\Models\Product::$categoryLabels[$category] ?? $category }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Origine ethnique (Select2) -->
+                    <div class="col-md-2">
+                        <select name="ethnic_origin" class="form-control select2-filter" data-placeholder="Origine">
+                            <option value=""></option>
+                            @foreach($ethnicOrigins as $origin)
+                                <option value="{{ $origin }}" {{ request('ethnic_origin') == $origin ? 'selected' : '' }}>
+                                    {{ $origin }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Ville (Select2) -->
+                    <div class="col-md-2">
+                        <select name="city" class="form-control select2-filter" data-placeholder="Ville">
+                            <option value=""></option>
+                            @foreach($cities as $city)
+                                <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
+                                    {{ $city }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Tri (Select2) -->
+                    <div class="col-md-2">
+                        <select name="sort" class="form-control select2-filter" data-placeholder="Trier par">
+                            <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Populaire</option>
+                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Plus récent</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Prix croissant
+                            </option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Prix
+                                décroissant</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <span class="text-muted">{{ $products->total() }} produit{{ $products->total() > 1 ? 's' : '' }}
+                        trouvé{{ $products->total() > 1 ? 's' : '' }}</span>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-benin-green px-4">
+                            <i class="bi bi-funnel me-2"></i> Filtrer
+                        </button>
+                        <a href="{{ route('products.index') }}" class="btn btn-outline-secondary px-4">
+                            Réinitialiser
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grille produits -->
+        @if($products->count() > 0)
+            <div class="product-grid">
+                @foreach($products as $product)
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="{{ route('products.show', $product) }}">
+                                @if($product->images && $product->images->first())
+                                    <img src="{{ $product->images->first()->full_url }}" alt="{{ $product->name }}">
+                                @else
+                                    <img src="{{ asset('images/default-product.jpg') }}" alt="{{ $product->name }}">
+                                @endif
+                            </a>
+
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                @if($product->featured)
+                                    <span class="product-badge badge-featured">Vedette</span>
+                                @endif
+                                @if($product->stock_status === 'out_of_stock')
+                                    <span class="product-badge badge-out-of-stock">Rupture</span>
+                                @elseif($product->stock_status === 'low_stock')
+                                    <span class="product-badge badge-low-stock">Stock bas</span>
+                                @endif
+                                @if($product->custom_order)
+                                    <span class="product-badge badge-custom-order">Sur commande</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="product-content">
+                            <h6><a href="{{ route('products.show', $product) }}">{{ $product->name }}</a></h6>
+
+                            @if($product->name_local)
+                                <div class="local-name">
+                                    <i class="bi bi-translate"></i> {{ $product->name_local }}
+                                </div>
+                            @endif
+
+                            <div class="mb-3">
+                                <span class="category-badge">{{ $product->category_label }}</span>
+                                <span class="category-badge ms-1">{{ $product->ethnic_origin }}</span>
+                            </div>
+
+                            @if($product->artisan)
+                                <div class="artisan-info">
+                                    <span class="artisan-name">
+                                        {{ $product->artisan->business_name ?? $product->artisan->user->name }}
+                                    </span>
+                                </div>
+                            @endif
+
+                            <div class="price-display">
+                                {{ number_format($product->price, 0, ',', ' ') }} FCFA
+                            </div>
+
+                            <div class="product-actions">
+                                <a href="{{ route('products.show', $product) }}" class="btn-discover">
+                                    Découvrir <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container mt-5">
+                {{ $products->withQueryString()->links('pagination::bootstrap-5') }}
+            </div>
+        @else
+            <div class="empty-state">
+                <i class="bi bi-basket"></i>
+                <h4>Aucun produit trouvé</h4>
+                <p class="text-muted">Aucun produit ne correspond à vos critères pour le moment.</p>
+                <a href="{{ route('products.index') }}" class="btn btn-benin-green mt-3">
+                    Voir tous les produits
+                </a>
+            </div>
+        @endif
+    </div>
+@endsection

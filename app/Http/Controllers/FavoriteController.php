@@ -56,38 +56,43 @@ class FavoriteController extends Controller
     }
 
     public function toggle(Request $request)
-{
-    $request->validate([
-        'favoritable_id' => 'required',
-        'favoritable_type' => 'required|in:App\\Models\\Product,App\\Models\\Artisan', // adaptez selon vos modèles
-    ]);
-
-    $user = auth()->user();
-    $existing = $user->favorites()
-        ->where('favoritable_id', $request->favoritable_id)
-        ->where('favoritable_type', $request->favoritable_type)
-        ->first();
-
-    if ($existing) {
-        // Supprimer le favori
-        $existing->delete();
-        $message = 'Produit retiré des favoris';
-        $added = false;
-    } else {
-        // Ajouter le favori
-        $user->favorites()->create([
-            'favoritable_id' => $request->favoritable_id,
-            'favoritable_type' => $request->favoritable_type,
+    {
+        $request->validate([
+            'favoritable_id' => 'required|integer',
+            'favoritable_type' => 'required|in:product,artisan,App\\Models\\Product,App\\Models\\Artisan',
         ]);
-        $message = 'Produit ajouté aux favoris';
-        $added = true;
-    }
 
-    return response()->json([
-        'success' => true,
-        'message' => $message,
-        'added' => $added,
-        'count' => $user->favorites()->count(),
-    ]);
-}
+        // Mapper le type simple vers la classe complète si nécessaire
+        $modelClass = match ($request->favoritable_type) {
+            'product' => 'App\\Models\\Product',
+            'artisan' => 'App\\Models\\Artisan',
+            default => $request->favoritable_type
+        };
+        $user = auth()->user();
+
+        $existing = $user->favorites()
+            ->where('favoritable_id', $request->favoritable_id)
+            ->where('favoritable_type', $modelClass)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+            $message = 'Retiré des favoris';
+            $added = false;
+        } else {
+            $user->favorites()->create([
+                'favoritable_id' => $request->favoritable_id,
+                'favoritable_type' => $modelClass,
+            ]);
+            $message = 'Ajouté aux favoris';
+            $added = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'added' => $added,
+            'count' => $user->favorites()->count(),
+        ]);
+    }
 }
