@@ -19,6 +19,8 @@ use App\Http\Controllers\{
     OrderController,
     FavoriteController,
     GastronomieController as ControllersGastronomieController,
+    GastronomieController as HttpControllersGastronomieController,
+    GastronomieController as AppHttpControllersGastronomieController,
     QuoteController,
     ReviewController,
     MessageController,
@@ -74,16 +76,16 @@ Route::prefix('gastronomie')->name('gastronomie.')->group(function () {
     Route::get('/{dish}', [GastronomieController::class, 'show'])->name('show');
 });
 
-// ===== PRODUITS (PUBLIC) – PRIORITAIRE =====
+// ===== Produits (public) =====
 Route::get('/products/index', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product}/reviews', [ProductController::class, 'reviews'])->name('products.reviews');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-Route::get('/products/{product}/reviews', [ProductController::class, 'reviews'])->name('products.reviews'); // si méthode existe
 
 // ===== Artisans (public) =====
 Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
 Route::get('/artisans/{artisan}/reviews', [ArtisanController::class, 'reviews'])->name('artisans.reviews');
 Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
-Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue'); // alias
+Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
 
 // ===== Témoignages publics =====
 Route::get('/artisan/{artisan}/testimonials', [HomeController::class, 'getArtisanTestimonials'])->name('artisan.testimonials');
@@ -142,13 +144,6 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-
 /*
 |--------------------------------------------------------------------------
 | ROUTES NÉCESSITANT UNE AUTHENTIFICATION
@@ -159,7 +154,10 @@ Route::middleware('auth')->group(function () {
     // ===== Déconnexion =====
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    // ===== PROFIL UTILISATEUR (ProfileController - créé par Breeze) =====
+    // ===== Notifications =====
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
+    // ===== Profil =====
     Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'show')->name('show');
         Route::get('/edit', 'edit')->name('edit');
@@ -168,23 +166,22 @@ Route::middleware('auth')->group(function () {
         Route::delete('/', 'destroy')->name('destroy');
     });
 
-    // ===== FAVORIS =====
+    // ===== Favoris =====
     Route::prefix('favorites')->name('favorites.')->controller(FavoriteController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
         Route::get('/{type?}', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::post('/toggle', 'toggle')->name('toggle');
         Route::delete('/{favorite}', 'destroy')->name('destroy');
     });
 
-    // ===== COMMANDES =====
+    // ===== Commandes =====
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/{order}', 'show')->name('show');
         Route::get('/track', 'tracking')->name('tracking');
+        Route::get('/{order}', 'show')->name('show');
     });
 
-    // ===== CHECKOUT / PAIEMENT =====
+    // ===== Checkout / Paiement =====
     Route::prefix('checkout')->name('checkout.')->controller(CheckoutController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/process', 'process')->name('process');
@@ -193,9 +190,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/cancel', 'cancel')->name('cancel');
         Route::post('/calculate-delivery', 'calculateDelivery')->name('calculate-delivery');
     });
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
 
-    // ===== DEVIS =====
+    // ===== Devis =====
     Route::prefix('quotes')->name('quotes.')->controller(QuoteController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
@@ -205,37 +201,38 @@ Route::middleware('auth')->group(function () {
         Route::post('/{quote}/reject', 'reject')->name('reject');
     });
 
-    // ===== AVIS =====
+    // ===== Avis =====
     Route::prefix('reviews')->name('reviews.')->controller(ReviewController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::put('/{review}', 'update')->name('update');
         Route::delete('/{review}', 'destroy')->name('destroy');
     });
 
-    // ===== MESSAGES =====
+    // ===== Messages =====
     Route::prefix('messages')->name('messages.')->controller(MessageController::class)->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::post('/mark-all-read', 'markAllRead')->name('markAllRead');
+        Route::delete('/clear-all', 'clearAll')->name('clearAll');
         Route::get('/{user}', 'show')->name('show');
         Route::post('/{user}', 'send')->name('send');
         Route::delete('/{message}', 'destroy')->name('destroy');
-        Route::post('/mark-all-read', 'markAllRead')->name('markAllRead');
-        Route::delete('/clear-all', 'clearAll')->name('clearAll');
     });
 
-    // ===== CONTACT (authentifié) =====
+    // ===== Contact (authentifié) =====
     Route::post('/contact/artisan/{artisan}', [ContactController::class, 'contactArtisan'])->name('contact.artisan');
     Route::post('/contact/vendor/{vendor}', [ContactController::class, 'contactVendor'])->name('contact.vendor');
 
-    // ===== ÉVÉNEMENTS CULTURELS (inscription) =====
+    // ===== Événements culturels (inscription) =====
     Route::post('/evenements/{event}/subscribe', [CulturalEventController::class, 'subscribe'])->name('events.subscribe');
     Route::delete('/evenements/{event}/unsubscribe', [CulturalEventController::class, 'unsubscribe'])->name('events.unsubscribe');
     Route::post('/evenements/preferences', [CulturalEventController::class, 'updatePreferences'])->name('events.preferences');
 
-    // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
+    // ===== Gestion des ressources (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-    // ===== ROUTES ADMIN (approuver, rejeter, etc.) =====
-    Route::middleware(['auth', 'role_or_permission:admin|super-admin'])->group(function () {
+
+    // ===== Routes Admin spéciales (approbation, vérification) =====
+    Route::middleware('role_or_permission:admin|super-admin')->group(function () {
         Route::post('/admin/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('admin.artisans.verify');
         Route::post('/admin/products/{product}/feature', [ProductController::class, 'feature'])->name('admin.products.feature');
         Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
@@ -243,14 +240,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('admin.artisans.approve');
         Route::post('/admin/artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('admin.artisans.reject');
     });
-    Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
+
+    // ===== Espace Client =====
+    Route::prefix('client')->name('client.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Client\DashboardController::class, 'index'])->name('dashboard');
 
         // Commandes
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::get('/orders/tracking', [OrderController::class, 'tracking'])->name('orders.tracking');
-        Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
         // Devis
         Route::resource('quotes', QuoteController::class)->except(['destroy']);
 
@@ -258,7 +257,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('favorites', FavoriteController::class)->only(['index', 'destroy']);
         Route::post('/favorites/toggle/{product}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
-        // Messages / contacts
+        // Messages
         Route::resource('messages', MessageController::class)->only(['index', 'show', 'store']);
         Route::get('/contacts/create/{artisan?}', [ContactController::class, 'create'])->name('contacts.create');
         Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
@@ -268,103 +267,76 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     });
-    /* ===== COMMENTÉ : Contrôleurs manquants =====
-    // DashboardController n'existe pas
-    // Route::prefix('dashboard')->name('dashboard.')->controller(DashboardController::class)->group(function () {...});
 
-    // ArtisanProfileController n'existe pas
-    // Route::prefix('artisan')->name('artisan.')->controller(ArtisanProfileController::class)->group(function () {...});
-
-    // NotificationController n'existe pas
-     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
-    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-
-    // UserController n'existe pas
-    // Route::post('/user/online', [UserController::class, 'updateOnlineStatus'])->name('user.online');
-    */
+    // ===== Espace Vendeur =====
+    Route::prefix('vendor')->name('vendor.')->group(function () {
+        Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
+        Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+    });
 });
 
 /*
 |--------------------------------------------------------------------------
-| ROUTES ADMIN (BACKOFFICE) – nécessite AdminDashboardController existant
+| ROUTES ADMIN (BACKOFFICE)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')
-    ->name('admin.')
-    ->middleware(['auth']) // ← seulement auth, pas de can:...
-    ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
-        // Ressources
-        Route::resource('artisans', ArtisanController::class);
-        Route::resource('products', ProductController::class);
-        Route::resource('vendors', VendorController::class)->except(['index', 'show']);
-        //Route::resource('dishes', DishController::class); // si vous avez un contrôleur
-        //Route::resource('users', UserController::class);
-        Route::resource('orders', OrderController::class);
-        Route::resource('quotes', QuoteController::class);
-        Route::resource('events', CulturalEventController::class);
-        Route::resource('reviews', ReviewController::class);
-        Route::resource('contacts', ContactController::class);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
 
-        // Analytics
-        Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
-
-        // Paramètres (pour super-admin)
-        // Route::prefix('settings')->name('settings.')->group(function () {
-        //     Route::get('/general', [SettingsController::class, 'general'])->name('general');
-        //     Route::get('/payment', [SettingsController::class, 'payment'])->name('payment');
-        //     Route::get('/notifications', [SettingsController::class, 'notifications'])->name('notifications');
-        // });
-
-        // Rôles & permissions (si contrôleur existe)
-        //Route::resource('roles', RoleController::class);
-
-        Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
-        Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
-        Route::post('orders/{order}/reject', [App\Http\Controllers\Admin\OrderController::class, 'rejectOrder'])->name('orders.reject');
-    });
-Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
+    // Ressources
+    Route::resource('artisans', ArtisanController::class);
+    Route::resource('products', ProductController::class);
     Route::resource('vendors', AdminVendorController::class);
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
+    Route::resource('users', UserController::class);
+    Route::resource('quotes', QuoteController::class);
+    Route::resource('events', CulturalEventController::class);
+    Route::resource('reviews', ReviewController::class);
+    Route::resource('contacts', ContactController::class);
 
-    // Détacher un plat du vendeur
+    // Commandes admin
+    Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
+    Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
+    Route::post('orders/{order}/reject', [App\Http\Controllers\Admin\OrderController::class, 'rejectOrder'])->name('orders.reject');
+
+    // Plats (vendeurs)
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
     Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
-    Route::resource('vendors', AdminVendorController::class);
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
-
-    // Détacher un plat du vendeur
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
-});
-Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
-    // ...
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
-});
 /*
 |--------------------------------------------------------------------------
-| ROUTES API (AJAX, services)
+| ROUTES API (AJAX)
 |--------------------------------------------------------------------------
 */
 Route::prefix('api')->name('api.')->group(function () {
     Route::get('/artisans/map', [ArtisanController::class, 'mapData'])->name('artisans.map');
     Route::get('/vendors/map', [VendorController::class, 'mapData'])->name('vendors.map');
     Route::get('/products/featured', [ProductController::class, 'featured'])->name('products.featured');
-    Route::get('/dishes/featured', [GastronomieController::class, 'featured'])->name('dishes.featured');
+    //Route::get('/dishes/featured', [AppHttpControllersGastronomieController::class, 'featured'])->name('dishes.featured');
     Route::get('/search/autocomplete', [SearchController::class, 'autocomplete'])->name('search.autocomplete');
     Route::post('/audio/generate', [ProductController::class, 'generateAudio'])->name('audio.generate');
     Route::post('/ai/description', [ProductController::class, 'generateDescription'])->name('ai.description');
     Route::post('/ai/translate', [ProductController::class, 'translate'])->name('ai.translate');
 });
+
+/*
+|--------------------------------------------------------------------------
+| DEBUG (à supprimer en production)
+|--------------------------------------------------------------------------
+*/
+Route::get('/debug-role', function () {
+    $user = auth()->user();
+    if (!$user) return 'Non connecté';
+    return [
+        'email'         => $user->email,
+        'roles'         => $user->getRoleNames(),
+        'has_admin'     => $user->hasRole('admin'),
+        'has_super_admin' => $user->hasRole('super-admin'),
+        'has_any_admin' => $user->hasAnyRole(['admin', 'super-admin']),
+    ];
+})->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -375,17 +347,4 @@ Route::fallback(function () {
     return redirect()->route('home');
 });
 
-Route::get('/debug-role', function () {
-    $user = auth()->user();
-    if (!$user) return 'Non connecté';
-    return [
-        'email' => $user->email,
-        'roles' => $user->getRoleNames(),
-        'has_admin' => $user->hasRole('admin'),
-        'has_super_admin' => $user->hasRole('super-admin'),
-        'has_any_admin' => $user->hasAnyRole(['admin', 'super-admin']),
-    ];
-})->middleware('auth');
-// Inclusion des fichiers supplémentaires – à décommenter une fois les contrôleurs créés
 require __DIR__ . '/auth.php';
- //require __DIR__ . '/admin.php';
