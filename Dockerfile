@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -19,8 +19,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Composer install en root AVANT tout le reste
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress --no-suggest
-RUN composer diagnose
+RUN composer install --no-dev --no-interaction --verbose
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
