@@ -3,11 +3,8 @@ FROM richarvey/nginx-php-fpm:1.7.2
 # Copie des fichiers dans le bon dossier
 COPY . /var/www/html
 
-# Installe les dépendances directement au moment du build
-RUN composer install --no-dev --working-dir=/var/www/html --optimize-autoloader
-
 # Image config
-ENV SKIP_COMPOSER 1
+ENV SKIP_COMPOSER 0
 ENV WEBROOT /var/www/html/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
