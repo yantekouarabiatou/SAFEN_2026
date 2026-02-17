@@ -2,6 +2,9 @@
 
 cd /var/www/html
 
+echo "Installing dependencies..."
+composer install --no-dev --optimize-autoloader --no-interaction
+
 echo "Caching config..."
 php artisan config:cache
 
