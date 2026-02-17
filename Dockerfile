@@ -1,20 +1,35 @@
-FROM richarvey/nginx-php-fpm:1.7.2
+FROM php:8.2-fpm
 
+# Dépendances système
+RUN apt-get update && apt-get install -y \
+    nginx \
+    curl \
+    zip \
+    unzip \
+    git \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Dossier de travail
+WORKDIR /var/www/html
+
+# Copie des fichiers
 COPY . .
 
-# Image config
-ENV SKIP_COMPOSER 1
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+# Installation des dépendances
+RUN composer install --no-dev --optimize-autoloader
 
-# Laravel config
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
+# Permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
+# Config nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-CMD ["/start.sh"]
+EXPOSE 80
+
+CMD ["/bin/sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
