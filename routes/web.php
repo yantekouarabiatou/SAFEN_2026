@@ -118,8 +118,7 @@ Route::delete('/chatbot/clear', [ChatbotController::class, 'clear'])->name('chat
 Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/add', 'add')->name('add');
-    Route::put('/{item}', 'update')->name('update');
-    Route::delete('/{item}', 'remove')->name('remove');
+    Route::patch('cart/update/{item}', [CartController::class, 'update'])->name('cart.update.patch'); // ← nom différent    Route::delete('/{item}', 'remove')->name('remove');
     Route::delete('/', 'clear')->name('clear');
     Route::get('/count', 'getCartCount')->name('count');
     Route::post('/merge-session', 'mergeSessionCart')->name('merge-session');
