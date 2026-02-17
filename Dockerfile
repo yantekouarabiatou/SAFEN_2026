@@ -1,24 +1,37 @@
-FROM richarvey/nginx-php-fpm:1.7.2
+FROM php:8.1-fpm
 
-# Copie des fichiers dans le bon dossier
-COPY . /var/www/html
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    nginx \
+    curl \
+    zip \
+    unzip \
+    git \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Image config
-ENV SKIP_COMPOSER 0
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Laravel config
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
+# Dossier de travail
+WORKDIR /var/www/html
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
+# Copier les fichiers du projet
+COPY . .
 
-# Rendre le script exécutable
-RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
+# Installer les dépendances Laravel
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Config nginx
+COPY docker/nginx.conf /etc/nginx/sites-enabled/default
+
+EXPOSE 80
 
 CMD ["/var/www/html/scripts/00-laravel-deploy.sh"]

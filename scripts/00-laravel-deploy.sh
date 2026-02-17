@@ -17,5 +17,5 @@ php artisan db:seed --force
 echo "Linking storage..."
 php artisan storage:link
 
-echo "Starting server..."
-/start.sh
+echo "Starting php-fpm and nginx..."
+php-fpm -D && nginx -g "daemon off;"
