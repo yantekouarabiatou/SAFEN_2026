@@ -1,57 +1,20 @@
-# ===============================
-# 1) Image PHP officielle
-# ===============================
-FROM php:8.2-fpm
+FROM richarvey/nginx-php-fpm:1.7.2
 
-# ===============================
-# 2) Installer dépendances système
-# ===============================
-RUN apt-get update && apt-get install -y \
-    git curl unzip zip libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libxml2-dev libzip-dev nginx \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
-
-# ===============================
-# 3) Installer Composer
-# ===============================
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# ===============================
-# 4) Définir dossier de travail
-# ===============================
-WORKDIR /var/www/html
-
-# ===============================
-# 5) Copier tout le projet Laravel
-# ===============================
 COPY . .
 
-# ===============================
-# 6) Installer dépendances Laravel
-# ===============================
-RUN composer install --no-dev --optimize-autoloader
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-# ===============================
-# 7) Donner permissions storage
-# ===============================
-RUN chmod -R 775 storage bootstrap/cache
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-# ===============================
-# 8) Créer lien storage/public
-# ===============================
-RUN php artisan storage:link || true
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# ===============================
-# 9) Copier config Nginx
-# ===============================
-COPY ./docker/nginx.conf /etc/nginx/sites-available/default
-
-# ===============================
-# 10) Exposer port Render
-# ===============================
-EXPOSE 80
-
-# ===============================
-# 11) Lancer Nginx + PHP-FPM
-# ===============================
-CMD service nginx start && php-fpm
+CMD ["/start.sh"]
