@@ -199,104 +199,104 @@ class ArtisanController extends Controller
         }
     }
 
-    public function edit(Artisan $artisan)
-    {
-        // Vérifier que l'utilisateur a le droit de modifier ce profil
-        if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
-            abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
-        }
+    // public function edit(Artisan $artisan)
+    // {
+    //     // Vérifier que l'utilisateur a le droit de modifier ce profil
+    //     if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
+    //         abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
+    //     }
 
-        return view('artisans.edit', compact('artisan'));
-    }
+    //     return view('artisans.edit', compact('artisan'));
+    // }
 
-    public function update(Request $request, Artisan $artisan)
-    {
-        // Vérifier que l'utilisateur a le droit de modifier ce profil
-        if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
-            abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
-        }
+    // public function update(Request $request, Artisan $artisan)
+    // {
+    //     // Vérifier que l'utilisateur a le droit de modifier ce profil
+    //     if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
+    //         abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
+    //     }
 
-        $validated = $request->validate([
-            'business_name' => 'required|string|max:255',
-            'craft' => 'required|string',
-            'bio' => 'nullable|string',
-            'years_experience' => 'nullable|integer|min:0',
-            'city' => 'required|string',
-            'neighborhood' => 'nullable|string',
-            'address' => 'nullable|string',
-            'postal_code' => 'nullable|string',
-            'phone' => 'required|string',
-            'email' => 'nullable|email',
-            'visible' => 'sometimes|boolean',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-        ]);
+    //     $validated = $request->validate([
+    //         'business_name' => 'required|string|max:255',
+    //         'craft' => 'required|string',
+    //         'bio' => 'nullable|string',
+    //         'years_experience' => 'nullable|integer|min:0',
+    //         'city' => 'required|string',
+    //         'neighborhood' => 'nullable|string',
+    //         'address' => 'nullable|string',
+    //         'postal_code' => 'nullable|string',
+    //         'phone' => 'required|string',
+    //         'email' => 'nullable|email',
+    //         'visible' => 'sometimes|boolean',
+    //         'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+    //     ]);
 
-        // Mettre à jour les données de base
-        $artisan->update([
-            'business_name' => $validated['business_name'],
-            'craft' => $validated['craft'],
-            'bio' => $validated['bio'],
-            'years_experience' => $validated['years_experience'],
-            'city' => $validated['city'],
-            'neighborhood' => $validated['neighborhood'],
-            'address' => $validated['address'],
-            'postal_code' => $validated['postal_code'],
-            'phone' => $validated['phone'],
-            'visible' => $request->boolean('visible', $artisan->visible),
-        ]);
+    //     // Mettre à jour les données de base
+    //     $artisan->update([
+    //         'business_name' => $validated['business_name'],
+    //         'craft' => $validated['craft'],
+    //         'bio' => $validated['bio'],
+    //         'years_experience' => $validated['years_experience'],
+    //         'city' => $validated['city'],
+    //         'neighborhood' => $validated['neighborhood'],
+    //         'address' => $validated['address'],
+    //         'postal_code' => $validated['postal_code'],
+    //         'phone' => $validated['phone'],
+    //         'visible' => $request->boolean('visible', $artisan->visible),
+    //     ]);
 
-        // Mettre à jour l'email de l'utilisateur si fourni
-        if (!empty($validated['email'])) {
-            Auth::user()->update(['email' => $validated['email']]);
-        }
+    //     // Mettre à jour l'email de l'utilisateur si fourni
+    //     if (!empty($validated['email'])) {
+    //         Auth::user()->update(['email' => $validated['email']]);
+    //     }
 
-        // Traitement des nouvelles photos
-        if ($request->hasFile('photos')) {
-            $currentPhotoCount = $artisan->photos()->count();
+    //     // Traitement des nouvelles photos
+    //     if ($request->hasFile('photos')) {
+    //         $currentPhotoCount = $artisan->photos()->count();
 
-            foreach ($request->file('photos') as $index => $photo) {
-                if ($photo->isValid()) {
-                    // Générer un nom de fichier unique
-                    $fileName = time() . '_' . uniqid() . '_' . ($currentPhotoCount + $index) . '.' . $photo->getClientOriginalExtension();
+    //         foreach ($request->file('photos') as $index => $photo) {
+    //             if ($photo->isValid()) {
+    //                 // Générer un nom de fichier unique
+    //                 $fileName = time() . '_' . uniqid() . '_' . ($currentPhotoCount + $index) . '.' . $photo->getClientOriginalExtension();
 
-                    // Stocker l'image
-                    $path = $photo->storeAs('artisans', $fileName, 'public');
+    //                 // Stocker l'image
+    //                 $path = $photo->storeAs('artisans', $fileName, 'public');
 
-                    // Créer l'entrée dans la table artisan_photos
-                    ArtisanPhoto::create([
-                        'artisan_id' => $artisan->id,
-                        'photo_url' => $path,
-                        'caption' => $request->input("captions.$index"),
-                        'order' => $currentPhotoCount + $index,
-                    ]);
-                }
-            }
-        }
+    //                 // Créer l'entrée dans la table artisan_photos
+    //                 ArtisanPhoto::create([
+    //                     'artisan_id' => $artisan->id,
+    //                     'photo_url' => $path,
+    //                     'caption' => $request->input("captions.$index"),
+    //                     'order' => $currentPhotoCount + $index,
+    //                 ]);
+    //             }
+    //         }
+    //     }
 
-        return redirect()->route('artisans.show', $artisan)
-            ->with('success', 'Votre profil a été mis à jour avec succès !');
-    }
+    //     return redirect()->route('artisans.show', $artisan)
+    //         ->with('success', 'Votre profil a été mis à jour avec succès !');
+    // }
 
-    public function destroy(Artisan $artisan)
-    {
-        // Vérifier que l'utilisateur a le droit de supprimer ce profil
-        if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
-            abort(403, 'Vous n\'êtes pas autorisé à supprimer ce profil.');
-        }
+    // public function destroy(Artisan $artisan)
+    // {
+    //     // Vérifier que l'utilisateur a le droit de supprimer ce profil
+    //     if (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin()) {
+    //         abort(403, 'Vous n\'êtes pas autorisé à supprimer ce profil.');
+    //     }
 
-        // Supprimer les photos associées
-        foreach ($artisan->photos as $photo) {
-            // Supprimer le fichier physique
-            Storage::disk('public')->delete($photo->photo_url);
-            // Supprimer l'entrée en base
-            $photo->delete();
-        }
+    //     // Supprimer les photos associées
+    //     foreach ($artisan->photos as $photo) {
+    //         // Supprimer le fichier physique
+    //         Storage::disk('public')->delete($photo->photo_url);
+    //         // Supprimer l'entrée en base
+    //         $photo->delete();
+    //     }
 
-        $artisan->delete();
+    //     $artisan->delete();
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Votre profil artisan a été supprimé.');
-    }
+    //     return redirect()->route('dashboard')
+    //         ->with('success', 'Votre profil artisan a été supprimé.');
+    // }
 
     // Méthodes d'administration
     public function pendingList()
