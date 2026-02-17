@@ -22,7 +22,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    //Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
     Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
 
     // Artisans

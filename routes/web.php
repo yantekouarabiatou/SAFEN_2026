@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     HomeController,
     ArtisanController,
-    GastronomieController,
     ProductController,
     VendorController,
     CultureController,
@@ -18,9 +17,7 @@ use App\Http\Controllers\{
     CheckoutController,
     OrderController,
     FavoriteController,
-    GastronomieController as ControllersGastronomieController,
-    GastronomieController as HttpControllersGastronomieController,
-    GastronomieController as AppHttpControllersGastronomieController,
+    GastronomieController,
     QuoteController,
     ReviewController,
     MessageController,
@@ -72,7 +69,7 @@ Route::get('/evenements/{event}', [CulturalEventController::class, 'show'])->nam
 
 // ===== Gastronomie =====
 Route::prefix('gastronomie')->name('gastronomie.')->group(function () {
-    Route::get('/', [ControllersGastronomieController::class, 'index'])->name('index');
+    Route::get('/', [GastronomieController::class, 'index'])->name('index');
     Route::get('/{dish}', [GastronomieController::class, 'show'])->name('show');
 });
 
@@ -263,10 +260,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
         Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
 
-        // Profil
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    });
+            });
 
     // ===== Espace Vendeur =====
     Route::prefix('vendor')->name('vendor.')->group(function () {
