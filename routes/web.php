@@ -118,14 +118,12 @@ Route::delete('/chatbot/clear', [ChatbotController::class, 'clear'])->name('chat
 Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/add', 'add')->name('add');
-    Route::patch('cart/update/{item}', [CartController::class, 'update'])->name('cart.update.patch'); // ← nom différent    Route::delete('/{item}', 'remove')->name('remove');
-    Route::delete('/', 'clear')->name('clear');
-    Route::get('/count', 'getCartCount')->name('count');
-    Route::post('/merge-session', 'mergeSessionCart')->name('merge-session');
-    Route::get('/check/{productId}', 'checkProduct')->name('check');
     Route::patch('/update/{item}', 'update')->name('update');
     Route::delete('/remove/{item}', 'remove')->name('remove');
     Route::delete('/clear', 'clear')->name('clear');
+    Route::get('/count', 'getCartCount')->name('count');
+    Route::post('/merge-session', 'mergeSessionCart')->name('merge-session');
+    Route::get('/check/{productId}', 'checkProduct')->name('check');
     Route::get('/deposit', 'getDepositAmount')->name('deposit');
 });
 
