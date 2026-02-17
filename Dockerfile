@@ -1,35 +1,27 @@
-FROM php:8.2-fpm
+FROM richarvey/nginx-php-fpm:1.7.2
 
-# Dépendances système
-RUN apt-get update && apt-get install -y \
-    nginx \
-    curl \
-    zip \
-    unzip \
-    git \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+# Copie des fichiers dans le bon dossier
+COPY . /var/www/html
 
-# Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Installe les dépendances directement au moment du build
+RUN composer install --no-dev --working-dir=/var/www/html --optimize-autoloader
 
-# Dossier de travail
-WORKDIR /var/www/html
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-# Copie des fichiers
-COPY . .
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-# Installation des dépendances
-RUN composer install --no-dev --optimize-autoloader
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Rendre le script exécutable
+RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
 
-# Config nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-
-CMD ["/bin/sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["/var/www/html/scripts/00-laravel-deploy.sh"]

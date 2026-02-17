@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-echo "Running composer..."
-composer install --no-dev --working-dir=/var/www/html
+cd /var/www/html
 
 echo "Caching config..."
-cd /var/www/html && php artisan config:cache
+php artisan config:cache
 
 echo "Caching routes..."
 php artisan route:cache
@@ -12,7 +11,11 @@ php artisan route:cache
 echo "Running migrations..."
 php artisan migrate --force
 
+echo "Seeding database..."
+php artisan db:seed --force
+
+echo "Linking storage..."
 php artisan storage:link
 
-echo "Starting nginx..."
+echo "Starting server..."
 /start.sh
