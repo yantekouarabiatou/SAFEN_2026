@@ -52,43 +52,6 @@ class Cart extends Model
         $this->save();
     }
 
-    public static function getOrCreateCart()
-    {
-        if (auth()->check()) {
-            // Récupérer le panier actif de l'utilisateur
-            $cart = self::where('user_id', auth()->id())
-                       ->where('status', 'active')
-                       ->first();
-
-            if (!$cart) {
-                $cart = self::create([
-                    'user_id' => auth()->id(),
-                    'status' => 'active',
-                    'total' => 0,
-                    'item_count' => 0
-                ]);
-            }
-        } else {
-            // Panier basé sur session
-            $sessionId = session()->getId();
-
-            $cart = self::where('session_id', $sessionId)
-                       ->where('status', 'active')
-                       ->first();
-
-            if (!$cart) {
-                $cart = self::create([
-                    'session_id' => $sessionId,
-                    'status' => 'active',
-                    'total' => 0,
-                    'item_count' => 0
-                ]);
-            }
-        }
-
-        return $cart;
-    }
-
     /**
      * Nettoyer les paniers de session expirés
      */
@@ -106,16 +69,16 @@ class Cart extends Model
     public static function mergeSessionCartToUser($userId, $sessionId)
     {
         $sessionCart = self::where('session_id', $sessionId)
-                          ->where('status', 'active')
-                          ->first();
+            ->where('status', 'active')
+            ->first();
 
         if (!$sessionCart) {
             return;
         }
 
         $userCart = self::where('user_id', $userId)
-                       ->where('status', 'active')
-                       ->first();
+            ->where('status', 'active')
+            ->first();
 
         if (!$userCart) {
             // Convertir le panier de session en panier utilisateur
@@ -149,5 +112,28 @@ class Cart extends Model
 
         // Mettre à jour les totaux
         $userCart->updateTotals();
+    }
+
+    // Dans le modèle Cart
+    public static function getOrCreateCart()
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            // Pour un utilisateur connecté, on récupère ou crée un panier lié à son compte
+            $cart = static::firstOrCreate(
+                ['user_id' => $user->id, 'status' => 'active'],
+                ['session_id' => session()->getId()]
+            );
+        } else {
+            // Pour un utilisateur non connecté, on utilise le session_id
+            $sessionId = session()->getId();
+            $cart = static::firstOrCreate(
+                ['session_id' => $sessionId, 'user_id' => null, 'status' => 'active'],
+                ['session_id' => $sessionId]
+            );
+        }
+
+        return $cart;
     }
 }

@@ -73,7 +73,7 @@ class Product extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 0, ',', ' ') . ' FCFA';
+        return number_format((float) $this->price, 0, ',', ' ') . ' FCFA';
     }
 
     public function getPriceInCurrencyAttribute()
@@ -85,7 +85,7 @@ class Product extends Model
         ];
 
         $symbol = $currencies[$this->currency] ?? $this->currency;
-        return number_format($this->price, $this->currency === 'XOF' ? 0 : 2, ',', ' ') . ' ' . $symbol;
+        return number_format((float) $this->price, $this->currency === 'XOF' ? 0 : 2, ',', ' ') . ' ' . $symbol;
     }
 
     public function getCategoryLabelAttribute()
@@ -106,8 +106,107 @@ class Product extends Model
         return $categories[$this->category] ?? $this->category;
     }
 
-     public function getFullUrlAttribute()
+    public function getFullUrlAttribute()
     {
-        return Storage::url($this->image_url);
+        return $this->image_url ? Storage::url($this->image_url) : null;
+    }
+
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    // Accesseurs
+    public function getIsAvailableAttribute()
+    {
+        return $this->available_for_order && $this->is_active;
+    }
+
+    public function getRequiredDepositAmountAttribute()
+    {
+        if (!$this->requires_deposit) {
+            return 0;
+        }
+        return round($this->price * ($this->deposit_percentage / 100), 0);
+    }
+
+    public function getFormattedDepositAttribute()
+    {
+        return number_format($this->required_deposit_amount, 0, ',', ' ') . ' FCFA';
+    }
+
+    public function getProductionTimeTextAttribute()
+    {
+        $days = $this->production_time_days;
+
+        if ($days <= 7) {
+            return "1 semaine";
+        } elseif ($days <= 14) {
+            return "2 semaines";
+        } elseif ($days <= 21) {
+            return "3 semaines";
+        } elseif ($days <= 30) {
+            return "1 mois";
+        } else {
+            $months = ceil($days / 30);
+            return $months . " mois";
+        }
+    }
+
+    public function getEstimatedDeliveryDateAttribute()
+    {
+        return now()->addDays($this->production_time_days)->format('d/m/Y');
+    }
+
+
+    public function canBeOrdered($quantity = 1)
+    {
+        // Pour les produits sur commande, on ne vérifie pas le stock
+        if ($this->is_custom || $this->production_type === 'made_to_order') {
+            return [
+                'can_order' => true,
+                'message' => 'Produit fabriqué sur commande - délai: ' . $this->production_time_days . ' jours'
+            ];
+        }
+
+        // Pour les produits en stock
+        if ($this->stock >= $quantity) {
+            return [
+                'can_order' => true,
+                'message' => 'En stock'
+            ];
+        }
+
+        return [
+            'can_order' => false,
+            'message' => 'Stock insuffisant'
+        ];
+    }
+
+    // Accesseur pour le statut de disponibilité
+    public function getAvailabilityStatusAttribute()
+    {
+        if ($this->is_custom) {
+            return 'Sur commande';
+        }
+
+        if ($this->stock > 10) {
+            return 'En stock';
+        } elseif ($this->stock > 0) {
+            return 'Stock limité';
+        } else {
+            return 'Rupture de stock';
+        }
+    }
+
+    public function getRatingAvgAttribute($value)
+    {
+        return $value ?? 0;
+    }
+
+    public function getRatingCountAttribute($value)
+    {
+        return $value ?? 0;
     }
 }

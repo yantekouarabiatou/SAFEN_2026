@@ -3,44 +3,52 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artisan;
-use App\Models\ChatLog;
 use App\Models\Product;
 use App\Models\Favorite;
-use Illuminate\Container\Attributes\DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB as FacadesDB;
 
 class DashboardController extends Controller
 {
-    public function index()
+     public function index()
     {
         $user = auth()->user();
         $data = [];
 
-        if ($user->hasRole('artisan')) {
+        // ✅ ADMIN - Utilise la méthode isAdmin() que vous avez déjà
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // ✅ ARTISAN - Utilise la méthode isArtisan() que vous avez déjà
+        if ($user->isArtisan()) {
             $artisan = $user->artisan;
 
             $data['stats'] = [
-                'products' => $artisan->products()->count(),
-                'views' => $artisan->views,
-                'rating' => $artisan->rating_avg,
-                'contacts' => 0, // À implémenter avec système de contact
+                'products' => $artisan ? $artisan->products()->count() : 0,
+                'views' => $artisan ? $artisan->views : 0,
+                'rating' => $artisan ? $artisan->rating_avg : 0,
+                'contacts' => 0,
             ];
 
-            $data['recentProducts'] = $artisan->products()
+            $data['recentProducts'] = $artisan ? $artisan->products()
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
-                ->get();
+                ->get() : collect();
 
-            $data['popularProducts'] = $artisan->products()
+            $data['popularProducts'] = $artisan ? $artisan->products()
                 ->orderBy('views', 'desc')
                 ->limit(5)
-                ->get();
+                ->get() : collect();
 
             return view('dashboard.artisan', $data);
         }
 
-        // Dashboard client
+        // ✅ VENDOR - Vérifier le rôle vendor
+        if ($user->role === 'vendor') {
+            return redirect()->route('dashboard.vendor');
+        }
+
+        // ✅ CLIENT (par défaut)
         $data['favorites'] = Favorite::where('user_id', $user->id)
             ->with(['favoritable'])
             ->orderBy('created_at', 'desc')
@@ -51,6 +59,11 @@ class DashboardController extends Controller
             ->with('images')
             ->limit(6)
             ->get();
+
+        $data['orders'] = $user->orders()->orderBy('created_at', 'desc')->limit(5)->get();
+        $data['messages'] = $user->conversations()->with('lastMessage')->limit(5)->get();
+        // $data['notifications'] = $user->notifications()->limit(5)->get();
+        $data['notifications'] = collect([]);
 
         return view('dashboard.client', $data);
     }
@@ -101,12 +114,6 @@ class DashboardController extends Controller
             ->with('success', 'Profil mis à jour avec succès !');
     }
 
-<<<<<<< HEAD
-    public function messages()
-    {
-        // Rediriger vers la page de messages principale
-        return redirect()->route('messages.index');
-=======
     public function artisan()
     {
         $user = auth()->user();
@@ -184,7 +191,7 @@ class DashboardController extends Controller
 
     public function messages()
     {
-        $messages = auth()->user()->conversations()->with('messages')->orderBy('updated_at', 'desc')->paginate(20);
+        $messages = auth()->user()->conversations()->orderBy('updated_at', 'desc')->paginate(20);
         return view('dashboard.messages', compact('messages'));
     }
 
@@ -248,6 +255,5 @@ class DashboardController extends Controller
     public function adminAnalytics()
     {
         return view('admin.analytics');
->>>>>>> 7aaa8e97d412cdcaded064a5429c71755e98e2ff
     }
 }

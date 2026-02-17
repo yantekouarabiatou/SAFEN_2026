@@ -17,20 +17,18 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Langues supportées
         $supportedLocales = ['en', 'fr', 'fon'];
+        $segment = $request->segment(1);
 
-        // Détecter la langue depuis l'URL (ex: /fr/artisans)
-        $locale = $request->segment(1);
-
-        if (in_array($locale, $supportedLocales)) {
-            App::setLocale($locale);
-            Session::put('locale', $locale);
+        // Si le segment est une langue supportée, on l'utilise
+        if (in_array($segment, $supportedLocales)) {
+            App::setLocale($segment);
+            Session::put('locale', $segment);
         } else {
-            // Si pas dans l'URL, utiliser la session ou la langue par défaut
+            // Sinon, on utilise la session ou la langue par défaut
             $locale = Session::get('locale', config('app.locale', 'fr'));
             if (!in_array($locale, $supportedLocales)) {
-                $locale = 'fr'; // Langue par défaut
+                $locale = 'fr';
             }
             App::setLocale($locale);
         }

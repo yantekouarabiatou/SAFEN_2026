@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Artisan as ModelsArtisan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Artisan;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +25,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
         'phone',
         'avatar',
         'address',
@@ -55,7 +58,17 @@ class User extends Authenticatable
 
     public function artisan()
     {
-        return $this->hasOne(Artisan::class);
+        return $this->hasOne(ModelsArtisan::class);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est administrateur
+     */
+    public function isAdmin()
+    {
+        // Adaptez cette logique selon votre système de rôles
+        // Par exemple, si vous avez une colonne 'role' dans la table users
+        return $this->role === 'admin' || $this->role === 'super_admin';
     }
 
     public function favorites()
@@ -76,11 +89,6 @@ class User extends Authenticatable
     public function isArtisan()
     {
         return $this->role === 'artisan';
-    }
-
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
     }
 
     public function getAvatarUrlAttribute()
@@ -127,6 +135,13 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'receiver_id');
     }
 
+    public function conversations()
+    {
+        return Conversation::where('user1_id', $this->id)
+            ->orWhere('user2_id', $this->id)
+            ->with('messages');
+    }
+
     public function locations()
     {
         return $this->hasMany(Location::class);
@@ -136,5 +151,39 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class);
     }
+
+     public function dishes()
+    {
+        return $this->hasMany(Dish::class);
+    }
+
+    // Dans User.php
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->whereNull('read_at');
+    }
+
+    public function recentMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->latest()
+            ->with('sender');
+    }
+
+    public function isOnline()
+    {
+        return $this->last_seen && $this->last_seen->diffInMinutes(now()) < 5;
+    }
+
+    public function cartTotal()
+    {
+        return $this->cartItems()->sum('total');
+    }
+    public function orders()
+    {
+        return $this->hasMany(GuestOrder::class, 'user_id');
+    }
+
 
 }

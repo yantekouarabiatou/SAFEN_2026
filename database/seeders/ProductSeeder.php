@@ -186,17 +186,24 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $item) {
-            // Créer le produit
-            $product = Product::create($item['data']);
+            // Créer ou mettre à jour le produit selon le slug
+            $product = Product::updateOrCreate(
+                ['slug' => $item['data']['slug']],
+                $item['data']
+            );
 
             // Créer les images associées
             foreach ($item['images'] as $index => $image) {
-                ProductImage::create([
-                    'product_id'   => $product->id,
-                    'image_url'    => "products/{$image}",
-                    'is_primary'   => $index === 0, // La première image est principale
-                    'order'        => $index + 1,
-                ]);
+                ProductImage::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'image_url' => "products/{$image}"
+                    ],
+                    [
+                        'is_primary'   => $index === 0, // La première image est principale
+                        'order'        => $index + 1,
+                    ]
+                );
             }
 
             $this->command->info("🛍️ Produit seedé : {$product->name}");

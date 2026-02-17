@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Connexion - AFRI-HERITAGE')
+@section('title', 'Connexion - TOTCHEMEGNON')
 
 @section('content')
 <div class="min-vh-100 d-flex align-items-center py-5" style="background: linear-gradient(135deg, var(--beige) 0%, #ffffff 100%);">
@@ -20,7 +20,7 @@
                                          style="width: 100px; height: 100px; backdrop-filter: blur(10px);">
                                         <i class="bi bi-flower1 fs-1"></i>
                                     </div>
-                                    <h2 class="fw-bold text-center">AFRI-HERITAGE</h2>
+                                    <h2 class="fw-bold text-center">TOTCHEMEGNON</h2>
                                     <p class="text-center text-white-50">Bénin</p>
                                 </div>
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class DishVendor extends Pivot
 {
+    
     protected $table = 'dish_vendor';
 
     protected $casts = [

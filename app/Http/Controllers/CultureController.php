@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Artisan;
+use App\Models\CulturalEvent;
 use App\Models\Dish;
 
 class CultureController extends Controller
@@ -15,8 +16,11 @@ class CultureController extends Controller
             'artisans' => Artisan::count(),
             'products' => Product::count(),
             'dishes' => Dish::count(),
-            'regions' => Product::distinct('ethnic_origin')->count(),
+            'regions' => Product::distinct('ethnic_origin')->count()
         ];
+
+        // Événements à venir
+        $upcomingEvents = CulturalEvent::upcoming()->limit(3)->get();
 
         // Produits vedettes
         $featuredProducts = Product::with(['images', 'artisan.user'])
@@ -63,10 +67,17 @@ class CultureController extends Controller
                 'description' => 'Le Bénin est considéré comme le berceau mondial de la religion vaudou.',
                 'icon' => '🕯️',
                 'category' => 'Spiritualité'
-            ],
+            ]
         ];
 
-        return view('culture.index', compact('stats', 'featuredProducts', 'featuredArtisans', 'popularDishes', 'culturalFacts'));
+        return view('culture.index', compact(
+            'stats',
+            'culturalFacts',
+            'featuredProducts',
+            'featuredArtisans',
+            'popularDishes',
+            'upcomingEvents'
+        ));
     }
 
     public function traditions()

@@ -377,6 +377,7 @@ class ChatbotController extends Controller
             'corroyeur' => 'corroyeur',
             'musicien' => 'musicien',
             'musique' => 'musicien',
+            'vendeuse ou commerçante ' =>'Vendeurs ou vendeuses',
 
             // Métiers modernes
             'mécanicien' => 'mecanicien',

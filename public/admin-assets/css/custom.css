@@ -1,4 +1,245 @@
+/* CUSTOMISATION COULEURS DU BÉNIN POUR COFIMA */
+:root {
+    --primary-color: #008751; /* Vert du Bénin */
+    --secondary-color: #FCD116; /* Jaune du Bénin */
+    --accent-color: #E8112d; /* Rouge du Bénin */
+    --primary-dark: #006341;
+    --primary-light: #00a862;
+}
 
-/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY3VzdG9tLmNzcyIsInNvdXJjZXMiOlsiY3VzdG9tLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiJ9 */
+/* Navbar - Gradient avec les couleurs du Bénin */
+.navbar-bg {
+    background: linear-gradient(135deg, #008751, #FCD116, #E8112d) !important;
+}
 
-/*# sourceMappingURL=custom.css.map */
+/* Menu headers */
+.menu-header {
+    color: #008751 !important;
+}
+
+/* Icônes sidebar */
+.sidebar-menu li a i {
+    color: #008751 !important;
+}
+
+/* Hover sidebar - Vert */
+.sidebar-menu li a:hover {
+    background: rgba(0, 135, 81, 0.08) !important;
+    color: #008751 !important;
+}
+
+/* Active state sidebar - Gradient Bénin */
+.sidebar-menu > li.active > a,
+.sidebar-menu .dropdown.active > a {
+    background: linear-gradient(135deg, #008751, #FCD116) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.sidebar-menu > li.active > a i,
+.sidebar-menu .dropdown.active > a i {
+    color: #ffffff !important;
+}
+
+/* Dropdown submenu active */
+.dropdown-menu li.active a {
+    color: #008751 !important;
+    font-weight: 600;
+}
+
+/* User dropdown header */
+.dropdown-menu .dropdown-header {
+    background: linear-gradient(135deg, #008751, #FCD116, #E8112d) !important;
+    color: #ffffff !important;
+}
+
+/* Boutons primary - Vert */
+.btn-primary {
+    background: linear-gradient(135deg, #008751, #00a862) !important;
+    border-color: #008751 !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #006341, #008751) !important;
+    border-color: #006341 !important;
+}
+
+/* Bouton secondaire - Jaune */
+.btn-secondary {
+    background: #FCD116 !important;
+    border-color: #FCD116 !important;
+    color: #333 !important;
+}
+
+/* Bouton danger - Rouge */
+.btn-danger {
+    background: #E8112d !important;
+    border-color: #E8112d !important;
+}
+
+/* Liens primary */
+.text-primary {
+    color: #008751 !important;
+}
+
+/* Background primary */
+.bg-primary {
+    background: #008751 !important;
+}
+
+/* Indicateur de sous-menu */
+.has-dropdown::after {
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.has-dropdown.active::after {
+    transform: rotate(180deg);
+}
+
+/* Style pour les options d'analyse - Couleurs Bénin */
+.nav-link .fas.fa-chart-pie {
+    color: #008751; /* Vert */
+}
+
+.nav-link .fas.fa-filter {
+    color: #FCD116; /* Jaune */
+}
+
+.nav-link .fas.fa-file-pdf {
+    color: #E8112d; /* Rouge */
+}
+
+.nav-link .fas.fa-file-excel {
+    color: #008751; /* Vert */
+}
+
+/* Badge pour les nouveaux menus - Rouge Bénin */
+.badge-new {
+    background: linear-gradient(45deg, #E8112d, #c60e27);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* Styles supplémentaires pour la page de demande */
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #e3e6f0;
+}
+
+.preview-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #008751; /* Accent vert Bénin */
+}
+
+.preview-card .card-header {
+    background: linear-gradient(90deg, #008751, #00a862);
+    color: white;
+    border-bottom: 1px solid #008751;
+}
+
+.preview-card .card-body {
+    background-color: white;
+}
+
+/* Indicateurs de statut - Couleurs Bénin */
+.text-success {
+    color: #008751 !important; /* Vert Bénin */
+}
+
+.text-warning {
+    color: #FCD116 !important; /* Jaune Bénin */
+}
+
+.text-danger {
+    color: #E8112d !important; /* Rouge Bénin */
+}
+
+.text-info {
+    color: #008751 !important; /* Vert Bénin */
+}
+
+/* Badges colorés Bénin */
+.badge-success {
+    background-color: #008751 !important;
+}
+
+.badge-warning {
+    background-color: #FCD116 !important;
+    color: #333 !important;
+}
+
+.badge-danger {
+    background-color: #E8112d !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .preview-card .row > div {
+        margin-bottom: 10px;
+    }
+}
+
+/* Optionnel : rendre l'icône plus visible sur mobile */
+@media (max-width: 767px) {
+    .settingPanelToggle {
+        right: 60px;
+        bottom: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+        background: linear-gradient(135deg, #008751, #FCD116);
+        color: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    
+    .settingPanelToggle i {
+        line-height: 50px;
+    }
+}
+
+.settingSidebar.show {
+    transform: translateX(0) !important;
+}
+
+.dropdown-item-unread-hover {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item-unread-hover:hover {
+    background-color: rgba(0, 135, 81, 0.08); /* Vert Bénin */
+}
+
+.notification-message {
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+/* Bordures et accents colorés Bénin */
+.border-benin {
+    border-left: 3px solid #008751;
+    border-top: 3px solid #FCD116;
+    border-right: 3px solid #E8112d;
+}
+
+/* Effet hover avec couleurs Bénin */
+.card:hover {
+    border-color: #008751;
+    box-shadow: 0 4px 12px rgba(0, 135, 81, 0.15);
+}
+
+/* Progress bar Bénin */
+.progress-bar-benin {
+    background: linear-gradient(90deg, #008751, #FCD116, #E8112d);
+}

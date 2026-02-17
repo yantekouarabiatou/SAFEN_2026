@@ -45,4 +45,11 @@ return [
         'voice_id' => env('ELEVENLABS_VOICE_ID', 'pNInz6obpgDQGcFmaJgB'), // Adam
     ],
 
+    'fedapay' => [
+        'secret_key' => env('FEDAPAY_SECRET_KEY'),
+        'public_key' => env('FEDAPAY_PUBLIC_KEY'),
+        'sandbox' => env('FEDAPAY_SANDBOX', true),
+        'webhook_secret' => env('FEDAPAY_WEBHOOK_SECRET'),
+    ],
+
 ];

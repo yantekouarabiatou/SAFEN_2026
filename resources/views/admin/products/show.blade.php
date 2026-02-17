@@ -24,16 +24,16 @@
                         @endphp
                         <div class="chocolat-parent">
                             <a href="{{ asset($primaryImage->image_url) }}" class="chocolat-image">
-                                <img src="{{ asset($primaryImage->image_url) }}" alt="{{ $product->name }}" 
+                                <img src="{{ asset($primaryImage->image_url) }}" alt="{{ $product->name }}"
                                      class="img-fluid rounded mb-3" id="main-image">
                             </a>
                         </div>
-                        
+
                         @if($product->images->count() > 1)
                         <div class="row">
                             @foreach($product->images as $image)
                             <div class="col-3 mb-2">
-                                <img src="{{ asset($image->image_url) }}" alt="{{ $product->name }}" 
+                                <img src="{{ asset($image->image_url) }}" alt="{{ $product->name }}"
                                      class="img-fluid rounded thumbnail-image cursor-pointer {{ $image->is_primary ? 'border border-primary' : '' }}"
                                      onclick="document.getElementById('main-image').src = '{{ asset($image->image_url) }}'">
                             </div>
@@ -52,7 +52,7 @@
                 </div>
             </div>
         </div>
-        
+
         {{-- Informations du produit --}}
         <div class="col-md-7">
             <div class="card">
@@ -98,40 +98,40 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     @if($product->name_local)
                     <div class="form-group">
                         <label class="text-muted">Nom local</label>
                         <p>{{ $product->name_local }}</p>
                     </div>
                     @endif
-                    
+
                     <div class="form-group">
                         <label class="text-muted">Artisan</label>
                         <p>
                             <a href="{{ route('admin.artisans.show', $product->artisan) }}">
-                                <img src="{{ $product->artisan->user->profile_photo_url ?? asset('admin-assets/img/avatar/avatar-1.png') }}" 
+                                <img src="{{ $product->artisan->user->profile_photo_url ?? asset('admin-assets/img/avatar/avatar-1.png') }}"
                                      alt="" class="rounded-circle mr-2" width="30">
                                 {{ $product->artisan->user->name }}
                             </a>
                             <small class="text-muted">- {{ $product->artisan->specialty }}</small>
                         </p>
                     </div>
-                    
+
                     @if($product->description)
                     <div class="form-group">
                         <label class="text-muted">Description</label>
                         <p>{{ $product->description }}</p>
                     </div>
                     @endif
-                    
+
                     @if($product->description_cultural)
                     <div class="form-group">
                         <label class="text-muted">Signification culturelle</label>
                         <p>{{ $product->description_cultural }}</p>
                     </div>
                     @endif
-                    
+
                     @if($product->description_technical)
                     <div class="form-group">
                         <label class="text-muted">Techniques de fabrication</label>
@@ -140,7 +140,7 @@
                     @endif
                 </div>
             </div>
-            
+
             {{-- Caractéristiques --}}
             <div class="card">
                 <div class="card-header">
@@ -156,7 +156,7 @@
                             </div>
                         </div>
                         @endif
-                        
+
                         @if($product->materials)
                         <div class="col-md-8">
                             <div class="form-group">
@@ -173,7 +173,7 @@
                         </div>
                         @endif
                     </div>
-                    
+
                     <div class="row">
                         @if($product->width || $product->height || $product->depth)
                         <div class="col-md-6">
@@ -187,7 +187,7 @@
                             </div>
                         </div>
                         @endif
-                        
+
                         @if($product->weight)
                         <div class="col-md-6">
                             <div class="form-group">
@@ -199,7 +199,7 @@
                     </div>
                 </div>
             </div>
-            
+
             {{-- Statistiques --}}
             <div class="card">
                 <div class="card-header">
@@ -222,9 +222,12 @@
                             <small class="text-muted">Favoris</small>
                         </div>
                         <div class="col-md-3">
-                            <div class="mb-2">
-                                <i class="fas fa-shopping-cart fa-2x text-primary"></i>
-                            </div>
+                            <form action="{{ route('cart.add') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="number" name="quantity" value="1" min="1">
+                                <button type="submit">Ajouter au panier</button>
+                            </form>
                             <h5>{{ $product->orders_count ?? 0 }}</h5>
                             <small class="text-muted">Commandes</small>
                         </div>
@@ -240,7 +243,7 @@
             </div>
         </div>
     </div>
-    
+
     {{-- Actions --}}
     <div class="row">
         <div class="col-12">
@@ -282,6 +285,27 @@
 
 @push('scripts')
 <script>
+$('.add-to-cart').click(function(e) {
+    e.preventDefault();
+    var product_id = $(this).data('product-id');
+    var quantity = $(this).data('quantity') || 1;
+
+    $.ajax({
+        url: '{{ route('cart.add') }}',
+        method: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            product_id: product_id,
+            quantity: quantity
+        },
+        success: function(response) {
+            // Mettre à jour l'interface
+        },
+        error: function(xhr) {
+            // Gérer les erreurs
+        }
+    });
+});
 function confirmDelete() {
     Swal.fire({
         title: 'Supprimer ce produit ?',
