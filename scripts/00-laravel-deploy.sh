@@ -31,4 +31,9 @@ chmod -R 775 storage bootstrap/cache
 
 echo "Démarrage des services..."
 php-fpm -D
+echo "Vérification port PHP-FPM..."
+apt-get update && apt-get install -y netcat-openbsd || true  # si pas installé
+nc -z 127.0.0.1 9000 && echo "Port 9000 OK" || echo "Port 9000 INACCESSIBLE !"
+ps aux | grep php-fpm
+sleep 5  # petit délai pour Render
 exec nginx -g "daemon off;"
