@@ -44,10 +44,12 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-di
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Force PHP-FPM à écouter sur TCP 127.0.0.1:9000 (très important pour éviter les problèmes de socket)
-RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
-    && echo "listen.allowed_clients = any" >> /usr/local/etc/php-fpm.d/www.conf
-
+# Force PHP-FPM à écouter sur TCP 127.0.0.1:9000 (IPv4 local seulement)
+# Pas de listen.allowed_clients = any → laisser blank ou commenter pour accepter localhost
+RUN sed -i 's|;listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i 's|;listen.allowed_clients = .*|;listen.allowed_clients =|' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf || true  # supprime si déjà présent
+    
 # Rend le script de déploiement exécutable
 RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
 
