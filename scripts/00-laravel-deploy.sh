@@ -32,21 +32,24 @@ chmod -R 775 storage bootstrap/cache || true
 echo "Démarrage de PHP-FPM..."
 php-fpm -D
 
-# Attente que PHP-FPM soit vraiment prêt
-echo "Attente PHP-FPM (max 15s)..."
-for i in {1..15}; do
+
+# Attente + debug
+echo "Attente PHP-FPM (max 20s)..."
+for i in {1..20}; do
     if nc -z 127.0.0.1 9000 2>/dev/null; then
-        echo "PHP-FPM prêt sur port 9000"
+        echo "PHP-FPM OK : connexion locale réussie sur 127.0.0.1:9000"
         break
     fi
-    echo "Attente... ($i/15)"
+    echo "Attente... ($i/20) - nc retourne code $?"
     sleep 1
 done
 
 if ! nc -z 127.0.0.1 9000 2>/dev/null; then
-    echo "ERREUR : PHP-FPM ne répond PAS sur 127.0.0.1:9000 après 15s"
-    ps aux | grep php-fpm | grep -v grep || echo "Aucun processus php-fpm visible"
-    netstat -tuln | grep 9000 || echo "Aucun écoute sur port 9000"
+    echo "ERREUR FATALE : PHP-FPM inaccessible sur 127.0.0.1:9000"
+    echo "Logs php-fpm récents :"
+    tail -n 20 /proc/$(pgrep php-fpm)/fd/2 || echo "Pas de logs stderr"
+    ps aux | grep php-fpm | grep -v grep
+    netstat -tuln | grep 9000 || echo "Port 9000 non écouté"
     exit 1
 fi
 
