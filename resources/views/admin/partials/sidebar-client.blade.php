@@ -5,7 +5,7 @@
                 <div class="d-flex align-items-center justify-content-center" style="width:45px;height:45px;background:#198754;border-radius:50%;margin-right:10px;">
                     <i class="bi bi-flower1 text-white fs-4"></i>
                 </div>
-                <span class="logo-name" style="font-weight:bold;font-size:1.2rem;">SAFEN</span>
+                <span class="logo-name" style="font-weight:bold;font-size:1.2rem;">TOTCHEMEGNON</span>
                 <small class="d-block text-muted">Espace Client</small>
             </a>
         </div>
@@ -73,7 +73,7 @@
 
             <li class="menu-header">MON COMPTE</li>
             <li class="{{ request()->routeIs('client.profile.edit') ? 'active' : '' }}">
-                <a href="{{ route('client.profile.edit') }}" class="nav-link">
+                <a href="#" class="nav-link">
                     <i class="fas fa-cog"></i><span>Paramètres</span>
                 </a>
             </li>

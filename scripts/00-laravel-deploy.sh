@@ -51,7 +51,7 @@ if ! nc -z 127.0.0.1 9000 2>/dev/null; then
     ps aux | grep php-fpm | grep -v grep
     netstat -tuln | grep 9000 || echo "Port 9000 non écouté"
     exit 1
-fi
+fia
 
 echo "Démarrage de Nginx..."
 exec nginx -g "daemon off;"
