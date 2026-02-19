@@ -21,6 +21,14 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CheckoutController;
 
+Route::post('/test-direct', function() {
+    return response()->json([
+        'success' => true,
+        'message' => 'Route test direct fonctionne',
+        'method' => request()->method()
+    ]);
+});
+
 // Pages publiques
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
@@ -39,41 +47,35 @@ Route::get('/culture/history', [CultureController::class, 'history'])->name('cul
 Route::get('/culture/festivals', [CultureController::class, 'festivals'])->name('culture.festivals');
 Route::get('/culture/ethnies', [CultureController::class, 'ethnies'])->name('culture.ethnies');
 
+// Artisans reviews (public)
+Route::get('/artisans/{artisan}/reviews', [ArtisanController::class, 'reviews'])->name('artisans.reviews');
 
-Route::get('/artisans/{artisan}/reviews', [ArtisanController::class, 'reviews'])
-    ->name('artisans.reviews');
-
-// Gastronomie
+// Gastronomie (public)
 Route::get('/gastronomie', [GastronomieController::class, 'index'])->name('gastronomie.index');
 Route::get('/gastronomie/{dish}', [GastronomieController::class, 'show'])->name('gastronomie.show');
 
-// Marketplace (Produits)
-//Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-//Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-//Route::get('/products/{product}/reviews', [ProductController::class, 'reviews'])->name('products.reviews');
-
-// Vendeurs & Restaurants
+// Vendeurs & Restaurants (public - index et show)
 Route::get('/vendors', [VendorController::class, 'index'])->name('vendors.index');
 Route::get('/vendors/{vendor}', [VendorController::class, 'show'])->name('vendors.show');
 Route::get('/vendors/{vendor}/dishes', [VendorController::class, 'dishes'])->name('vendors.dishes');
 
-// Recherche
+// Recherche (public)
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/search/advanced', [SearchController::class, 'advanced'])->name('search.advanced');
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
-// Géolocalisation
+// Géolocalisation (public)
 Route::get('/artisans/nearby', [LocationController::class, 'locateArtisans'])->name('artisans.nearby');
 Route::get('/vendors/nearby', [LocationController::class, 'locateVendors'])->name('vendors.nearby');
 Route::get('/map', [LocationController::class, 'map'])->name('map');
 Route::get('/geolocate', [LocationController::class, 'geolocate'])->name('geolocate');
 
-// Chatbot
+// Chatbot (public)
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
 Route::delete('/chatbot/clear', [ChatbotController::class, 'clear'])->name('chatbot.clear');
 
-// Authentification (Breeze)
+// Authentification (Breeze) - routes publiques pour invités
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
@@ -82,6 +84,9 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
+// ============================================
+// ROUTES PROTÉGÉES PAR AUTHENTIFICATION
+// ============================================
 Route::middleware('auth')->group(function () {
     // Déconnexion
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -137,72 +142,84 @@ Route::middleware('auth')->group(function () {
     Route::post('/contact/artisan/{artisan}', [ContactController::class, 'contactArtisan'])->name('contact.artisan');
     Route::post('/contact/vendor/{vendor}', [ContactController::class, 'contactVendor'])->name('contact.vendor');
 
-    // Routes pour artisans
-
+    // Routes pour artisans (dashboard spécifique)
     Route::get('/dashboard/artisan', [DashboardController::class, 'artisan'])->name('dashboard.artisan');
     Route::get('/dashboard/artisan/products', [DashboardController::class, 'artisanProducts'])->name('dashboard.artisan.products');
     Route::get('/dashboard/artisan/orders', [DashboardController::class, 'artisanOrders'])->name('dashboard.artisan.orders');
     Route::get('/dashboard/artisan/analytics', [DashboardController::class, 'artisanAnalytics'])->name('dashboard.artisan.analytics');
     Route::get('/dashboard/artisan/reviews', [DashboardController::class, 'artisanReviews'])->name('dashboard.artisan.reviews');
+
+    // ============================================
+    // PRODUCTS CRUD (protégé par auth)
+    // ============================================
+    Route::get('/products/index', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+
+    // ============================================
+    // VENDORS CRUD (protégé par auth)
+    // ============================================
+    Route::get('/vendors/create', [VendorController::class, 'create'])->name('vendors.create');
+    Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store');
+    Route::get('/vendors/{vendor}/edit', [VendorController::class, 'edit'])->name('vendors.edit');
+    Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update');
+    Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('vendors.destroy');
+
+    // Dashboard vendeur
+    Route::get('/dashboard/vendor', [DashboardController::class, 'vendor'])->name('dashboard.vendor');
+
+    // ============================================
+    // ARTISANS CRUD (protégé par auth)
+    // ============================================
+    Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
+    Route::get('/artisans/create', [ArtisanController::class, 'create'])->name('artisans.create');
+    Route::post('/artisans', [ArtisanController::class, 'store'])->name('artisans.store');
+    Route::get('/artisans/{artisan}/edit', [ArtisanController::class, 'edit'])->name('artisans.edit');
+    Route::put('/artisans/{artisan}', [ArtisanController::class, 'update'])->name('artisans.update');
+    Route::delete('/artisans/{artisan}', [ArtisanController::class, 'destroy'])->name('artisans.destroy');
+    Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
 });
 
-// Artisans CRUD
-Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
-Route::get('/artisans/create', [ArtisanController::class, 'create'])->name('artisans.create');
-Route::post('/artisans', [ArtisanController::class, 'store'])->name('artisans.store');
-Route::get('/artisans/{artisan}/edit', [ArtisanController::class, 'edit'])->name('artisans.edit');
-Route::put('/artisans/{artisan}', [ArtisanController::class, 'update'])->name('artisans.update');
-Route::delete('/artisans/{artisan}', [ArtisanController::class, 'destroy'])->name('artisans.destroy');
-Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
-// Products CRUD
-Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-Route::get('products/index', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+// ============================================
+// ROUTES ADMIN (protégées par middleware admin)
+// ============================================
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [DashboardController::class, 'admin'])->name('dashboard');
+    Route::get('/users', [DashboardController::class, 'adminUsers'])->name('users');
+    Route::get('/artisans', [DashboardController::class, 'adminArtisans'])->name('artisans');
+    Route::get('/orders', [DashboardController::class, 'adminOrders'])->name('orders');
+    Route::get('/reviews', [DashboardController::class, 'adminReviews'])->name('reviews');
+    Route::get('/analytics', [DashboardController::class, 'adminAnalytics'])->name('analytics');
 
-// Routes pour vendeurs
-Route::get('/vendors/create', [VendorController::class, 'create'])->name('vendors.create');
-Route::post('/vendors', [VendorController::class, 'store'])->name('vendors.store');
-Route::get('/vendors/{vendor}/edit', [VendorController::class, 'edit'])->name('vendors.edit');
-Route::put('/vendors/{vendor}', [VendorController::class, 'update'])->name('vendors.update');
-Route::delete('/vendors/{vendor}', [VendorController::class, 'destroy'])->name('vendors.destroy');
-
-Route::get('/dashboard/vendor', [DashboardController::class, 'vendor'])->name('dashboard.vendor');
-
-// Routes pour administrateurs
-Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
-Route::get('/admin/users', [DashboardController::class, 'adminUsers'])->name('admin.users');
-Route::get('/admin/artisans', [DashboardController::class, 'adminArtisans'])->name('admin.artisans');
-Route::get('/admin/products', [DashboardController::class, 'adminProducts'])->name('admin.products');
-Route::get('/admin/orders', [DashboardController::class, 'adminOrders'])->name('admin.orders');
-Route::get('/admin/reviews', [DashboardController::class, 'adminReviews'])->name('admin.reviews');
-Route::get('/admin/analytics', [DashboardController::class, 'adminAnalytics'])->name('admin.analytics');
-
-Route::post('/admin/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('admin.artisans.verify');
-Route::post('/admin/products/{product}/feature', [ProductController::class, 'feature'])->name('admin.products.feature');
-Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
-
-
-
-// Routes API pour AJAX
-Route::prefix('api')->group(function () {
-    Route::get('/artisans/map', [ArtisanController::class, 'mapData'])->name('api.artisans.map');
-    Route::get('/vendors/map', [VendorController::class, 'mapData'])->name('api.vendors.map');
-    Route::get('/products/featured', [ProductController::class, 'featured'])->name('api.products.featured');
-    Route::get('/dishes/featured', [GastronomieController::class, 'featured'])->name('api.dishes.featured');
-    Route::get('/search/autocomplete', [SearchController::class, 'autocomplete'])->name('api.search.autocomplete');
-
-    // Audio pronunciation
-    Route::post('/audio/generate', [ProductController::class, 'generateAudio'])->name('api.audio.generate');
-
-    // IA Services
-    Route::post('/ai/description', [ProductController::class, 'generateDescription'])->name('api.ai.description');
-    Route::post('/ai/translate', [ProductController::class, 'translate'])->name('api.ai.translate');
+    // Admin actions
+    Route::post('/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('artisans.verify');
+    Route::post('/products/{product}/feature', [ProductController::class, 'feature'])->name('products.feature');
+    Route::post('/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
 });
 
+// ============================================
+// ROUTES API (préfixe /api)
+// ============================================
+Route::prefix('api')->name('api.')->group(function () {
+    Route::get('/artisans/map', [ArtisanController::class, 'mapData'])->name('artisans.map');
+    Route::get('/vendors/map', [VendorController::class, 'mapData'])->name('vendors.map');
+    Route::get('/products/featured', [ProductController::class, 'featured'])->name('products.featured');
+    Route::get('/dishes/featured', [GastronomieController::class, 'featured'])->name('dishes.featured');
+    Route::get('/search/autocomplete', [SearchController::class, 'autocomplete'])->name('search.autocomplete');
+
+    // Audio & IA (protégés si nécessaire)
+    Route::middleware('auth')->group(function () {
+        Route::post('/audio/generate', [ProductController::class, 'generateAudio'])->name('audio.generate');
+        Route::post('/ai/description', [ProductController::class, 'generateDescription'])->name('ai.description');
+        Route::post('/ai/translate', [ProductController::class, 'translate'])->name('ai.translate');
+    });
+});
+
+// Route spéciale (à déplacer dans un groupe approprié si nécessaire)
 Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
 
 // Routes de fallback
@@ -210,5 +227,6 @@ Route::fallback(function () {
     return redirect()->route('home');
 });
 
+// Inclusion des fichiers de routes supplémentaires
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

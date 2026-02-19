@@ -41,7 +41,7 @@ class ArtisanSeeder extends Seeder
                 'longitude'        => 2.3912,
                 'languages'        => ['Fon', 'Français', 'Anglais'],
                 'pricing_info'     => 'Tenue complète : 35 000 - 180 000 FCFA | Pagne sur mesure : 20 000 - 80 000 FCFA',
-                'photos'           => ['tailleu1', 'tissu.jpg','atelier.jpg','sandal.jpg','sac.jpg'],
+                'photos'           => ['', 'tissu.jpg','atelier.jpg','sandal.jpg','sac.jpg'],
             ],
 
             // 3. Forgeron - Parakou (Bariba)
