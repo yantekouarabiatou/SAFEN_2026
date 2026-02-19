@@ -14,12 +14,11 @@ mkdir -p storage/logs
 touch storage/logs/laravel.log
 chmod 666 storage/logs/laravel.log
 
-echo "Caching config..."
-php artisan config:cache || echo "config:cache ignoré"
-
 echo "Clearing config cache..."
 php artisan config:clear || true
 
+echo "Caching config..."
+php artisan config:cache || echo "config:cache ignoré"
 
 echo "Caching routes..."
 php artisan route:cache || echo "route:cache ignoré"
@@ -43,7 +42,7 @@ php-fpm -D
 echo "Attente PHP-FPM (max 20s)..."
 for i in {1..20}; do
     if nc -z 127.0.0.1 9000 2>/dev/null; then
-        echo "PHP-FPM OK : connexion locale réussie sur 127.0.0.1:9000"
+        echo "PHP-FPM OK"
         break
     fi
     sleep 1
@@ -54,25 +53,5 @@ if ! nc -z 127.0.0.1 9000 2>/dev/null; then
     exit 1
 fi
 
-echo "Test rapide de Laravel..."
-php artisan --version || echo "Laravel inaccessible"
-
-echo "Test direct index.php..."
-php public/index.php 2>&1 | head -n 20 || echo "Erreur dans index.php"
-
-echo "Vérification des permissions public/..."
-ls -la public/ | head -n 10
-
-echo "Affichage des derniers logs Laravel..."
-tail -n 50 storage/logs/laravel.log 2>/dev/null || echo "Pas encore de logs"
-
 echo "Démarrage de Nginx..."
 exec nginx -g "daemon off;"
-
----
-
-## 📝 Et active APP_DEBUG temporairement
-
-Dans Render → **Environment** :
-```
-APP_DEBUG=true
