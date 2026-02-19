@@ -44,6 +44,8 @@ if ! nc -z 127.0.0.1 9000 2>/dev/null; then
     echo "ERREUR : PHP-FPM inaccessible"
     exit 1
 fi
+echo "Affichage des derniers logs Laravel..."
+tail -n 50 storage/logs/laravel.log || echo "Pas de logs Laravel"
 
 echo "Démarrage de Nginx..."
 exec nginx -g "daemon off;"
