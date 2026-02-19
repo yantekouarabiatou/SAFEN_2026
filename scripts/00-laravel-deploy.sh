@@ -53,12 +53,17 @@ fi
 echo "Test rapide de Laravel..."
 php artisan --version || echo "Laravel inaccessible"
 
+echo "Test direct index.php..."
+php public/index.php 2>&1 | head -n 20 || echo "Erreur dans index.php"
+
+echo "Vérification des permissions public/..."
+ls -la public/ | head -n 10
+
 echo "Affichage des derniers logs Laravel..."
 tail -n 50 storage/logs/laravel.log 2>/dev/null || echo "Pas encore de logs"
 
 echo "Démarrage de Nginx..."
 exec nginx -g "daemon off;"
-```
 
 ---
 
