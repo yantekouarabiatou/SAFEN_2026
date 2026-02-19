@@ -3,6 +3,12 @@ set -euo pipefail
 
 cd /var/www/html || { echo "ERREUR : impossible de cd /var/www/html"; exit 1; }
 
+echo "=== DEBUG ENVIRONNEMENT ==="
+echo "APP_KEY présente ? $(printenv APP_KEY | head -c 20)..."
+echo "APP_ENV = $APP_ENV"
+echo "DB_CONNECTION = $DB_CONNECTION"
+echo "=========================="
+
 echo "Vérification vendor/autoload.php..."
 if [ ! -f vendor/autoload.php ]; then
     echo "ERREUR CRITIQUE : vendor/autoload.php introuvable !"
@@ -14,8 +20,10 @@ mkdir -p storage/logs
 touch storage/logs/laravel.log
 chmod 666 storage/logs/laravel.log
 
-echo "Clearing config cache..."
+echo "Clearing all caches..."
 php artisan config:clear || true
+php artisan cache:clear || true
+php artisan view:clear || true
 
 echo "Caching config..."
 php artisan config:cache || echo "config:cache ignoré"
