@@ -145,6 +145,7 @@
                 <div class="dropdown-title text-center border-bottom pb-3 mb-3">
                     {{ Auth::user()->fullName ?? 'Bienvenue' }}
                     <small class="d-block text-muted mt-1">{{ Auth::user()->email }}</small>
+                    <small class="d-block text-muted mt-1">{{ Auth::user()->role }}</small>
                 </div>
 
                 <a href="#" class="dropdown-item has-icon">
