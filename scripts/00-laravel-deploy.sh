@@ -17,6 +17,10 @@ chmod 666 storage/logs/laravel.log
 echo "Caching config..."
 php artisan config:cache || echo "config:cache ignoré"
 
+echo "Clearing config cache..."
+php artisan config:clear || true
+
+
 echo "Caching routes..."
 php artisan route:cache || echo "route:cache ignoré"
 
