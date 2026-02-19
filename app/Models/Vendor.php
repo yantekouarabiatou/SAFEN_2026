@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class Vendor extends Model
 {
@@ -18,6 +20,7 @@ class Vendor extends Model
         'latitude',
         'longitude',
         'phone',
+        'logo',
         'whatsapp',
         'specialties',
         'description',
@@ -40,10 +43,15 @@ class Vendor extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getLogoUrlAttribute()
+    {
+        return $this->logo ? Storage::url($this->logo) : asset('images/default-vendor.jpg');
+    }
+
     public function dishes()
     {
         return $this->belongsToMany(Dish::class, 'dish_vendor')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     public function reviews()

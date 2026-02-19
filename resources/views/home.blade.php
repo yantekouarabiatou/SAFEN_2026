@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'AFRI-HERITAGE - Le Bénin authentique, raconté par l\'IA')
+@section('title', 'TOTCHEMEGNON - Le Bénin authentique, raconté par l\'IA')
 
 @push('styles')
 <!-- Swiper CSS -->
@@ -260,6 +260,132 @@
         .counter {
             font-size: 2rem;
         }
+
+    }
+    .testimonial-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 150, 57, 0.1);
+        border-color: var(--benin-green);
+    }
+
+    .rating-stars {
+        color: #FFD700;
+        font-size: 1.1rem;
+    }
+
+    .testimonial-carousel {
+        position: relative;
+        padding: 0 40px;
+    }
+
+    .testimonial-carousel .swiper-button-next,
+    .testimonial-carousel .swiper-button-prev {
+        color: var(--benin-green);
+        background: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .testimonial-carousel .swiper-button-next:after,
+    .testimonial-carousel .swiper-button-prev:after {
+        font-size: 1.2rem;
+    }
+
+    .testimonial-carousel .swiper-pagination-bullet {
+        background: #dee2e6;
+        opacity: 1;
+    }
+
+    .testimonial-carousel .swiper-pagination-bullet-active {
+        background: var(--benin-green);
+    }
+
+    @media (max-width: 768px) {
+        .testimonial-carousel {
+            padding: 0 20px;
+        }
+
+        .testimonial-carousel .swiper-button-next,
+        .testimonial-carousel .swiper-button-prev {
+            display: none;
+        }
+    }
+</style>
+@endpush
+
+@push('styles')
+<style>
+    .testimonial-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 150, 57, 0.1);
+        border-color: var(--benin-green);
+    }
+
+    .rating-stars {
+        color: #FFD700;
+        font-size: 1.1rem;
+    }
+
+    .testimonial-carousel {
+        position: relative;
+        padding: 0 40px;
+    }
+
+    .testimonial-carousel .swiper-button-next,
+    .testimonial-carousel .swiper-button-prev {
+        color: var(--benin-green);
+        background: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .testimonial-carousel .swiper-button-next:after,
+    .testimonial-carousel .swiper-button-prev:after {
+        font-size: 1.2rem;
+    }
+
+    .testimonial-carousel .swiper-pagination-bullet {
+        background: #dee2e6;
+        opacity: 1;
+    }
+
+    .testimonial-carousel .swiper-pagination-bullet-active {
+        background: var(--benin-green);
+    }
+
+    @media (max-width: 768px) {
+        .testimonial-carousel {
+            padding: 0 20px;
+        }
+
+        .testimonial-carousel .swiper-button-next,
+        .testimonial-carousel .swiper-button-prev {
+            display: none;
+        }
     }
 </style>
 @endpush
@@ -400,7 +526,7 @@
                             <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-green me-2"></i> Avis vérifiés</li>
                             <li class="mb-2"><i class="bi bi-check-circle-fill text-benin-green me-2"></i> Contact direct</li>
                         </ul>
-                        <a href="{{ route('artisans.index') }}" class="btn btn-benin-green w-100 rounded-pill">
+                        <a href="{{ route('artisans.vue') }}" class="btn btn-benin-green w-100 rounded-pill">
                             <i class="bi bi-compass me-2"></i> Explorer les artisans
                         </a>
                     </div>
@@ -574,7 +700,7 @@
                 <h2 class="display-6 fw-bold text-charcoal mb-2">Artisans du Mois</h2>
                 <p class="text-muted">Découvrez nos artisans les mieux notés et vérifiés</p>
             </div>
-            <a href="{{ route('artisans.index') }}" class="btn btn-outline-benin-green rounded-pill d-none d-md-inline-flex">
+            <a href="{{ route('artisans.vue') }}" class="btn btn-outline-benin-green rounded-pill d-none d-md-inline-flex">
                 Voir tous <i class="bi bi-arrow-right ms-2"></i>
             </a>
         </div>
@@ -676,122 +802,109 @@
             <p class="text-muted">Découvrez les expériences de notre communauté</p>
         </div>
 
-        <div class="testimonial-carousel swiper" data-aos="fade-up" data-aos-delay="100">
-            <div class="swiper-wrapper pb-5">
-                <!-- Testimonial 1 -->
-                <div class="swiper-slide">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ asset('artisans/artisan1.jpg') }}"
-                                 alt="Marie Koko"
-                                 class="rounded-circle me-3"
-                                 style="width: 60px; height: 60px;">
-                            <div>
-                                <h6 class="mb-0 fw-bold">Marie Koko</h6>
-                                <small class="text-muted">Cuisinière à Cotonou</small>
+        @if($testimonials->count() > 0)
+            <div class="testimonial-carousel swiper" data-aos="fade-up" data-aos-delay="100">
+                <div class="swiper-wrapper pb-5">
+                    @foreach($testimonials as $testimonial)
+                        @php
+                            // Gérer les témoignages fallback et dynamiques
+                            $userName = $testimonial->user->name ?? 'Utilisateur';
+                            $userImage = $testimonial->user->avatar_url ?? asset('images/default-user.jpg');
+                            $userRole = $testimonial->reviewable->craft_label ?? 'Client';
+                            $userCity = $testimonial->reviewable->city ?? '';
+
+                            // Si c'est un fallback, utiliser les données fallback
+                            if (isset($testimonial->is_fallback) && $testimonial->is_fallback) {
+                                $userImage = $testimonial->user->avatar_url;
+                                $userRole = $testimonial->reviewable->craft_label;
+                                $userCity = $testimonial->reviewable->city ?? '';
+                            }
+                        @endphp
+
+                        <div class="swiper-slide">
+                            <div class="testimonial-card">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="{{ $userImage }}"
+                                         alt="{{ $userName }}"
+                                         class="rounded-circle me-3"
+                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ $userName }}</h6>
+                                        <small class="text-muted">
+                                            {{ $userRole }}
+                                            @if($userCity)
+                                                • {{ $userCity }}
+                                            @endif
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="rating-stars mb-3">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi bi-star{{ $i <= $testimonial->rating ? '-fill' : '' }} text-warning"></i>
+                                    @endfor
+                                    <small class="text-muted ms-2">{{ $testimonial->rating }}/5</small>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    "{{ Str::limit($testimonial->comment, 180) }}"
+                                </p>
+                                @isset($testimonial->created_at)
+                                    <small class="text-benin-green mt-2 d-block">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        {{ $testimonial->created_at->format('d/m/Y') }}
+                                    </small>
+                                @endisset
                             </div>
                         </div>
-                        <div class="rating-stars mb-3">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <p class="text-muted mb-0">
-                            "Grâce à AFRI-HERITAGE, j'ai triplé ma clientèle ! Les touristes me trouvent facilement
-                            et je peux maintenant vendre mes plats traditionnels à l'international. Merci !"
-                        </p>
-                    </div>
+                    @endforeach
                 </div>
 
-                <!-- Testimonial 2 -->
-                <div class="swiper-slide">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ asset('artisans/artisan2.jpg') }}"
-                                 alt="Jean Soglo"
-                                 class="rounded-circle me-3"
-                                 style="width: 60px; height: 60px;">
-                            <div>
-                                <h6 class="mb-0 fw-bold">Jean Soglo</h6>
-                                <small class="text-muted">Sculpteur à Abomey</small>
-                            </div>
-                        </div>
-                        <div class="rating-stars mb-3">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <p class="text-muted mb-0">
-                            "L'IA qui génère les descriptions culturelles de mes sculptures est incroyable !
-                            Mes clients comprennent maintenant toute la symbolique de mon travail."
-                        </p>
-                    </div>
-                </div>
+                <!-- Pagination -->
+                <div class="swiper-pagination"></div>
 
-                <!-- Testimonial 3 -->
-                <div class="swiper-slide">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ asset('artisans/artisan4.jpg') }}"
-                                 alt="Sophie Djossou"
-                                 class="rounded-circle me-3"
-                                 style="width: 60px; height: 60px;">
-                            <div>
-                                <h6 class="mb-0 fw-bold">Sophie Djossou</h6>
-                                <small class="text-muted">Cliente à Paris</small>
-                            </div>
-                        </div>
-                        <div class="rating-stars mb-3">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <p class="text-muted mb-0">
-                            "En tant que Béninoise de la diaspora, cette plateforme me permet de rester connectée
-                            à mes racines. J'ai commandé plusieurs tissus traditionnels, la livraison était impeccable !"
-                        </p>
-                    </div>
-                </div>
+                <!-- Navigation -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        @else
+            <div class="text-center py-4">
+                <i class="bi bi-chat-quote fs-1 text-muted mb-3"></i>
+                <p class="text-muted">Soyez le premier à partager votre expérience !</p>
+                <a href="{{ route('artisans.index') }}" class="btn btn-benin-green">
+                    Découvrir les artisans
+                </a>
+            </div>
+        @endif
 
-                <!-- Testimonial 4 -->
-                <div class="swiper-slide">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ asset('artisans/artisan5.jpg') }}"
-                                 alt="Marc Azonhiho"
-                                 class="rounded-circle me-3"
-                                 style="width: 60px; height: 60px;">
-                            <div>
-                                <h6 class="mb-0 fw-bold">Marc Azonhiho</h6>
-                                <small class="text-muted">Mécanicien à Porto-Novo</small>
-                            </div>
-                        </div>
-                        <div class="rating-stars mb-3">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <p class="text-muted mb-0">
-                            "Excellente plateforme ! Je reçois maintenant des clients qui me trouvent sur la carte.
-                            Le système de notation m'a permis de bâtir ma réputation en ligne."
+        <!-- CTA pour laisser un avis -->
+        @auth
+            <div class="text-center mt-5">
+                <div class="card border-0 shadow-sm" style="max-width: 600px; margin: 0 auto;">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Partagez votre expérience</h5>
+                        <p class="text-muted mb-3">
+                            Votre avis aide notre communauté à grandir et permet aux artisans de s'améliorer.
                         </p>
+                        <a href="{{ route('artisans.vue') }}" class="btn btn-benin-green">
+                            <i class="bi bi-star me-2"></i>Laisser un avis
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- Pagination -->
-            <div class="swiper-pagination"></div>
-        </div>
+        @else
+            <div class="text-center mt-5">
+                <p class="text-muted mb-3">Connectez-vous pour partager votre expérience</p>
+                <a href="{{ route('login') }}" class="btn btn-outline-benin-green me-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+                </a>
+                <a href="{{ route('register') }}" class="btn btn-benin-green">
+                    <i class="bi bi-person-plus me-2"></i>S'inscrire
+                </a>
+            </div>
+        @endauth
     </div>
 </section>
+
+
 
 <!-- Culture Section avec Bento Grid -->
 <section class="py-5 parallax-section"
@@ -900,7 +1013,7 @@
                     <a href="{{ route('register') }}" class="btn btn-benin-yellow btn-lg rounded-pill px-5">
                         <i class="bi bi-person-plus me-2"></i> Créer mon compte
                     </a>
-                    <a href="{{ route('artisans.index') }}" class="btn btn-outline-light btn-lg rounded-pill px-5">
+                    <a href="{{ route('artisans.vue') }}" class="btn btn-outline-light btn-lg rounded-pill px-5">
                         <i class="bi bi-compass me-2"></i> Explorer
                     </a>
                 </div>
@@ -1153,6 +1266,33 @@ function speakText(text) {
         console.log('Synthèse vocale non supportée, utiliser ElevenLabs API');
     }
 }
+
+    // Initialiser le carousel de témoignages
+    const testimonialSwiper = new Swiper('.testimonial-carousel', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+            },
+            1024: {
+                slidesPerView: 3,
+            },
+        }
+    });
 
 // Load initial fact
 document.addEventListener('DOMContentLoaded', function() {

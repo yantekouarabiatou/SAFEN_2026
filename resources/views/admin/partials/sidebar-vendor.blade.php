@@ -14,10 +14,10 @@
                     <span>Dashboard</span>
                 </a>
             </li>
-            
+
             {{-- Gestion des plats --}}
             <li class="menu-header">Mes Plats</li>
-            
+
             <li class="dropdown">
                 <a href="#" class="menu-toggle nav-link has-dropdown">
                     <i data-feather="coffee"></i>
@@ -32,47 +32,47 @@
                     </li>
                 </ul>
             </li>
-            
+
             {{-- Commandes --}}
             <li class="menu-header">Ventes</li>
-            
+
             <li>
                 <a href="{{ route('dashboard.orders') }}" class="nav-link">
                     <i data-feather="shopping-cart"></i>
                     <span>Commandes</span>
                 </a>
             </li>
-            
+
             {{-- Communication --}}
             <li class="menu-header">Communication</li>
-            
+
             <li class="{{ request()->routeIs('dashboard.messages') ? 'active' : '' }}">
                 <a href="{{ route('dashboard.messages') }}" class="nav-link">
                     <i data-feather="message-square"></i>
                     <span>Messages</span>
                 </a>
             </li>
-            
+
             {{-- Profil --}}
             <li class="menu-header">Mon Compte</li>
-            
+
             <li class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
                 <a href="{{ route('profile.edit') }}" class="nav-link">
                     <i data-feather="settings"></i>
                     <span>Paramètres</span>
                 </a>
             </li>
-            
+
             {{-- Retour au site --}}
             <li class="menu-header">Navigation</li>
-            
+
             <li>
                 <a href="{{ route('home') }}" class="nav-link">
                     <i data-feather="globe"></i>
                     <span>Retour au site</span>
                 </a>
             </li>
-            
+
             <li>
                 <a href="{{ route('logout') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i data-feather="log-out"></i>

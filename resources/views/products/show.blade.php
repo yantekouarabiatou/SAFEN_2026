@@ -1028,11 +1028,18 @@
                     </div>
 
                     <!-- Action Buttons -->
+                    <!-- Action Buttons -->
                     <div class="action-buttons">
                         @if($product->stock_status !== 'out_of_stock')
-                            <button class="btn-primary-action" onclick="addToCart({{ $product->id }}, 1)">
+                            <button class="btn-primary-action" id="add-to-cart-btn" data-product-id="{{ $product->id }}"
+                                onclick="addToCart({{ $product->id }}, 1)">
                                 <i class="bi bi-cart-plus-fill"></i> Ajouter au panier
                             </button>
+
+                            <!-- Bouton "Voir le panier" caché au départ -->
+                            <a href="{{ route('cart.index') }}" class="btn-primary-action d-none" id="view-cart-btn">
+                                <i class="bi bi-cart-check-fill"></i> Voir le panier
+                            </a>
                         @endif
 
                         <button class="btn-secondary-action" onclick="contactArtisan()">
@@ -1068,14 +1075,14 @@
                                         alt="{{ $product->artisan->user->name ?? $product->artisan->business_name }}"
                                         class="artisan-avatar">
                                 @else
-                                    <!-- Affichage des initiales -->
-                                    <div class="avatar-initials"
-                                        title="{{ $product->artisan->user->name ?? $product->artisan->business_name }}">
-                                        {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
-                                        (str_word_count($product->artisan->user->name ?? '') > 1 
-                                            ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1)) 
-                                            : '') }}                                   
-                                             </div>
+                                                <!-- Affichage des initiales -->
+                                                <div class="avatar-initials"
+                                                    title="{{ $product->artisan->user->name ?? $product->artisan->business_name }}">
+                                                    {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
+                                    (str_word_count($product->artisan->user->name ?? '') > 1
+                                        ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1))
+                                        : '') }}
+                                                </div>
                                 @endif
                             </div>
 
@@ -1332,6 +1339,174 @@
         let currentSpeed = 5000;
         let isAutoplayActive = true;
         let carouselInstance;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkIfInCart({{ $product->id }});
+        });
+
+        function checkIfInCart(productId) {
+            fetch(`/cart/check/${productId}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.in_cart) {
+                        const addBtn = document.getElementById('add-to-cart-btn');
+                        const viewBtn = document.getElementById('view-cart-btn');
+                        if (addBtn && viewBtn) {
+                            addBtn.classList.add('d-none');
+                            viewBtn.classList.remove('d-none');
+                        }
+                    }
+                })
+                .catch(err => console.error('Erreur check cart:', err));
+        }
+        // Fonction pour ajouter au panier
+        function addToCart(productId, quantity = 1) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            const btn = document.getElementById('add-to-cart-btn');
+            const viewBtn = document.getElementById('view-cart-btn');
+
+            // Optionnel : désactiver temporairement le bouton pendant la requête
+            if (btn) btn.disabled = true;
+
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast("✅ Produit ajouté au panier !", 'success');
+
+                        // Changer le bouton
+                        if (btn && viewBtn) {
+                            btn.classList.add('d-none');
+                            viewBtn.classList.remove('d-none');
+                        }
+
+                        // Mettre à jour le compteur du panier (si vous avez un badge dans la navbar)
+                        updateCartCount(data.cart_count);
+                    } else {
+                        showToast(data.message || "Erreur lors de l'ajout", 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Une erreur est survenue', 'error');
+                })
+                .finally(() => {
+                    if (btn) btn.disabled = false;
+                });
+        }
+        function showToast(message, type = 'info') {
+            const bgColor = type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-info');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white ${bgColor} border-0 position-fixed top-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                                    <div class="d-flex">
+                                        <div class="toast-body">${message}</div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                    </div>
+                                `;
+
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Supprimer le toast du DOM après qu'il soit caché
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+
+        // Fonction pour mettre à jour le compteur du panier
+        function updateCartCount(count) {
+            const cartCounters = document.querySelectorAll('.cart-count');
+            cartCounters.forEach(counter => {
+                counter.textContent = count;
+                counter.style.display = count > 0 ? 'inline' : 'none';
+            });
+        }
+
+        // Fonction pour gérer les favoris
+        function toggleFavorite(productId) {
+            const button = document.getElementById('favorite-btn');
+            const isActive = button.classList.contains('active');
+
+            button.classList.toggle('active');
+            const icon = button.querySelector('i');
+            icon.className = isActive ? 'bi bi-heart' : 'bi bi-heart-fill';
+
+            fetch('/favorites/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        showToast(data.message, data.success ? 'success' : 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur favoris:', error);
+                    showToast('Erreur lors de la mise à jour des favoris.', 'error');
+                });
+        }
+
+        // Fonction pour contacter l'artisan
+        function contactArtisan() {
+            // Ouvrir le chatbot ou rediriger vers la page de contact
+            if (typeof openChat === 'function') {
+                openChat();
+            } else {
+                // Fallback: rediriger vers la page de l'artisan
+                window.location.href = '/artisans/{{ $product->vendor_id }}';
+            }
+        }
+
+        // Fonction pour partager le produit
+        function shareProduct() {
+            const url = window.location.href;
+            const title = '{{ $product->name }}';
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                });
+            } else {
+                // Fallback: copier dans le presse-papiers
+                navigator.clipboard.writeText(url).then(function () {
+                    showToast('Lien copié dans le presse-papiers !', 'success');
+                }).catch(function () {
+                    // Fallback final: ouvrir une popup de partage
+                    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    window.open(shareUrl, 'share', 'width=600,height=400');
+                });
+            }
+        }
 
         // Initialisation du carousel quand le DOM est chargé
         document.addEventListener('DOMContentLoaded', function () {

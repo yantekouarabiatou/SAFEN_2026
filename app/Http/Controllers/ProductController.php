@@ -10,6 +10,115 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Product::query()
+            ->with(['images', 'artisan.user'])           // Charger l'artisan + son user
+            ->whereHas('artisan', function ($q) {        // ← IMPORTANT : seulement artisans approuvés
+                $q->where('status', 'approved');
+            });
+
+        // Recherche textuelle
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('name_local', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtre par catégorie
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Filtre par origine ethnique
+        if ($request->filled('ethnic_origin')) {
+            $query->where('ethnic_origin', $request->ethnic_origin);
+        }
+
+        // Filtre par ville (nouveau)
+        if ($request->filled('city')) {
+            $query->whereHas('artisan', function ($q) use ($request) {
+                $q->where('city', $request->city);
+            });
+        }
+
+        // Filtre par prix
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Tri
+        $sort = $request->input('sort', 'popular');
+        switch ($sort) {
+            case 'newest':
+                $query->latest();
+                break;
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'popular':
+            default:
+                $query->orderBy('views', 'desc');
+                break;
+        }
+
+        $products = $query->paginate(16)->withQueryString();
+
+        // Données pour les filtres
+        $categories     = Product::select('category')->distinct()->pluck('category');
+        $ethnicOrigins  = Product::select('ethnic_origin')->distinct()->pluck('ethnic_origin');
+
+        // Villes des artisans approuvés (uniquement ceux qui ont des produits)
+        $cities = Product::whereHas('artisan', function ($q) {
+            $q->where('status', 'approved');
+        })
+            ->with('artisan')
+            ->get()
+            ->pluck('artisan.city')
+            ->filter()
+            ->unique()
+            ->values();
+
+        return view('products.index', compact(
+            'products',
+            'categories',
+            'ethnicOrigins',
+            'cities'
+        ));
+    }
+
+    public function show(Product $product)
+    {
+        $product->increment('views');
+        $product->load(['artisan.user', 'artisan.photos', 'images', 'reviews.user']);
+
+        // Produits similaires
+        $similarProducts = Product::where('category', $product->category)
+            ->where('id', '!=', $product->id)
+            ->with(['images', 'artisan'])
+            ->take(4)
+            ->get();
+
+        // Autres produits du même artisan
+        $sameArtisanProducts = Product::where('artisan_id', $product->artisan_id)
+            ->where('id', '!=', $product->id)
+            ->with(['images'])
+            ->take(4)
+            ->get();
+
+        return view('products.show', compact('product', 'similarProducts', 'sameArtisanProducts'));
+    }
+
+
     public function create()
     {
         // Vérifier que l'utilisateur a un profil artisan
@@ -107,7 +216,10 @@ class ProductController extends Controller
                 }
             }
 
-            Log::info('Produit ajouté avec succès', ['product_id' => $product->id]);
+        // Générer la description culturelle avec IA (asynchrone)
+        // if (empty($validated['description_cultural'])) {
+        //     dispatch(new \App\Jobs\GenerateCulturalDescription($product));
+        // }
 
             return redirect()->route('products.show', $product)
                 ->with('success', 'Produit ajouté avec succès !');

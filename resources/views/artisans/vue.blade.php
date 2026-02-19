@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Artisans & Services - AFRI-HERITAGE Bénin')
+@section('title', __('Liste des artisans '))
 
 @push('styles')
     <style>
@@ -147,18 +147,19 @@
         <div class="container position-relative">
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb text-white">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white">Accueil</a></li>
-                    <li class="breadcrumb-item active text-white">Artisans & Services</li>
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}"
+                            class="text-white">{{ __('messages.home') }}</a></li>
+                    <li class="breadcrumb-item active text-white">{{ __('Liste des Artisans') }}</li>
                 </ol>
             </nav>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-4">
                 <div>
-                    <h1 class="display-5 fw-bold text-white mb-2">Artisans & Services</h1>
-                    <p class="lead text-white-75 mb-0">Trouvez les meilleurs artisans près de chez vous</p>
+                    <h1 class="display-5 fw-bold text-white mb-2">{{ __('artisans.title') }}</h1>
+                    <p class="lead text-white-75 mb-0">{{ __('Liste des artisans') }}</p>
                 </div>
                 <a href="{{ route('artisans.create') }}" class="btn btn-light rounded-pill px-4 py-2 fw-bold">
-                    <i class="bi bi-plus-circle me-2"></i> Devenir artisan
+                    <i class="bi bi-plus-circle me-2"></i> {{ __('artisans.become_artisan') ?? 'Devenir artisan' }}
                 </a>
             </div>
         </div>
@@ -170,22 +171,22 @@
             <div class="col-lg-3">
                 <div class="filter-sidebar sticky-top" style="top: 2rem;">
                     <h5 class="fw-bold mb-4">
-                        <i class="bi bi-funnel me-2 text-benin-green"></i> Filtres
+                        <i class="bi bi-funnel me-2 text-benin-green"></i> {{ __('messages.filter') }}
                     </h5>
 
                     <form method="GET" action="{{ route('artisans.index') }}">
                         <div class="mb-4">
-                            <label for="search" class="form-label fw-bold">Rechercher</label>
+                            <label for="search" class="form-label fw-bold">{{ __('messages.search') }}</label>
                             <input type="text" name="search" id="search" class="form-control rounded-pill"
-                                value="{{ request('search') }}" placeholder="Nom, métier...">
+                                value="{{ request('search') }}" placeholder="{{ __('artisans.search_placeholder') }}">
                         </div>
 
                         <div class="mb-4">
-                            <label for="craft" class="form-label fw-bold">Métier</label>
+                            <label for="craft" class="form-label fw-bold">{{ __('artisans.filter_by_craft') }}</label>
                             <select name="craft" id="craft" class="form-select rounded-pill">
-                                <option value="">Tous les métiers</option>
-                                @foreach($crafts as $craft)
-                                    <option value="{{ $craft }}" {{ request('craft') == $craft ? 'selected' : '' }}>
+                                <option value="">{{ __('artisans.all_crafts') }}</option>
+                                @foreach(__('artisans.crafts') as $key => $craft)
+                                    <option value="{{ $key }}" {{ request('craft') == $key ? 'selected' : '' }}>
                                         {{ $craft }}
                                     </option>
                                 @endforeach
@@ -193,11 +194,11 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="city" class="form-label fw-bold">Ville</label>
+                            <label for="city" class="form-label fw-bold">{{ __('artisans.filter_by_city') }}</label>
                             <select name="city" id="city" class="form-select rounded-pill">
-                                <option value="">Toutes les villes</option>
-                                @foreach($cities as $city)
-                                    <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>
+                                <option value="">{{ __('artisans.all_cities') }}</option>
+                                @foreach(__('artisans.cities') as $key => $city)
+                                    <option value="{{ $key }}" {{ request('city') == $key ? 'selected' : '' }}>
                                         {{ $city }}
                                     </option>
                                 @endforeach
@@ -208,7 +209,7 @@
                             <input type="hidden" name="latitude" value="{{ request('latitude') }}">
                             <input type="hidden" name="longitude" value="{{ request('longitude') }}">
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Rayon (km)</label>
+                                <label class="form-label fw-bold">{{ __('artisans.radius') ?? 'Rayon (km)' }}</label>
                                 <input type="range" name="radius" min="5" max="100" step="5" value="{{ request('radius', 30) }}"
                                     class="form-range" oninput="document.getElementById('radiusVal').textContent = this.value">
                                 <div class="text-center mt-2 fw-bold">
@@ -218,7 +219,7 @@
                         @endif
 
                         <button type="submit" class="btn btn-benin-green w-100 rounded-pill py-2">
-                            <i class="bi bi-search me-2"></i> Filtrer
+                            <i class="bi bi-search me-2"></i> {{ __('messages.filter') }}
                         </button>
                     </form>
                 </div>
@@ -230,22 +231,22 @@
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <span class="fs-5 fw-bold text-charcoal">
-                            {{ $artisans->total() }} artisans trouvés
+                            {{ $artisans->total() }} {{ __('artisans.found_artisans') ?? 'artisans trouvés' }}
                         </span>
                     </div>
 
                     <div class="btn-group view-toggle" role="group">
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="grid"
                             onclick="changeView('grid')">
-                            <i class="bi bi-grid-3x3-gap"></i> Grille
+                            <i class="bi bi-grid-3x3-gap"></i> {{ __('artisans.view_grid') }}
                         </button>
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="list"
                             onclick="changeView('list')">
-                            <i class="bi bi-list-ul"></i> Liste
+                            <i class="bi bi-list-ul"></i> {{ __('artisans.view_list') }}
                         </button>
                         <button type="button" class="btn btn-outline-secondary view-btn" data-view="map"
                             onclick="changeView('map')">
-                            <i class="bi bi-geo-alt"></i> Carte
+                            <i class="bi bi-geo-alt"></i> {{ __('artisans.view_map') }}
                         </button>
                     </div>
                 </div>
@@ -259,12 +260,11 @@
 
                 <!-- Vue Grille / Liste -->
                 <div id="view-content" data-view-content="grid" data-view-content="list" style="display: none;">
-                    <div class="view-wrapper {{ currentView == 'grid' ? 'artisan-grid' : 'artisan-list' }}">
+                    <div class="view-wrapper artisan-grid">
                         @forelse($artisans as $artisan)
-                            <div class="artisan-card {{ currentView == 'list' ? 'd-flex mb-3' : '' }}">
+                            <div class="artisan-card">
                                 <!-- Image -->
-                                <div class="{{ currentView == 'list' ? 'flex-shrink-0' : '' }}"
-                                    style="{{ currentView == 'list' ? 'width: 240px;' : '' }}">
+                                <div class="" style="">
                                     <a href="{{ route('artisans.show', $artisan) }}">
                                         <img src="{{ $artisan->photos->first()?->full_url ?? asset('images/default-artisan.jpg') }}"
                                             alt="{{ $artisan->user->name }}" class="img-fluid w-100"
@@ -283,7 +283,7 @@
                                 </div>
 
                                 <!-- Contenu -->
-                                <div class="{{ currentView == 'list' ? 'flex-grow-1 p-4' : 'p-4' }}">
+                                <div class="p-4">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <div>
                                             <h5 class="mb-1">
@@ -293,7 +293,7 @@
                                                 </a>
                                                 @if($artisan->verified)
                                                     <span class="verified-badge ms-2">
-                                                        <i class="bi bi-patch-check-fill me-1"></i>Vérifié
+                                                        <i class="bi bi-patch-check-fill me-1"></i>{{ __('artisans.verified') }}
                                                     </span>
                                                 @endif
                                             </h5>
@@ -332,7 +332,7 @@
                                             @endif
                                             <a href="{{ route('artisans.show', $artisan) }}"
                                                 class="btn btn-benin-green btn-sm rounded-pill px-4">
-                                                Voir profil
+                                                {{ __('views.see') }} {{ __('views.view_profile') }}
                                             </a>
                                         </div>
                                     </div>
@@ -342,8 +342,8 @@
                             <div class="col-12">
                                 <div class="empty-state">
                                     <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
-                                    <h4>Aucun artisan trouvé</h4>
-                                    <p class="text-muted">Modifiez vos critères de recherche</p>
+                                    <h4>{{ __('views.no_artisans_found') }}</h4>
+                                    <p class="text-muted">{{ __('views.modify_search') }}</p>
                                 </div>
                             </div>
                         @endforelse
@@ -362,99 +362,160 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Valeur par défaut
-    let currentView = localStorage.getItem('artisansView') || 'grid';
-
-    function changeView(view) {
-        currentView = view;
-        localStorage.setItem('artisansView', view);
-
-        // Mise à jour boutons
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.remove('active', 'btn-primary');
-            btn.classList.add('btn-outline-secondary');
-        });
-
-        const activeBtn = document.querySelector(`.view-btn[data-view="${view}"]`);
-        if (activeBtn) {
-            activeBtn.classList.remove('btn-outline-secondary');
-            activeBtn.classList.add('active', 'btn-primary');
-        }
-
-        // Affichage des contenus
-        document.querySelectorAll('[data-view-content]').forEach(el => {
-            el.style.display = (el.dataset.viewContent === view) ? 'block' : 'none';
-        });
-
-        // Chargement carte si nécessaire
-        if (view === 'map' && typeof google !== 'undefined' && !window.artisansMapInitialized) {
-            initArtisansMap();
-            window.artisansMapInitialized = true;
-        }
-    }
-
-    // Appliquer au chargement
-    document.addEventListener('DOMContentLoaded', () => {
-        changeView(currentView);
-    });
-</script>
-
-<!-- Carte Google Maps -->
-@if($artisans->count() > 0)
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initArtisansMap" async defer></script>
     <script>
-        let map;
-        let markers = [];
+        // Valeur par défaut
+        let currentView = localStorage.getItem('artisansView') || 'grid';
 
-        function initArtisansMap() {
-            const center = { lat: 9.3077, lng: 2.3158 }; // Centre Bénin
+        function changeView(view) {
+            currentView = view;
+            localStorage.setItem('artisansView', view);
 
-            map = new google.maps.Map(document.getElementById('artisans-map'), {
-                center: center,
-                zoom: 7,
-                styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+            // Mise à jour boutons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-secondary');
             });
 
-            @foreach($artisans as $artisan)
-                @if($artisan->latitude && $artisan->longitude)
-                    addMarker({
-                        lat: {{ $artisan->latitude }},
-                        lng: {{ $artisan->longitude }},
-                        title: "{{ addslashes($artisan->user->name) }}",
-                        craft: "{{ addslashes($artisan->craft_label) }}",
-                        city: "{{ addslashes($artisan->city) }}",
-                        id: {{ $artisan->id }},
-                        distance: {{ $artisan->distance ?? 'null' }}
-                    });
-                @endif
-            @endforeach
+            const activeBtn = document.querySelector(`.view-btn[data-view="${view}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('btn-outline-secondary');
+                activeBtn.classList.add('active', 'btn-primary');
+            }
+
+            // Gestion des vues grid/list
+            const viewWrapper = document.querySelector('.view-wrapper');
+            const artisanCards = document.querySelectorAll('.artisan-card');
+
+            if (view === 'grid') {
+                viewWrapper.classList.remove('artisan-list');
+                viewWrapper.classList.add('artisan-grid');
+
+                artisanCards.forEach(card => {
+                    card.classList.remove('d-flex', 'mb-3');
+                    const imageDiv = card.querySelector('div:first-child');
+                    const contentDiv = card.querySelector('div.p-4');
+
+                    if (imageDiv) {
+                        imageDiv.classList.remove('flex-shrink-0');
+                        imageDiv.style.width = '';
+                    }
+                    if (contentDiv) {
+                        contentDiv.classList.remove('flex-grow-1');
+                    }
+                });
+            } else if (view === 'list') {
+                viewWrapper.classList.remove('artisan-grid');
+                viewWrapper.classList.add('artisan-list');
+
+                artisanCards.forEach(card => {
+                    card.classList.add('d-flex', 'mb-3');
+                    const imageDiv = card.querySelector('div:first-child');
+                    const contentDiv = card.querySelector('div.p-4');
+
+                    if (imageDiv) {
+                        imageDiv.classList.add('flex-shrink-0');
+                        imageDiv.style.width = '240px';
+                    }
+                    if (contentDiv) {
+                        contentDiv.classList.add('flex-grow-1');
+                    }
+                });
+            }
+
+            // Affichage des contenus
+            document.querySelectorAll('[data-view-content]').forEach(el => {
+                el.style.display = (el.dataset.viewContent === view) ? 'block' : 'none';
+            });
+
+            // Chargement carte si nécessaire
+            if (view === 'map' && typeof google !== 'undefined' && !window.artisansMapInitialized) {
+                initArtisansMap();
+                window.artisansMapInitialized = true;
+            }
         }
 
-        function addMarker(data) {
-            const marker = new google.maps.Marker({
-                position: { lat: data.lat, lng: data.lng },
-                map: map,
-                title: data.title
-            });
-
-            const info = new google.maps.InfoWindow({
-                content: `
-                    <div class="p-2" style="min-width:220px;">
-                        <h6 class="fw-bold mb-1">${data.title}</h6>
-                        <p class="small mb-1"><strong>${data.craft}</strong></p>
-                        <p class="small mb-2">${data.city}</p>
-                        ${data.distance ? `<p class="small mb-2 text-success"><strong>${data.distance.toFixed(1)} km</strong></p>` : ''}
-                        <a href="/artisans/${data.id}" class="btn btn-sm btn-benin-green w-100 mt-2">
-                            Voir profil
-                        </a>
-                    </div>
-                `
-            });
-
-            marker.addListener('click', () => info.open(map, marker));
-            markers.push(marker);
-        }
+        // Appliquer au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            changeView(currentView);
+        });
     </script>
-@endif
+
+    <!-- Carte Google Maps -->
+    @if($artisans->count() > 0)
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initArtisansMap"
+            async defer></script>
+        <script>
+            let map;
+            let markers = [];
+
+            function initArtisansMap() {
+                const center = { lat: 9.3077, lng: 2.3158 }; // Centre Bénin
+
+                map = new google.maps.Map(document.getElementById('artisans-map'), {
+                    center: center,
+                    zoom: 7,
+                    styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+                });
+
+                @foreach($artisans as $artisan)
+                    @if($artisan->latitude && $artisan->longitude)
+                        addMarker({
+                            lat: {{ $artisan->latitude }},
+                            lng: {{ $artisan->longitude }},
+                            title: "{{ addslashes($artisan->user->name) }}",
+                            craft: "{{ addslashes($artisan->craft_label) }}",
+                            city: "{{ addslashes($artisan->city) }}",
+                            id: {{ $artisan->id }},
+                            distance: {{ $artisan->distance ?? 'null' }}
+                                    });
+                    @endif
+                @endforeach
+                }
+            function toggleFavorite(favoritableId, favoritableType) {
+                fetch('/favorites/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        favoritable_id: favoritableId,
+                        favoritable_type: favoritableType
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mettre à jour l'interface (icône, compteur)
+                            console.log(data.message);
+                        }
+                    });
+            }
+            function addMarker(data) {
+                const marker = new google.maps.Marker({
+                    position: { lat: data.lat, lng: data.lng },
+                    map: map,
+                    title: data.title
+                });
+
+                const info = new google.maps.InfoWindow({
+                    content: `
+                            <div class="p-2" style="min-width:220px;">
+                                <h6 class="fw-bold mb-1">${data.title}</h6>
+                                <p class="small mb-1"><strong>${data.craft}</strong></p>
+                                <p class="small mb-2">${data.city}</p>
+                                ${data.distance ? `<p class="small mb-2 text-success"><strong>${data.distance.toFixed(1)} km</strong></p>` : ''}
+                                <a href="/artisans/${data.id}" class="btn btn-sm btn-benin-green w-100 mt-2">
+                                    {{ __('artisans.view_profile') }}
+                                </a>
+                            </div>
+                        `
+                });
+
+                marker.addListener('click', () => info.open(map, marker));
+                markers.push(marker);
+            }
+        </script>
+    @endif
 @endpush

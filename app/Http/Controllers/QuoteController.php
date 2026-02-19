@@ -2,112 +2,141 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Quote;
 use App\Models\Artisan;
-use App\Models\Product;
+use App\Models\Quote;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class QuoteController extends Controller
 {
+    /**
+     * Affiche la liste des devis du client.
+     */
     public function index()
     {
-        $quotes = Quote::where('user_id', Auth::id())
-            ->with(['artisan.user', 'product'])
+        $quotes = Quote::where('user_id', auth()->id())
+            ->with('artisan.user')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
 
         return view('quotes.index', compact('quotes'));
     }
 
+    /**
+     * Affiche le formulaire de création d'un devis.
+     */
+    public function create(Request $request)
+    {
+        // Récupère tous les artisans avec leur utilisateur associé
+        $artisans = Artisan::with('user')->get();
+
+        // Artisan pré-sélectionné (si fourni dans l'URL)
+        $selectedArtisanId = $request->query('artisan_id');
+
+        return view('quotes.create', compact('artisans', 'selectedArtisanId'));
+    }
+
+    /**
+     * Enregistre un nouveau devis.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'artisan_id' => 'required|exists:artisans,id',
-            'product_id' => 'nullable|exists:products,id',
-            'subject' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
-            'budget' => 'nullable|numeric|min:0',
-            'desired_date' => 'nullable|date|after:today'
+            'artisan_id'   => 'required|exists:artisans,id',
+            'product_id'   => 'nullable|exists:products,id',
+            'subject'      => 'required|string|max:255',
+            'description'  => 'required|string',
+            'budget'       => 'nullable|numeric|min:0',
+            'desired_date' => 'nullable|date',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
 
-        $quote = Quote::create($validated);
+        Quote::create($validated);
 
-        // Notifier l'artisan (à implémenter)
-        // $artisan = Artisan::find($validated['artisan_id']);
-        // Envoyer notification email/WhatsApp
-
-        return redirect()->route('quotes.show', $quote)
-            ->with('success', 'Votre demande de devis a été envoyée avec succès !');
+        return redirect()->route('client.quotes.index')
+            ->with('success', 'Votre demande de devis a été envoyée avec succès.');
     }
 
+    /**
+     * Affiche les détails d'un devis.
+     */
     public function show(Quote $quote)
     {
-        // Vérifier que l'utilisateur a accès à ce devis
-        if ($quote->user_id !== Auth::id() &&
-            (!$quote->artisan || $quote->artisan->user_id !== Auth::id())) {
+        // Vérifie que le devis appartient bien à l'utilisateur connecté
+        if ($quote->user_id !== auth()->id()) {
             abort(403);
         }
-
-        $quote->load(['artisan.user', 'product', 'user']);
 
         return view('quotes.show', compact('quote'));
     }
 
+    /**
+     * Affiche le formulaire d'édition (si vous souhaitez permettre la modification).
+     */
+    public function edit(Quote $quote)
+    {
+        if ($quote->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // On peut restreindre l'édition uniquement aux devis en attente
+        if ($quote->status !== 'pending') {
+            return redirect()->route('client.quotes.index')
+                ->with('error', 'Vous ne pouvez modifier que les devis en attente.');
+        }
+
+        $artisans = Artisan::with('user')->get();
+
+        return view('client.quotes.edit', compact('quote', 'artisans'));
+    }
+
+    /**
+     * Met à jour un devis.
+     */
     public function update(Request $request, Quote $quote)
     {
-        // Seul l'artisan peut répondre
-        if (!$quote->artisan || $quote->artisan->user_id !== Auth::id()) {
+        if ($quote->user_id !== auth()->id()) {
             abort(403);
+        }
+
+        if ($quote->status !== 'pending') {
+            return redirect()->route('client.quotes.index')
+                ->with('error', 'Ce devis ne peut plus être modifié.');
         }
 
         $validated = $request->validate([
-            'response' => 'required|string|min:10',
-            'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:responded,accepted,rejected'
+            'artisan_id'   => 'required|exists:artisans,id',
+            'subject'      => 'required|string|max:255',
+            'description'  => 'required|string',
+            'budget'       => 'nullable|numeric|min:0',
+            'desired_date' => 'nullable|date',
         ]);
-
-        $validated['response_date'] = now();
 
         $quote->update($validated);
 
-        // Notifier le client (à implémenter)
-
-        return redirect()->route('quotes.show', $quote)
-            ->with('success', 'Réponse envoyée avec succès.');
+        return redirect()->route('client.quotes.index')
+            ->with('success', 'Devis mis à jour avec succès.');
     }
 
-    public function accept(Quote $quote)
+    /**
+     * Supprime un devis (si nécessaire).
+     */
+    public function destroy(Quote $quote)
     {
-        // Seul le client peut accepter
-        if ($quote->user_id !== Auth::id()) {
+        if ($quote->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $quote->update([
-            'status' => 'accepted',
-            'accepted_at' => now()
-        ]);
-
-        return redirect()->route('quotes.show', $quote)
-            ->with('success', 'Devis accepté. Vous pouvez maintenant procéder au paiement.');
-    }
-
-    public function reject(Quote $quote)
-    {
-        // Seul le client peut refuser
-        if ($quote->user_id !== Auth::id()) {
-            abort(403);
+        // On peut autoriser la suppression seulement si le devis est encore en attente
+        if ($quote->status !== 'pending') {
+            return redirect()->route('client.quotes.index')
+                ->with('error', 'Vous ne pouvez supprimer que les devis en attente.');
         }
 
-        $quote->update([
-            'status' => 'rejected'
-        ]);
+        $quote->delete();
 
-        return redirect()->route('quotes.show', $quote)
-            ->with('success', 'Devis refusé.');
+        return redirect()->route('client.quotes.index')
+            ->with('success', 'Devis supprimé.');
     }
 }

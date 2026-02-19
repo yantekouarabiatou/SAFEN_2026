@@ -41,7 +41,7 @@ class ArtisanSeeder extends Seeder
                 'longitude'        => 2.3912,
                 'languages'        => ['Fon', 'Français', 'Anglais'],
                 'pricing_info'     => 'Tenue complète : 35 000 - 180 000 FCFA | Pagne sur mesure : 20 000 - 80 000 FCFA',
-                'photos'           => ['', 'tissu.jpg','atelier.jpg','sandal.jpg','sac.jpg'],
+                'photos'           => ['tailleu1', 'tissu.jpg', 'atelier.jpg', 'sandal.jpg', 'sac.jpg'],
             ],
 
             // 3. Forgeron - Parakou (Bariba)
@@ -113,7 +113,7 @@ class ArtisanSeeder extends Seeder
                 'name'     => $data['name'],
                 'email'    => $email,
                 'password' => bcrypt('password123'),
-                'role'     => 'artisan',
+               // 'role'     => 'artisan',
             ]);
 
             // Numéro WhatsApp / téléphone béninois aléatoire mais réaliste
@@ -122,25 +122,38 @@ class ArtisanSeeder extends Seeder
             // Création de l'artisan
             $artisan = Artisan::create([
                 'user_id'          => $user->id,
-                'business_name'    => $data['name'] . ' - ' . ucfirst($data['craft']),
+                'business_name'    => $data['name'],
                 'craft'            => $data['craft'],
                 'bio'              => $data['bio'],
                 'years_experience' => $data['years_experience'],
                 'city'             => $data['city'],
-                'neighborhood'     => $data['neighborhood'] ?? null,
+                'neighborhood'     => $data['neighborhood'],
                 'latitude'         => $data['latitude'],
                 'longitude'        => $data['longitude'],
                 'whatsapp'         => $phone,
                 'phone'            => $phone,
-                'languages_spoken' => $data['languages'],
-                'pricing_info'     => $data['pricing_info'] ?? null,
-                'rating_avg'       => rand(35, 50) / 10,   // 3.5 à 5.0
-                'rating_count'     => rand(8, 120),
-                'verified'         => rand(0, 10) >= 6,     // ~40% vérifiés
-                'featured'         => rand(0, 10) >= 8,     // ~20% en vedette
+
+                // ✅ JSON correct
+                'languages_spoken' => json_encode($data['languages']),
+
+                'pricing_info'     => $data['pricing_info'],
+
+                // ⭐ Stats
+                'rating_avg'       => rand(35, 50) / 10,
+                'rating_count'     => rand(10, 200),
+                'verified'         => rand(0, 10) >= 6,
+                'featured'         => rand(0, 10) >= 8,
                 'visible'          => true,
-                'views'            => rand(120, 4800),
+                'views'            => rand(200, 5000),
+
+                // ✅ Statut ajouté
+                'status'           => 'approved',
+                'approved_at'      => now(),
+                'approved_by'      => null,
+                'rejected_at'      => null,
+                'rejection_reason' => null,
             ]);
+
 
             // Ajout des photos (portfolio)
             foreach ($data['photos'] as $index => $photoFile) {

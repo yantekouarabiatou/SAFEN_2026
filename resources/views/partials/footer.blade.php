@@ -32,35 +32,35 @@
 
             <!-- Quick Links -->
             <div class="col-6 col-lg-2">
-                <h6 class="text-benin-yellow fw-bold mb-3">Navigation</h6>
+                <h6 class="text-benin-yellow fw-bold mb-3">{{ __('messages.home') }}</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ route('home') }}">Accueil</a></li>
-                    <li class="mb-2"><a href="{{ route('artisans.vue') }}">Artisans</a></li>
-                    <li class="mb-2"><a href="{{ route('gastronomie.index') }}">Gastronomie</a></li>
-                    <li class="mb-2"><a href="{{ route('products.index') }}">Marketplace</a></li>
-                    <li class="mb-2"><a href="{{ route('culture.index') }}">Culture</a></li>
+                    <li class="mb-2"><a href="{{ route('home') }}">{{ __('footer.home') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('artisans.index') }}">{{ __('footer.artisans') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('gastronomie.index') }}">{{ __('footer.gastronomy') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('products.index') }}">{{ __('footer.marketplace') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('culture.index') }}">{{ __('footer.culture') }}</a></li>
                 </ul>
             </div>
 
             <!-- Services -->
             <div class="col-6 col-lg-2">
-                <h6 class="text-benin-yellow fw-bold mb-3">Services</h6>
+                <h6 class="text-benin-yellow fw-bold mb-3">{{ __('footer.footer_services') }}</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ route('register') }}">Devenir artisan</a></li>
-                    <li class="mb-2"><a href="{{ route('faq') }}">FAQ</a></li>
-                    <li class="mb-2"><a href="{{ route('help') }}">Aide</a></li>
-                    <li class="mb-2"><a href="{{ route('contact.create') }}">Contact</a></li>
+                    <li class="mb-2"><a href="{{ route('register') }}">{{ __('footer.become_artisan') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('faq') }}">{{ __('footer.faq') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('help') }}">{{ __('messages.help') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('contact.create') }}">{{ __('messages.contact') }}</a></li>
                 </ul>
             </div>
 
             <!-- Newsletter -->
             <div class="col-lg-4">
-                <h6 class="text-benin-yellow fw-bold mb-3">Newsletter</h6>
+                <h6 class="text-benin-yellow fw-bold mb-3">{{ __('footer.newsletter') }}</h6>
                 <p class="text-white-50 small">
-                    Recevez nos actualités et découvertes culturelles chaque semaine.
+                    {{ __('footer.subscribe') }}
                 </p>
                 <form class="d-flex gap-2" id="newsletter-form">
-                    <input type="email" class="form-control form-control-sm" placeholder="Votre email"
+                    <input type="email" class="form-control form-control-sm" placeholder="{{ __('footer.email') }}"
                            style="border-radius: 20px;" required>
                     <button type="submit" class="btn btn-benin-yellow btn-sm px-3" style="border-radius: 20px;">
                         <i class="bi bi-send"></i>
@@ -85,13 +85,13 @@
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
                 <p class="text-white-50 small mb-0">
-                    &copy; 2026 TOTCHEMEGNON Bénin. Tous droits réservés.
+                    {{ __('footer.copyright') }}
                 </p>
             </div>
             <div class="col-md-6 text-center text-md-end">
-                <a href="{{ route('legal') }}" class="text-white-50 small me-3">Mentions légales</a>
-                <a href="{{ route('privacy') }}" class="text-white-50 small me-3">Confidentialité</a>
-                <a href="{{ route('terms') }}" class="text-white-50 small">CGV</a>
+                <a href="{{ route('legal') }}" class="text-white-50 small me-3">{{ __('footer.legal') }}</a>
+                <a href="{{ route('privacy') }}" class="text-white-50 small me-3">{{ __('footer.privacy') }}</a>
+                <a href="{{ route('terms') }}" class="text-white-50 small">{{ __('footer.terms') }}</a>
             </div>
         </div>
     </div>

@@ -70,3 +70,4 @@ class Quote extends Model
         return $this->amount ? number_format($this->amount, 0, ',', ' ') . ' FCFA' : '-';
     }
 }
+
