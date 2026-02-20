@@ -288,7 +288,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('events', CulturalEventController::class);
     Route::resource('reviews', ReviewController::class);
     Route::resource('contacts', ContactController::class);
-    Route::ressouce('dishes', App\Http\Controllers\Admin\DishController::class);
+    Route::ressource('dishes', App\Http\Controllers\Admin\DishController::class);
     // Commandes admin
     Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
     Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
