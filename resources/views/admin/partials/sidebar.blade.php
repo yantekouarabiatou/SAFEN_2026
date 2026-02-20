@@ -122,7 +122,7 @@
                 <a href="{{ route('admin.contacts.index') }}" class="nav-link">
                     <i class="fas fa-envelope"></i><span>Messages</span>
                     @php
-                    $unreadMessages = \App\Models\Contact::where('read', false)->count();
+                    $unreadMessages = \App\Models\Contact::where('status','read')->count();
                     @endphp
                     @if($unreadMessages > 0)
                     <span class="badge badge-danger">{{ $unreadMessages }}</span>
