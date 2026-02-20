@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $event->name . ' - AFRI-HERITAGE')
+@section('title', $event->nameTitle . ' - TOTCHEMEGNON')
 
 @push('styles')
 <style>

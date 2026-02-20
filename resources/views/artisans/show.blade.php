@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $artisan->user->name . ' - Artisan AFRI-HERITAGE')
+@section('title', $artisan->user->name . ' - TOTCHEMEGNON')
 
 @push('styles')
     <style>
@@ -651,7 +651,7 @@
         function shareArtisan() {
             if (navigator.share) {
                 navigator.share({
-                    title: '{{ $artisan->user->name }} - AFRI-HERITAGE',
+                    title: '{{ $artisan->user->name }} - TOTCHEMEGNON',
                     text: 'Découvrez cet artisan talentueux du Bénin',
                     url: window.location.href
                 });

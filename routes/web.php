@@ -224,7 +224,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/evenements/{event}/unsubscribe', [CulturalEventController::class, 'unsubscribe'])->name('events.unsubscribe');
     Route::post('/evenements/preferences', [CulturalEventController::class, 'updatePreferences'])->name('events.preferences');
 
-    // ===== Gestion des ressources (création, édition, suppression) =====
+    // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
 
@@ -299,6 +299,20 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
 });
 
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class);
+    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
+    Route::resource('vendors', AdminVendorController::class);
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
+
+    // Détacher un plat du vendeur
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
+});
+Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
+    // ...
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+});
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX)
