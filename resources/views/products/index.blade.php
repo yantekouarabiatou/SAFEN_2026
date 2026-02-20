@@ -586,7 +586,8 @@
     <div class="hero-products">
         <div class="container">
             <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb" style="background: rgba(255,255,255,0.1); padding: 0.75rem 1rem; border-radius: 50px;">
+                <ol class="breadcrumb"
+                    style="background: rgba(255,255,255,0.1); padding: 0.75rem 1rem; border-radius: 50px;">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}" style="color: white;">Accueil</a></li>
                     <li class="breadcrumb-item active" style="color: white;">Arts & Artisanat</li>
                 </ol>
@@ -659,15 +660,18 @@
                         <select name="sort" class="form-control select2-filter" data-placeholder="Trier par">
                             <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Populaire</option>
                             <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Plus récent</option>
-                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Prix croissant</option>
-                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Prix décroissant</option>
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Prix croissant
+                            </option>
+                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Prix
+                                décroissant</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Boutons filtres -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <span class="text-muted">{{ $products->total() }} produit{{ $products->total() > 1 ? 's' : '' }} trouvé{{ $products->total() > 1 ? 's' : '' }}</span>
+                    <span class="text-muted">{{ $products->total() }} produit{{ $products->total() > 1 ? 's' : '' }}
+                        trouvé{{ $products->total() > 1 ? 's' : '' }}</span>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-benin-green px-4">
                             <i class="bi bi-funnel me-2"></i> Filtrer
@@ -722,7 +726,8 @@
                             @if($product->name_local)
                                 <div class="local-name">
                                     <i class="bi bi-translate"></i> {{ $product->name_local }}
-                                    <button class="audio-btn" onclick="speakText('{{ addslashes($product->name_local) }}')" title="Écouter">
+                                    <button class="audio-btn" onclick="speakText('{{ addslashes($product->name_local) }}')"
+                                        title="Écouter">
                                         <i class="bi bi-volume-up-fill"></i>
                                     </button>
                                 </div>
@@ -784,10 +789,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Google Maps (si utilisé) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&libraries=places"></script>
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- jQuery ici → juste avant tes scripts personnalisés -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 
     <script>
@@ -944,11 +950,11 @@
             toast.setAttribute('role', 'alert');
             toast.style.zIndex = '9999';
             toast.innerHTML = `
-                                    <div class="d-flex">
-                                        <div class="toast-body">${message}</div>
-                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                                    </div>
-                                `;
+                                        <div class="d-flex">
+                                            <div class="toast-body">${message}</div>
+                                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                        </div>
+                                    `;
 
             document.body.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);
@@ -1012,6 +1018,17 @@
                     }
                 });
             }, observerOptions);
+
+            var map = L.map('map').setView([9.3077, 2.3158], 7); // Centre sur le Bénin
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            // Exemple marqueur artisan
+            L.marker([6.3703, 2.3912]) // Coordonnées Cotonou
+                .addTo(map)
+                .bindPopup("Artisan à Cotonou");
 
             document.querySelectorAll('.product-card').forEach(card => {
                 observer.observe(card);
