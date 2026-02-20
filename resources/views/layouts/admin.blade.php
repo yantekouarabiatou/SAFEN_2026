@@ -1,23 +1,23 @@
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
     <title>@yield('title', 'Administration') - TOTCHEMEGNON Admin</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS (CDN HTTPS) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Icons -->
+    <!-- Bootstrap Icons (CDN HTTPS) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts (HTTPS) -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Tes assets locaux – TOUJOURS avec asset() -->
+    <!-- Tes assets locaux – OBLIGATOIREMENT avec asset() -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
@@ -35,12 +35,6 @@
 
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
-
-    
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
-        <!-- Styles pushés depuis les vues -->
-    @stack('styles')
 
     <!-- Couleurs Bénin & Navbar Professionnelle -->
     <style>
@@ -605,11 +599,9 @@
         </div>
     </div>
 
-    <!-- General JS Scripts -->
-    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+   <!-- General JS Scripts -->
+<script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
 
-    <!-- JS Libraries -->
-    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
 <!-- JS Libraries -->
 <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
@@ -618,12 +610,17 @@
 <script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
 <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
-<!-- Feather Icons -->
+<!-- Feather Icons (HTTPS externe) -->
 <script src="https://unpkg.com/feather-icons"></script>
 
 <!-- Template JS -->
 <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
 <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
+
+<!-- Initialisation Feather Icons -->
+<script>
+    feather.replace();
+</script>
 
 <!-- CSRF global pour AJAX -->
 <script>
@@ -634,74 +631,9 @@
     });
 </script>
 
-    <!-- Feather Icons -->
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-        feather.replace();
+<!-- Scripts pushés par les vues -->
+@stack('scripts')
 
-        // Remplacer les icônes après chargement des dropdowns
-        $(document).on('shown.bs.dropdown', function() {
-            feather.replace();
-        });
-    </script>
-
-    <!-- CSRF global pour AJAX -->
-    <script>
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        // Notifications iziToast globales
-        @if(session('success'))
-            iziToast.success({
-                title: 'Succès',
-                message: '{{ session('success') }}',
-                position: 'topRight',
-                timeout: 5000
-            });
-        @endif
-
-        @if(session('error'))
-            iziToast.error({
-                title: 'Erreur',
-                message: '{{ session('error') }}',
-                position: 'topRight',
-                timeout: 6000
-            });
-        @endif
-
-        // Amélioration plein écran
-        $(document).ready(function() {
-            $('.fullscreen-btn').on('click', function(e) {
-                e.preventDefault();
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                    $(this).find('i').attr('data-feather', 'minimize');
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                        $(this).find('i').attr('data-feather', 'maximize');
-                    }
-                }
-                feather.replace();
-            });
-
-            // Afficher badge si nombre > 0
-            function updateBadge(id, count) {
-                const badge = $(id);
-                if (count > 0) {
-                    badge.text(count > 99 ? '99+' : count).show();
-                } else {
-                    badge.hide();
-                }
-            }
-
-            // Exemple: updateBadge('#msg-count', 5);
-            // Exemple: updateBadge('#notif-count', 12);
-        });
-    </script>
     <script>
     $(document).ready(function() {
         // Initialiser les dropdowns du sidebar
@@ -726,7 +658,7 @@
             $('.dropdown:has(a[href*="orders"]) .dropdown-menu').addClass('show');
         @endif
     });
-</script>
+ </script>
 
     <!-- Scripts pushés depuis les vues -->
     @stack('scripts')
