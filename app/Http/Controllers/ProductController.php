@@ -84,7 +84,7 @@ class ProductController extends Controller
             ->filter()
             ->unique()
             ->values();
-
+       //dd($products->first()); // ou mieux : dd($products->first()->images);
         return view('products.index', compact(
             'products',
             'categories',

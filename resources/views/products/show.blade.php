@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $product->name . ' - AFRI-HERITAGE')
+@section('title', $product->name . ' - TOTCHEMEGNON')
 
 @push('styles')
     <style>
@@ -957,14 +957,13 @@
                     @else
                         <!-- Image par défaut si aucune image -->
                         <div class="main-image">
-                            <img src="{{ asset('images/default-product.jpg') }}" alt="{{ $product->name }}"
-                                onclick="openImageModal('{{ asset('images/default-product.jpg') }}')">
+                            <img src="{{ asset('products/vodoun.jpg') }}" alt="{{ $product->name }}"
+                                onclick="openImageModal('{{ asset('product/vodoun.jpg') }}')">
                         </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Product Info Column (reste inchangé) -->
             <!-- Product Info Column -->
             <div class="col-lg-5">
                 <div class="action-card">
@@ -1064,71 +1063,23 @@
                     </div>
                 </div>
 
-                <!-- Artisan Card -->
-                @if($product->artisan)
-                    <div class="action-card">
-                        <div class="artisan-card">
-                            <!-- Avatar / Initiales -->
-                            <div class="artisan-avatar-container">
-                                @if($product->artisan->photos && $product->artisan->photos->first())
-                                    <img src="{{ Storage::url($product->artisan->photos->first()->photo_url) }}"
-                                        alt="{{ $product->artisan->user->name ?? $product->artisan->business_name }}"
-                                        class="artisan-avatar">
-                                @else
-                                                <!-- Affichage des initiales -->
-                                                <div class="avatar-initials"
-                                                    title="{{ $product->artisan->user->name ?? $product->artisan->business_name }}">
-                                                    {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
-                                    (str_word_count($product->artisan->user->name ?? '') > 1
-                                        ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1))
-                                        : '') }}
-                                                </div>
-                                @endif
-                            </div>
-
-                            <!-- Nom -->
-                            <h5>
-                                {{ $product->artisan->business_name ?? $product->artisan->user->name ?? 'Artisan' }}
-                            </h5>
-
-                            <!-- Métier -->
-                            <div class="craft-type">
-                                <i class="bi bi-tools me-1"></i>
-                                {{ $product->artisan->craft_label ?? 'Artisan' }}
-                            </div>
-
-                            <!-- Note -->
-                            <div class="rating-stars small mb-3">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i
-                                        class="bi {{ $i <= floor($product->artisan->rating_avg ?? 0) ? 'bi-star-fill' : 'bi-star' }}"></i>
-                                @endfor
-                                <span class="text-muted ms-1">({{ $product->artisan->rating_count ?? 0 }})</span>
-                            </div>
-
-                            <!-- Boutons d'action -->
-                            <div class="d-grid gap-2">
-                                @if(Route::has('artisans.show'))
-                                    <a href="{{ route('artisans.show', $product->artisan) }}"
-                                        class="btn btn-outline-benin-green rounded-pill">
-                                        Voir le profil
-                                    </a>
-                                @else
-                                    <button class="btn btn-outline-benin-green rounded-pill" onclick="showArtisanInfo()">
-                                        Voir les infos
-                                    </button>
-                                @endif
-
-                                @if($product->artisan->whatsapp)
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $product->artisan->whatsapp) }}"
-                                        target="_blank" class="btn btn-success rounded-pill">
-                                        <i class="bi bi-whatsapp me-2"></i> WhatsApp
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                <!-- Avatar / Initiales -->
+                <div class="artisan-avatar-container">
+                    @if($product->artisan->photos && $product->artisan->photos->first())
+                        <img src="{{ $product->artisan->photos->first()->full_url }}"
+                            alt="{{ $product->artisan->user->name ?? $product->artisan->business_name }}"
+                            class="artisan-avatar">
+                    @else
+                                <!-- Affichage des initiales -->
+                                <div class="avatar-initials"
+                                    title="{{ $product->artisan->user->name ?? $product->artisan->business_name }}">
+                                    {{ strtoupper(substr($product->artisan->user->name ?? 'A', 0, 1)) .
+                        (str_word_count($product->artisan->user->name ?? '') > 1
+                            ? strtoupper(substr(strrchr($product->artisan->user->name, ' '), 1, 1))
+                            : '') }}
+                                </div>
+                    @endif
+                </div>
 
                 <!-- Delivery Info -->
                 <div class="action-card delivery-card">
@@ -1419,11 +1370,11 @@
             toast.setAttribute('aria-atomic', 'true');
             toast.style.zIndex = '9999';
             toast.innerHTML = `
-                                    <div class="d-flex">
-                                        <div class="toast-body">${message}</div>
-                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                                    </div>
-                                `;
+                                        <div class="d-flex">
+                                            <div class="toast-body">${message}</div>
+                                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                        </div>
+                                    `;
 
             document.body.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);

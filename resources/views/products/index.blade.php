@@ -719,7 +719,7 @@
                             @if($product->images && $product->images->count() > 1)
                                 <div class="quick-view">
                                     @foreach($product->images->take(4) as $image)
-                                        <img src="{{ $image->image_url }}" alt="{{ $product->name }}"
+                                        <img src="{{ $image->full_url }}" alt="{{ $product->name }}"
                                             onclick="window.location.href='{{ route('products.show', $product) }}'">
                                     @endforeach
                                 </div>
@@ -765,7 +765,7 @@
                             @if($product->artisan)
                                 <div class="artisan-info">
                                     @if($product->artisan->photos && $product->artisan->photos->first())
-                                        <img src="{{ Storage::url($product->artisan->photos->first()->photo_url) }}"
+                                        <img src="{{ $product->artisan->photos->first()->full_url }}"
                                             alt="{{ $product->artisan->business_name ?? $product->artisan->user->name }}"
                                             class="artisan-avatar">
                                     @else
@@ -785,7 +785,6 @@
                                     </span>
                                 </div>
                             @endif
-
                             <!-- Price -->
                             <div class="price-display">
                                 {{ number_format($product->price, 0, ',', ' ') }} FCFA
@@ -984,11 +983,11 @@
             toast.setAttribute('role', 'alert');
             toast.style.zIndex = '9999';
             toast.innerHTML = `
-                                <div class="d-flex">
-                                    <div class="toast-body">${message}</div>
-                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                                </div>
-                            `;
+                                    <div class="d-flex">
+                                        <div class="toast-body">${message}</div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                                    </div>
+                                `;
 
             document.body.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);

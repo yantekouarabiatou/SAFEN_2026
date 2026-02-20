@@ -235,7 +235,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/evenements/preferences', [CulturalEventController::class, 'updatePreferences'])->name('events.preferences');
 
     // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
-    Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('artisans', ArtisanController::class)->only(['store', 'edit', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
     // ===== ROUTES ADMIN (approuver, rejeter, etc.) =====
     Route::middleware(['auth', 'role_or_permission:admin|super-admin'])->group(function () {
@@ -353,6 +353,8 @@ Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function (
     Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
     Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
 });
+
+Route::get('artisans/create', [ArtisanController::class, 'create'])->name('artisans.create');
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX, services)

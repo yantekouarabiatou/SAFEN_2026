@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Culture Béninoise - AFRI-HERITAGE')
+@section('title', 'Culture Béninoise - TOTCHEMEGNON')
 
 @section('content')
 <section class="py-5">
