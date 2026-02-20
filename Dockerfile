@@ -39,8 +39,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Installation des dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --verbose --profile || true
 # Permissions Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache

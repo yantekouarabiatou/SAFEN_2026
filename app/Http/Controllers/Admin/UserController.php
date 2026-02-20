@@ -6,25 +6,62 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('roles');
+        if ($request->ajax()) {
+            $users = User::with(['roles', 'poste'])
+                ->select('users.*') // Important pour éviter conflits avec with()
+                ->latest();
 
-        if ($request->filled('search')) {
-            $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
+            return DataTables::of($users)
+                ->addIndexColumn()
+                ->addColumn('full_name', function ($user) {
+                    return $user->name ?? ($user->prenom . ' ' . $user->nom);
+                })
+                ->addColumn('roles', function ($user) {
+                    return $user->roles->pluck('name')->implode(', ');
+                })
+                ->addColumn('status', function ($user) {
+                    return $user->is_active
+                        ? '<span class="badge bg-success">Actif</span>'
+                        : '<span class="badge bg-danger">Inactif</span>';
+                })
+                ->addColumn('created_at', function ($user) {
+                    return $user->created_at->format('d/m/Y H:i');
+                })
+                ->addColumn('action', function ($user) {
+                    $edit = '<a href="' . route('admin.users.edit', $user->id) . '" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                         </a>';
+
+                    $delete = '';
+                    if (auth()->id() !== $user->id) {
+                        $delete = '<button class="btn btn-sm btn-danger btn-delete" data-id="' . $user->id . '">
+                                  <i class="bi bi-trash"></i>
+                               </button>';
+                    }
+
+                    return $edit . ' ' . $delete;
+                })
+                ->rawColumns(['status', 'action', 'roles'])
+                ->make(true);
         }
 
-        if ($request->filled('role')) {
-            $query->role($request->role);
-        }
+        // Statistiques pour les cartes du haut
+        $stats = [
+            'total' => User::count(),
+            'active_this_month' => User::where('created_at', '>=', now()->startOfMonth())->count(),
+            'artisans' => User::whereHas('roles', fn($q) => $q->where('name', 'artisan'))->count(),
+            'admins' => User::whereHas('roles', fn($q) => $q->whereIn('name', ['admin', 'super-admin']))->count(),
+        ];
 
-        $users = $query->latest()->paginate(15);
+        $roles = Role::orderBy('name')->get();
 
-        return view('admin.users.index', compact('users'));
+        return view('pages.users.index', compact('stats', 'roles'));
     }
 
     public function create()
