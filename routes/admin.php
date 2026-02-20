@@ -41,8 +41,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('vendors', VendorController::class);
 
     // Orders
-    Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
+    Route::resource('orders', OrderController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::post('orders/{order}/validate', [OrderController::class, 'validateOrder'])->name('orders.validate');
+    Route::post('orders/{order}/reject', [OrderController::class, 'rejectOrder'])->name('orders.reject');
 
     // Quotes
     Route::resource('quotes', QuoteController::class)->only(['index', 'show', 'destroy']);

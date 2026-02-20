@@ -189,7 +189,7 @@
         .navbar-afri .nav-link {
             color: var(--charcoal) !important;
             font-weight: 500;
-            margin: 0 0.5rem;
+            /* margin: 0 0.5rem; */
             padding: 0.5rem 1rem !important;
             border-radius: 8px;
             transition: all 0.3s ease;
@@ -1153,6 +1153,9 @@ function filterByCategory(category) {
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
     <!-- Google Maps API (pour les cartes) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&libraries=places"></script>
 

@@ -41,9 +41,49 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- DataTable remplira via AJAX -->
+                                @foreach($orders as $order)
+                                    <tr>
+                                        <td><a href="{{ route('admin.orders.show', $order->id) }}">{{ $order->order_number }}</a></td>
+                                        <td>
+                                            @if($order->user_id)
+                                                {{ $order->user->name ?? 'Utilisateur #' . $order->user_id }}
+                                            @else
+                                                {{ $order->guest_name ?? 'Anonyme' }}
+                                            @endif
+                                        </td>
+                                        <td>{{ $order->formatted_total }}</td>
+                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getStatusBadge($order->order_status) !!}</td>
+                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getPaymentStatusBadge($order->payment_status) !!}</td>
+                                        <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                        <td>
+                                            @if($order->order_status === 'pending')
+                                                <form action="{{ route('admin.orders.validate', $order->id) }}" method="POST" style="display:inline;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Valider" onclick="return confirm('Valider cette commande ?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.orders.reject', $order->id) }}" method="POST" style="display:inline;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Refuser" onclick="return confirm('Refuser cette commande ?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-info" title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.orders.edit', $order->id) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
+                        <div class="mt-3">
+                            {{ $orders->links() }}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -29,25 +29,25 @@
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('artisans.*') ? 'active' : '' }}" href="{{ route('artisans.vue') }}">
 						<i class="bi bi-tools me-1"></i>
-						{{ __('artisans & services') }}
+						{{ __('Artisans & services') }}
 					</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('gastronomie.*') ? 'active' : '' }}" href="{{ route('gastronomie.index') }}">
 						<i class="bi bi-egg-fried me-1"></i>
-						Gastronomie
+						Gastronomies
 					</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
 						<i class="bi bi-palette me-1"></i>
-						Arts & Artisanat
+						Arts & Artisanats
 					</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link {{ request()->routeIs('culture.*') ? 'active' : '' }}" href="{{ route('culture.index') }}">
 						<i class="bi bi-book me-1"></i>
-						Culture
+						Cultures
 					</a>
 				</li>
 			</ul>
