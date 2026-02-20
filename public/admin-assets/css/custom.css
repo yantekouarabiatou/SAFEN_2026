@@ -1,3 +1,13 @@
+/* Correction visibilité des sous-menus sidebar */
+.dropdown-menu .dropdown-item {
+    color: #008751 !important;
+    background: transparent !important;
+}
+
+.dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus {
+    color: #ffffff !important;
+    background: #008751 !important;
+}
 /* CUSTOMISATION COULEURS DU BÉNIN POUR COFIMA */
 :root {
     --primary-color: #008751; /* Vert du Bénin */

@@ -2,7 +2,7 @@
 
 return [
     'become_artisan' => 'Devenir artisan',
-    'subtitle' => 'Découvrez les artisans et services traditionnels du Bénin',
+    'subtitle' => 'Découvrez les  traditionnels du Bénin',
     'search_placeholder' => 'Rechercher un artisan, un métier...',
     'filter_by_craft' => 'Filtrer par métier',
     'filter_by_city' => 'Filtrer par ville',

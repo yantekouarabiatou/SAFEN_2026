@@ -67,7 +67,7 @@
 
         .main-sidebar .sidebar-menu li.active a {
             background-color: var(--benin-green) !important;
-            color: white !important;
+            color: #60686f !important;
         }
 
         .badge-benin-green {
@@ -681,6 +681,31 @@
             // Exemple: updateBadge('#notif-count', 12);
         });
     </script>
+    <script>
+    $(document).ready(function() {
+        // Initialiser les dropdowns du sidebar
+        $('.nav-link.has-dropdown').on('click', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            
+            // Fermer les autres dropdowns ouverts
+            if (!$this.next('.dropdown-menu').hasClass('show')) {
+                $('.dropdown-menu.show').removeClass('show');
+                $('.nav-link.has-dropdown.active').removeClass('active');
+            }
+            
+            // Toggle le menu actuel
+            $this.next('.dropdown-menu').toggleClass('show');
+            $this.toggleClass('active');
+        });
+        
+        // Garder le dropdown ouvert si on est sur une page enfant
+        @if(request()->is('admin/orders*'))
+            $('.dropdown:has(a[href*="orders"])').addClass('active');
+            $('.dropdown:has(a[href*="orders"]) .dropdown-menu').addClass('show');
+        @endif
+    });
+</script>
 
     <!-- Scripts pushés depuis les vues -->
     @stack('scripts')

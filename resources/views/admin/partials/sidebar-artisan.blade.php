@@ -24,11 +24,11 @@
                     <span>Produits</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li class="{{ request()->routeIs('dashboard.artisan.products') ? 'active' : '' }}">
-                        <a class="nav-link" href="#">Mes produits</a>
+                        <li class="{{ request()->routeIs('admin.products.index') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.products.index') }}">Mes produits</a>
                     </li>
-                    <li class="{{ request()->routeIs('products.create') ? 'active' : '' }}">
-                        <a class="nav-link" href="#">Ajouter un produit</a>
+                        <li class="{{ request()->routeIs('admin.products.create') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.products.create') }}">Ajouter un produit</a>
                     </li>
                 </ul>
             </li>
@@ -58,10 +58,11 @@
                     <i data-feather="message-square"></i>
                     <span>Messages</span>
                     @php
-                        $unreadCount = auth()->user()->unreadMessages ?? 0;
+                    $user = auth()->user();
+                    $unreadCount = $user && $user->unreadMessages ? $user->unreadMessages->count() : 0;
                     @endphp
                     @if($unreadCount > 0)
-                        <span class="badge badge-primary">{{ $unreadCount }}</span>
+                    <span class="badge badge-primary">{{ $unreadCount }}</span>
                     @endif
                 </a>
             </li>
