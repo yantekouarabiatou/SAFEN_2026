@@ -1,65 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd /var/www/html || { echo "ERREUR : impossible de cd /var/www/html"; exit 1; }
+cd /var/www/html
 
-echo "=== DEBUG ENVIRONNEMENT ==="
-echo "APP_KEY présente ? $(printenv APP_KEY | head -c 20)..."
-echo "APP_ENV = $APP_ENV"
-echo "DB_CONNECTION = $DB_CONNECTION"
-echo "=========================="
+# === On fait le minimum pour démarrer vite ===
 
-echo "Vérification vendor/autoload.php..."
-if [ ! -f vendor/autoload.php ]; then
-    echo "ERREUR CRITIQUE : vendor/autoload.php introuvable !"
-    exit 1
-fi
-
-echo "Création du fichier de log Laravel..."
+echo "Création dossier logs (rapide)"
 mkdir -p storage/logs
 touch storage/logs/laravel.log
-chmod 666 storage/logs/laravel.log
+chmod 666 storage/logs/laravel.log || true
 
-echo "Clearing all caches..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan view:clear || true
+echo "Lien storage (rapide)"
+php artisan storage:link --force || true
 
-echo "Caching config..."
-php artisan config:cache || echo "config:cache ignoré"
-
-echo "Caching routes..."
-php artisan route:cache || echo "route:cache ignoré"
-
-echo "Running migrations..."
-php artisan migrate --force --no-interaction || echo "Migrations ignorées"
-
-echo "Seeding database..."
-php artisan db:seed --force --no-interaction || echo "Seeding ignoré"
-
-echo "Linking storage..."
-php artisan storage:link || echo "storage:link ignoré"
-
-echo "Permissions..."
+echo "Permissions rapides"
 chown -R www-data:www-data storage bootstrap/cache || true
 chmod -R 775 storage bootstrap/cache || true
 
-echo "Démarrage de PHP-FPM..."
+echo "Démarrage PHP-FPM en arrière-plan"
 php-fpm -D
 
-echo "Attente PHP-FPM (max 20s)..."
-for i in {1..20}; do
-    if nc -z 127.0.0.1 9000 2>/dev/null; then
-        echo "PHP-FPM OK"
-        break
-    fi
-    sleep 1
-done
+# On attend seulement 5 secondes (pas 20)
+echo "Attente très courte PHP-FPM..."
+sleep 5
 
-if ! nc -z 127.0.0.1 9000 2>/dev/null; then
-    echo "ERREUR : PHP-FPM inaccessible"
-    exit 1
-fi
-
-echo "Démarrage de Nginx..."
+echo "Démarrage Nginx"
 exec nginx -g "daemon off;"
