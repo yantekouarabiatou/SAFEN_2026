@@ -1,43 +1,45 @@
-<!DOCTYPE html>
-<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>@yield('title', 'Administration') - TOTCHEMEGNON Admin</title>
 
-    <!-- Remplace TOUS les liens comme ça -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
 
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- Tes assets locaux – TOUJOURS avec asset() -->
-<link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
-<link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
-<link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
-<link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
+    <!-- Tes assets locaux – TOUJOURS avec asset() -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
-<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
 
-<!-- SweetAlert CSS -->
-<link rel="stylesheet" href="{{ asset('admin-assets/bundles/sweetalert/sweetalert.css') }}">
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/sweetalert/sweetalert.css') }}">
 
-<!-- iziToast CSS -->
-<link rel="stylesheet" href="{{ asset('admin-assets/bundles/izitoast/css/iziToast.min.css') }}">
+    <!-- iziToast CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/izitoast/css/iziToast.min.css') }}">
 
-<!-- Select2 CSS -->
-<link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
 
-<!-- Favicon -->
-<link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
-    <!-- Styles pushés depuis les vues -->
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
+        <!-- Styles pushés depuis les vues -->
     @stack('styles')
 
     <!-- Couleurs Bénin & Navbar Professionnelle -->
@@ -608,6 +610,7 @@
 
     <!-- JS Libraries -->
     <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+<!-- JS Libraries -->
 <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
@@ -615,8 +618,22 @@
 <script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
 <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
+<!-- Feather Icons -->
+<script src="https://unpkg.com/feather-icons"></script>
+
+<!-- Template JS -->
 <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
 <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
+
+<!-- CSRF global pour AJAX -->
+<script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    });
+</script>
+
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
@@ -627,10 +644,6 @@
             feather.replace();
         });
     </script>
-
-    <!-- Template JS -->
-    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
-    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
 
     <!-- CSRF global pour AJAX -->
     <script>
