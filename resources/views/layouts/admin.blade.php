@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
@@ -8,16 +10,16 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
 
-    <!-- Bootstrap CSS (CDN HTTPS) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 
-    <!-- Bootstrap Icons (CDN HTTPS) -->
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <!-- Google Fonts (HTTPS) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Tes assets locaux – OBLIGATOIREMENT avec asset() -->
+    <!-- Tes assets locaux – TOUJOURS avec asset() -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
@@ -36,7 +38,10 @@
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
 
-    <!-- Couleurs Bénin & Navbar Professionnelle -->
+    <!-- Styles pushés depuis les vues -->
+    @stack('styles')
+
+    <!-- Couleurs Bénin & Navbar Professionnelle (gardé intact) -->
     <style>
         :root {
             --benin-green: #008751;
@@ -47,12 +52,8 @@
         }
 
         /* === Couleurs Bénin === */
-        .bg-benin-green {
-            background-color: var(--benin-green) !important;
-        }
-        .text-benin-green {
-            color: var(--benin-green) !important;
-        }
+        .bg-benin-green { background-color: var(--benin-green) !important; }
+        .text-benin-green { color: var(--benin-green) !important; }
         .btn-benin-green {
             background-color: var(--benin-green);
             border-color: var(--benin-green);
@@ -63,9 +64,7 @@
             border-color: var(--benin-dark);
         }
 
-        .sidebar-brand a {
-            color: var(--benin-green) !important;
-        }
+        .sidebar-brand a { color: var(--benin-green) !important; }
 
         .main-sidebar .sidebar-menu li.active a {
             background-color: var(--benin-green) !important;
@@ -85,24 +84,10 @@
             transition: all 0.3s ease;
         }
 
-        /* Disposition générale */
-        .main-navbar .form-inline {
-            flex: 1;
-            max-width: 600px;
-        }
+        .main-navbar .form-inline { flex: 1; max-width: 600px; }
+        .main-navbar .navbar-nav { display: flex; align-items: center; gap: 8px; }
+        .main-navbar .navbar-nav.navbar-right { margin-left: auto; gap: 15px; }
 
-        .main-navbar .navbar-nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .main-navbar .navbar-nav.navbar-right {
-            margin-left: auto;
-            gap: 15px;
-        }
-
-        /* Boutons d'action navbar (sidebar, fullscreen) */
         .nav-link-lg {
             width: 42px;
             height: 42px;
@@ -114,14 +99,8 @@
             position: relative;
         }
 
-        .nav-link-lg:hover {
-            background-color: rgba(0, 135, 81, 0.1);
-        }
-
-        .nav-link-lg i {
-            width: 20px;
-            height: 20px;
-        }
+        .nav-link-lg:hover { background-color: rgba(0, 135, 81, 0.1); }
+        .nav-link-lg i { width: 20px; height: 20px; }
 
         /* Barre de recherche améliorée */
         .search-element {
@@ -170,10 +149,7 @@
         }
 
         /* Dropdowns notifications & messages */
-        .dropdown-list-toggle {
-            position: relative;
-        }
-
+        .dropdown-list-toggle { position: relative; }
         .dropdown-list-toggle .nav-link {
             width: 42px;
             height: 42px;
@@ -185,9 +161,7 @@
             position: relative;
         }
 
-        .dropdown-list-toggle .nav-link:hover {
-            background-color: rgba(0, 135, 81, 0.1);
-        }
+        .dropdown-list-toggle .nav-link:hover { background-color: rgba(0, 135, 81, 0.1); }
 
         /* Badge de compteur */
         .badge-sm {
@@ -216,9 +190,7 @@
             min-height: 52px;
         }
 
-        .nav-link-user:hover {
-            background-color: rgba(0, 135, 81, 0.05);
-        }
+        .nav-link-user:hover { background-color: rgba(0, 135, 81, 0.05); }
 
         .nav-link-user .rounded-circle,
         .nav-link-user .avatar-initial {
@@ -337,9 +309,7 @@
             text-decoration: none;
         }
 
-        .dropdown-footer a:hover {
-            text-decoration: underline;
-        }
+        .dropdown-footer a:hover { text-decoration: underline; }
 
         .dropdown-list-content {
             max-height: 320px;
@@ -348,61 +318,25 @@
         }
 
         /* Scroll personnalisé */
-        .dropdown-list-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .dropdown-list-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .dropdown-list-content::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 3px;
-        }
-
-        .dropdown-list-content::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0;
-        }
+        .dropdown-list-content::-webkit-scrollbar { width: 6px; }
+        .dropdown-list-content::-webkit-scrollbar-track { background: #f1f1f1; }
+        .dropdown-list-content::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
+        .dropdown-list-content::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 
         /* Responsive */
         @media (max-width: 991px) {
-            .main-navbar {
-                padding: 0 15px;
-            }
-
-            .search-element {
-                max-width: 250px;
-            }
-
-            .nav-link-user .d-lg-inline-block {
-                display: none !important;
-            }
-
-            .navbar-right {
-                gap: 8px !important;
-            }
+            .main-navbar { padding: 0 15px; }
+            .search-element { max-width: 250px; }
+            .nav-link-user .d-lg-inline-block { display: none !important; }
+            .navbar-right { gap: 8px !important; }
         }
 
         @media (max-width: 767px) {
-            .main-navbar {
-                height: 60px;
-            }
-
-            .nav-link-lg {
-                width: 38px;
-                height: 38px;
-            }
-
+            .main-navbar { height: 60px; }
+            .nav-link-lg { width: 38px; height: 38px; }
             .nav-link-user .avatar-initial,
-            .nav-link-user .rounded-circle {
-                width: 36px;
-                height: 36px;
-            }
-
-            .dropdown-list {
-                min-width: 300px;
-            }
+            .nav-link-user .rounded-circle { width: 36px; height: 36px; }
+            .dropdown-list { min-width: 300px; }
         }
 
         /* Animation des icônes */
@@ -412,16 +346,13 @@
             20%, 40% { transform: rotate(10deg); }
         }
 
-        .notification-toggle:hover i {
-            animation: bellRing 0.5s ease-in-out;
-        }
+        .notification-toggle:hover i { animation: bellRing 0.5s ease-in-out; }
 
         /* État actif */
         .navbar-nav li.active .nav-link {
             background-color: rgba(0, 135, 81, 0.1);
             color: var(--benin-green);
         }
-        
     </style>
 </head>
 
@@ -522,7 +453,7 @@
                             @if($user->profile_photo_url ?? false)
                                 <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
                             @else
-                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor, 0, 6) }}, #{{ substr($bgColor, 2, 6) }});">
+                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor,0,6) }}, #{{ substr($bgColor,2,6) }});">
                                     {{ $initials }}
                                 </div>
                             @endif
@@ -599,68 +530,41 @@
         </div>
     </div>
 
-   <!-- General JS Scripts -->
-<script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+    <!-- General JS Scripts -->
+    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
 
-<!-- JS Libraries -->
-<script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
-<script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
-<script src="{{ asset('admin-assets/bundles/izitoast/js/iziToast.min.js') }}"></script>
-<script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
-<script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
+    <!-- JS Libraries -->
+    <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/izitoast/js/iziToast.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
-<!-- Feather Icons (HTTPS externe) -->
-<script src="https://unpkg.com/feather-icons"></script>
+    <!-- Feather Icons (HTTPS externe) -->
+    <script src="https://unpkg.com/feather-icons"></script>
 
-<!-- Template JS -->
-<script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
-<script src="{{ asset('admin-assets/js/custom.js') }}"></script>
+    <!-- Template JS -->
+    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
 
-<!-- Initialisation Feather Icons -->
-<script>
-    feather.replace();
-</script>
-
-<!-- CSRF global pour AJAX -->
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    });
-</script>
-
-<!-- Scripts pushés par les vues -->
-@stack('scripts')
-
+    <!-- Initialisation Feather Icons -->
     <script>
-    $(document).ready(function() {
-        // Initialiser les dropdowns du sidebar
-        $('.nav-link.has-dropdown').on('click', function(e) {
-            e.preventDefault();
-            var $this = $(this);
-            
-            // Fermer les autres dropdowns ouverts
-            if (!$this.next('.dropdown-menu').hasClass('show')) {
-                $('.dropdown-menu.show').removeClass('show');
-                $('.nav-link.has-dropdown.active').removeClass('active');
-            }
-            
-            // Toggle le menu actuel
-            $this.next('.dropdown-menu').toggleClass('show');
-            $this.toggleClass('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
         });
-        
-        // Garder le dropdown ouvert si on est sur une page enfant
-        @if(request()->is('admin/orders*'))
-            $('.dropdown:has(a[href*="orders"])').addClass('active');
-            $('.dropdown:has(a[href*="orders"]) .dropdown-menu').addClass('show');
-        @endif
-    });
- </script>
+    </script>
 
-    <!-- Scripts pushés depuis les vues -->
+    <!-- CSRF global pour AJAX -->
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+    </script>
+
+    <!-- Scripts pushés par les vues -->
     @stack('scripts')
 </body>
 </html>
