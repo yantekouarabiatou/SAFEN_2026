@@ -5,32 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
     <title>@yield('title', 'Administration') - TOTCHEMEGNON Admin</title>
 
-    <!-- General CSS Files -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
+    <!-- Remplace TOUS les liens comme ça -->
 
-    <!-- Template CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom style CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- SweetAlert CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/sweetalert/sweetalert.css') }}">
+<!-- Tes assets locaux – TOUJOURS avec asset() -->
+<link rel="stylesheet" href="{{ asset('admin-assets/css/app.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/css/components.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
 
-    <!-- iziToast CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/izitoast/css/iziToast.min.css') }}">
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
 
-    <!-- Select2 CSS -->
-    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
+<!-- SweetAlert CSS -->
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/sweetalert/sweetalert.css') }}">
 
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
+<!-- iziToast CSS -->
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/izitoast/css/iziToast.min.css') }}">
 
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
+
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin-assets/img/favicon.ico') }}">
     <!-- Styles pushés depuis les vues -->
     @stack('styles')
 
@@ -520,7 +526,7 @@
                             @if($user->profile_photo_url ?? false)
                                 <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
                             @else
-                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor,0,6) }}, #{{ substr($bgColor,2,6) }});">
+                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor, 0, 6) }}, #{{ substr($bgColor, 2, 6) }});">
                                     {{ $initials }}
                                 </div>
                             @endif
@@ -601,14 +607,16 @@
     <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
 
     <!-- JS Libraries -->
-    <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
-    <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('admin-assets/bundles/izitoast/js/iziToast.min.js') }}"></script>
-    <script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
-    <script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/sweetalert/sweetalert.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/izitoast/js/iziToast.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/select2/dist/js/select2.full.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
+<script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
+<script src="{{ asset('admin-assets/js/custom.js') }}"></script>
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
