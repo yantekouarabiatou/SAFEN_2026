@@ -777,15 +777,19 @@
     </div>
 @endsection
 
-@push('scripts')
-    <!-- Vos scripts existants -->
-    <script>
-        // ... garde tous tes scripts (toggleFavorite, addToCart, speakText, etc.)
-        // Assure-toi que jQuery est chargé AVANT ces scripts
-    </script>
-@endpush
+
 
 @push('scripts')
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Google Maps (si utilisé) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&libraries=places"></script>
+
+    <!-- jQuery ici → juste avant tes scripts personnalisés -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+
     <script>
         function resetFilters() {
             window.location.href = "{{ route('products.index') }}";
