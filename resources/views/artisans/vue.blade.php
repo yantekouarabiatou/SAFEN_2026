@@ -521,7 +521,7 @@ nav[aria-label] ul.pagination li.disabled a {
             <h1>{{ __('artisans.title') }}</h1>
             <p>{{ __('Liste des artisans') }}</p>
         </div>
-        <a href="{{ route('artisans.create') }}" class="btn-become">
+        <a href="{{ route('admin.artisans.create') }}" class="btn-become">
             <i class="bi bi-hammer me-1"></i>
             {{ __('artisans.become_artisan') ?? 'Devenir artisan' }}
         </a>
