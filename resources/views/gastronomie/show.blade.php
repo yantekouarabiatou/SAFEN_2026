@@ -864,7 +864,7 @@
         @if($dish->images->first())
             <img src="{{ asset($dish->images->first()->image_url) }}" alt="{{ $dish->name }}" class="dish-hero-image">
         @else
-            <img src="{{ asset('images/default-dish.jpg') }}" alt="{{ $dish->name }}" class="dish-hero-image">
+            <img src="{{ asset('dishes/Bénin.jpg') }}" alt="{{ $dish->name }}" class="dish-hero-image">
         @endif
 
         <div class="dish-hero-overlay">
