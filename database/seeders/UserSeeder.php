@@ -2,20 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Artisan;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Créer / Vérifier les rôles AVANT tout
-        $this->createRoles();
+        // ✅ Vider le cache Spatie avant toute assignation
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 2. Super Admin
+        // ─────────────────────────────────────────────
+        // 1. SUPER ADMIN
+        // ─────────────────────────────────────────────
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
@@ -25,9 +27,11 @@ class UserSeeder extends Seeder
                 'city'     => 'Cotonou',
             ]
         );
-        $superAdmin->assignRole('super-admin');
+        $superAdmin->syncRoles('super-admin');
 
-        // 3. Admin classique
+        // ─────────────────────────────────────────────
+        // 2. ADMIN
+        // ─────────────────────────────────────────────
         $admin = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
@@ -37,77 +41,85 @@ class UserSeeder extends Seeder
                 'city'     => 'Cotonou',
             ]
         );
-        $admin->assignRole('admin');
+        $admin->syncRoles('admin');
 
-        // 4. Artisans (avec profil Artisan)
+        // ─────────────────────────────────────────────
+        // 3. ARTISANS (5 comptes + profil Artisan)
+        // ─────────────────────────────────────────────
         $crafts = [
             'tisserand', 'bijoutier', 'sculpteur', 'potier', 'couturier',
             'forgeron', 'menuisier', 'tanneur', 'coiffeur', 'autre',
         ];
 
+        $cities = ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'];
+
         foreach (range(1, 5) as $i) {
+            $city = $cities[array_rand($cities)];
+
             $user = User::firstOrCreate(
-                ['email' => "artisan$i@example.com"],
+                ['email' => "artisan{$i}@example.com"],
                 [
-                    'name'     => "Artisan $i",
+                    'name'     => "Artisan {$i}",
                     'password' => Hash::make('password'),
                     'phone'    => '+2296' . rand(1000000, 9999999),
-                    'city'     => ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'][array_rand(['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Ouidah'])],
+                    'city'     => $city,
                 ]
             );
 
-            $user->assignRole('artisan');
+            // ✅ syncRoles évite les doublons si le seeder tourne plusieurs fois
+            $user->syncRoles('artisan');
 
-            // Créer le profil artisan associé
+            // Profil artisan lié
             Artisan::firstOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'business_name' => "Atelier de " . $user->name,
+                    'business_name' => "Atelier de {$user->name}",
                     'craft'         => $crafts[array_rand($crafts)],
-                    'city'          => $user->city,
-                    'status'        => 'approved', // ou 'pending' selon ta logique
+                    'city'          => $city,
+                    'status'        => 'approved',
                 ]
             );
         }
 
-        // 5. Clients simples
+        // ─────────────────────────────────────────────
+        // 4. VENDORS (3 comptes)
+        // ─────────────────────────────────────────────
+        foreach (range(1, 3) as $i) {
+            $user = User::firstOrCreate(
+                ['email' => "vendor{$i}@example.com"],
+                [
+                    'name'     => "Vendeur {$i}",
+                    'password' => Hash::make('password'),
+                    'phone'    => '+2296' . rand(1000000, 9999999),
+                    'city'     => $cities[array_rand($cities)],
+                ]
+            );
+
+            $user->syncRoles('vendor');
+        }
+
+        // ─────────────────────────────────────────────
+        // 5. CLIENTS (10 comptes)
+        // ─────────────────────────────────────────────
         foreach (range(1, 10) as $i) {
             $user = User::firstOrCreate(
-                ['email' => "client$i@safen.bj"],
+                ['email' => "client{$i}@safen.bj"],
                 [
-                    'name'     => "Client $i",
+                    'name'     => "Client {$i}",
                     'password' => Hash::make('client123'),
                     'phone'    => '+2296' . rand(1000000, 9999999),
-                    'city'     => ['Cotonou', 'Porto-Novo', 'Parakou'][rand(0, 2)],
+                    'city'     => $cities[array_rand($cities)],
                 ]
             );
 
-            $user->assignRole('client');
+            $user->syncRoles('client');
         }
 
-        $this->command->info('Utilisateurs créés : ' . User::count());
-        $this->command->info('Profils artisans créés : ' . Artisan::count());
-        $this->command->info('Rôles assignés avec succès.');
-    }
-
-    /**
-     * Créer tous les rôles nécessaires si ils n'existent pas
-     */
-    private function createRoles(): void
-    {
-        $roles = [
-            'super-admin',
-            'admin',
-            'artisan',
-            'vendor',
-            'client',
-            // Ajoute ici tous les rôles que tu utilises dans ton projet
-        ];
-
-        foreach ($roles as $roleName) {
-            Role::firstOrCreate(['name' => $roleName]);
-        }
-
-        $this->command->info('Rôles de base vérifiés/créés (' . count($roles) . ').');
+        // ─────────────────────────────────────────────
+        // Résumé
+        // ─────────────────────────────────────────────
+        $this->command->info('✅ Utilisateurs créés   : ' . User::count());
+        $this->command->info('✅ Profils artisans     : ' . Artisan::count());
+        $this->command->info('✅ Rôles assignés avec succès (syncRoles).');
     }
 }

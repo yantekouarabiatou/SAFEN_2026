@@ -11,13 +11,16 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset le cache des permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         DB::transaction(function () {
-            // ---------- PERMISSIONS EN FRANÇAIS ----------
+
+            // ─────────────────────────────────────────────
+            // PERMISSIONS
+            // ─────────────────────────────────────────────
             $permissions = [
-                // Artisans
+
+                // ── Artisans ──────────────────────────────
                 'voir artisans',
                 'créer artisans',
                 'modifier artisans',
@@ -25,7 +28,7 @@ class RolePermissionSeeder extends Seeder
                 'approuver artisans',
                 'gérer artisans',
 
-                // Produits artisanaux
+                // ── Produits artisanaux ───────────────────
                 'voir produits',
                 'créer produits',
                 'modifier produits',
@@ -33,7 +36,7 @@ class RolePermissionSeeder extends Seeder
                 'approuver produits',
                 'gérer produits',
 
-                // Vendeurs (gastronomie)
+                // ── Vendeurs ──────────────────────────────
                 'voir vendeurs',
                 'créer vendeurs',
                 'modifier vendeurs',
@@ -41,7 +44,7 @@ class RolePermissionSeeder extends Seeder
                 'approuver vendeurs',
                 'gérer vendeurs',
 
-                // Plats / Gastronomie
+                // ── Plats / Gastronomie ───────────────────
                 'voir plats',
                 'créer plats',
                 'modifier plats',
@@ -49,111 +52,176 @@ class RolePermissionSeeder extends Seeder
                 'approuver plats',
                 'gérer plats',
 
-                // Utilisateurs
+                // ── Utilisateurs ──────────────────────────
                 'voir utilisateurs',
                 'créer utilisateurs',
                 'modifier utilisateurs',
                 'supprimer utilisateurs',
                 'gérer utilisateurs',
 
-                // Commandes (produits & plats)
+                // ── Commandes ─────────────────────────────
                 'voir commandes',
+                'créer commandes',
                 'modifier commandes',
                 'annuler commandes',
                 'gérer commandes',
+                'voir suivi livraison',           // NEW – client tracking
 
-                // Devis
+                // ── Devis ─────────────────────────────────
                 'voir devis',
+                'créer devis',
+                'modifier devis',
+                'supprimer devis',
                 'gérer devis',
 
-                // Événements culturels
+                // ── Événements culturels ──────────────────
                 'voir événements',
                 'créer événements',
                 'modifier événements',
                 'supprimer événements',
                 'gérer événements',
 
-                // Avis
+                // ── Avis ──────────────────────────────────
                 'voir avis',
                 'créer avis',
+                'modifier avis',
                 'modérer avis',
                 'supprimer avis',
                 'gérer avis',
 
-                // Messages / Contact
+                // ── Messages / Contact ─────────────────────
                 'voir messages',
+                'envoyer messages',               // NEW
                 'répondre messages',
                 'supprimer messages',
                 'gérer messages',
 
-                // Favoris (client)
+                // ── Favoris ───────────────────────────────
                 'gérer favoris',
 
-                // Analytics
-                'voir analytics',
+                // ── Profil ────────────────────────────────
+                'modifier profil artisan',        // NEW
+                'modifier profil vendeur',        // NEW
 
-                // Paramètres généraux
+                // ── Analytics ─────────────────────────────
+                'voir analytics',
+                'voir analytics artisan',         // NEW – artisan own stats
+                'voir analytics vendeur',         // NEW – vendor own stats
+
+                // ── Paramètres système ────────────────────
                 'gérer paramètres généraux',
                 'gérer paramètres paiement',
                 'gérer paramètres notifications',
 
-                // Rôles & permissions (super-admin uniquement)
+                // ── Rôles & permissions ───────────────────
                 'gérer rôles et permissions',
-                'access-admin',                  
 
+                // ── Accès interfaces ──────────────────────
+                'access-admin',
+                'access-artisan-dashboard',       // NEW
+                'access-vendor-dashboard',        // NEW
+                'access-client-dashboard',        // NEW
             ];
 
-            // Création des permissions
             foreach ($permissions as $perm) {
                 Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
             }
 
-            // ---------- RÔLES ET ASSIGNATIONS ----------
-            // Super Admin : toutes les permissions
+            // ─────────────────────────────────────────────
+            // RÔLES
+            // ─────────────────────────────────────────────
+
+            // ── Super Admin ───────────────────────────────
             $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
             $superAdmin->syncPermissions(Permission::all());
 
-            // Admin : tout sauf 'gérer rôles et permissions'
+            // ── Admin ─────────────────────────────────────
             $admin = Role::firstOrCreate(['name' => 'admin']);
-            $admin->syncPermissions(Permission::where('name', '!=', 'gérer rôles et permissions')->pluck('name'));
+            $admin->syncPermissions(
+                Permission::whereNotIn('name', ['gérer rôles et permissions'])->pluck('name')
+            );
 
-            // Artisan : gestion de ses propres produits, commandes, avis...
+            // ── Artisan ───────────────────────────────────
             $artisan = Role::firstOrCreate(['name' => 'artisan']);
             $artisan->syncPermissions([
+                'access-artisan-dashboard',
+                // Produits
                 'voir produits',
                 'créer produits',
                 'modifier produits',
+                'supprimer produits',       // ses propres produits (filtré en contrôleur)
+                // Commandes
                 'voir commandes',
+                'modifier commandes',
                 'gérer commandes',
+                // Devis
+                'voir devis',
+                'modifier devis',
+                // Avis
                 'voir avis',
+                'modifier avis',            // répondre aux avis
+                // Messages
+                'voir messages',
+                'envoyer messages',
                 'répondre messages',
-                'gérer favoris', // optionnel
+                // Profil
+                'modifier profil artisan',
+                // Analytics
+                'voir analytics artisan',
             ]);
 
-            // Vendor : gestion de ses plats, commandes...
+            // ── Vendor ────────────────────────────────────
             $vendor = Role::firstOrCreate(['name' => 'vendor']);
             $vendor->syncPermissions([
+                'access-vendor-dashboard',
+                // Plats
                 'voir plats',
                 'créer plats',
                 'modifier plats',
+                'supprimer plats',          // ses propres plats (filtré en contrôleur)
+                // Commandes
                 'voir commandes',
+                'modifier commandes',
                 'gérer commandes',
+                // Avis
                 'voir avis',
+                'modifier avis',
+                // Messages
+                'voir messages',
+                'envoyer messages',
                 'répondre messages',
+                // Profil
+                'modifier profil vendeur',
+                // Analytics
+                'voir analytics vendeur',
             ]);
 
-            // Client : voir produits/plats, gérer favoris, laisser avis
+            // ── Client ────────────────────────────────────
             $client = Role::firstOrCreate(['name' => 'client']);
             $client->syncPermissions([
+                'access-client-dashboard',
+                // Produits & Plats
                 'voir produits',
                 'voir plats',
+                // Commandes
+                'voir commandes',
+                'créer commandes',
+                'annuler commandes',
+                'voir suivi livraison',
+                // Devis
+                'voir devis',
+                'créer devis',
+                // Favoris
                 'gérer favoris',
+                // Avis
                 'voir avis',
                 'créer avis',
-                'voir commandes',
+                // Messages
+                'voir messages',
+                'envoyer messages',
             ]);
 
-            $this->command->info('✅ Rôles et permissions créés/mis à jour en français.');
+            $this->command->info('✅ Rôles et permissions créés/mis à jour avec succès.');
         });
     }
 }

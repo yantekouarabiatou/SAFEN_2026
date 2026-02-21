@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
             public function boot(UrlGenerator $url)
     {
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         // Force HTTPS sur Render (et tout environnement de production)
         if (config('app.env') === 'production' || $this->app->environment('production')) {
             URL::forceScheme('https');

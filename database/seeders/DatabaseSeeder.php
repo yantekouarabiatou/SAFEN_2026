@@ -3,19 +3,18 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run()
     {
         $this->call([
-            UserSeeder::class,
-            RolePermissionSeeder::class,
+            RolePermissionSeeder::class, // ✅ 1. Permissions & rôles D'ABORD
+            UserSeeder::class,           // ✅ 2. Utilisateurs avec rôles déjà définis
             ArtisanSeeder::class,
-            ProductSeeder::class,
             DishSeeder::class,
-            VendorSeeder::class,
+            VendorSeeder::class,         // avant DishSeeder (clé étrangère)
+            ProductSeeder::class,
             CulturalEventSeeder::class,
         ]);
     }

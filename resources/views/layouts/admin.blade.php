@@ -499,16 +499,8 @@
             </nav>
 
             <!-- Sidebar conditionnelle -->
-            @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin'))
                 @include('admin.partials.sidebar')
-            @elseif(auth()->user()->hasRole('artisan'))
-                @include('admin.partials.sidebar-artisan')
-            @elseif(auth()->user()->hasRole('vendor'))
-                @include('admin.partials.sidebar-vendor')
-            @else
-                @include('admin.partials.sidebar')
-            @endif
-
+            
             <!-- Main Content -->
             <div class="main-content">
                 <section class="section">
