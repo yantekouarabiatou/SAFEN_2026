@@ -189,7 +189,7 @@
         .navbar-afri .nav-link {
             color: var(--charcoal) !important;
             font-weight: 500;
-            /* margin: 0 0.5rem; */
+            margin: 0 0.5rem;
             padding: 0.5rem 1rem !important;
             border-radius: 8px;
             transition: all 0.3s ease;
