@@ -26,8 +26,10 @@ class ArtisanPhoto extends Model
         return $this->belongsTo(Artisan::class);
     }
 
+
     public function getFullUrlAttribute()
     {
-        return Storage::url($this->photo_url);
+        // Option 1 : utiliser asset() si vos fichiers sont dans public/storage
+        return asset('storage/' . $this->photo_url);
     }
 }

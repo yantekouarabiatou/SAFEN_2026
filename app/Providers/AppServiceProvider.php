@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\UrlGenerator;
+use Illuminate\Support\Facades\URL;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -20,8 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
             public function boot(UrlGenerator $url)
     {
-        if (env('APP_ENV') == 'production') {
-            $url->forceScheme('https');
+        // Force HTTPS sur Render (et tout environnement de production)
+        if (config('app.env') === 'production' || $this->app->environment('production')) {
+            URL::forceScheme('https');
         }
     
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {

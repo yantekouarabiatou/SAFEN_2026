@@ -446,15 +446,15 @@
                 <!-- Quick Stats avec animation -->
                 <div class="row g-4 mt-2">
                     <div class="col-6 col-md-3">
-                        <div class="counter" data-target="150">0</div>
+                        <div class="counter" data-target="{{ $stats['artisans'] }}">{{ $stats['artisans'] }}</div>
                         <small class="text-white-50 d-block">Artisans</small>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="counter" data-target="500">0</div>
+                        <div class="counter" data-target="{{ $stats['products'] }}">{{ $stats['products'] }}</div>
                         <small class="text-white-50 d-block">Produits</small>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="counter" data-target="75">0</div>
+                        <div class="counter" data-target="{{ $stats['dishes'] }}">{{ $stats['dishes'] }}</div>
                         <small class="text-white-50 d-block">Plats</small>
                     </div>
                     <div class="col-6 col-md-3">

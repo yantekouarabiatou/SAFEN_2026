@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Gastronomie Béninoise - AFRI-HERITAGE')
+@section('title', 'Gastronomie Béninoise - TOTCHEMEGNON')
 
 @push('styles')
 <style>

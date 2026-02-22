@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('artisan_create.form_title') . ' - AFRI-HERITAGE Bénin')
+@section('title', __('artisan_create.form_title') . ' - TOTCHEMEGNON')
 
 @push('styles')
     <style>

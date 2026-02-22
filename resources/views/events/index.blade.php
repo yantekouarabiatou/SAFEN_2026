@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Événements Culturels - AFRI-HERITAGE')
+@section('title', 'Événements Culturels - TOTCHEMEGNON')
 
 @push('styles')
 <style>

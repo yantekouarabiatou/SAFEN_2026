@@ -15,6 +15,13 @@ class HomeController extends Controller
 {
     public function index()
     {
+         // Statistiques
+        $stats = [
+            'artisans' => Artisan::count(),
+            'products' => Product::count(),
+            'dishes' => Dish::count(),
+            'regions' => Product::distinct('ethnic_origin')->count()
+        ];
         $featuredProducts = Product::with(['artisan.user', 'primaryImage'])
             ->where('featured', true)
             ->where('stock_status', 'in_stock')
@@ -31,7 +38,7 @@ class HomeController extends Controller
         // Récupérer les témoignages dynamiques
         $testimonials = $this->getTestimonials();
 
-        return view('home', compact('featuredProducts', 'featuredArtisans', 'testimonials'));
+        return view('home', compact('featuredProducts', 'featuredArtisans', 'testimonials','stats'));
     }
 
     /**
