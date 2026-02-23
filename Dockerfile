@@ -38,24 +38,31 @@ WORKDIR /var/www/html
 # Copie du code source
 COPY . .
 
-# Installation des dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --verbose --profile || true
-# Permissions Laravel
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Création des dossiers Laravel nécessaires
+RUN mkdir -p storage/logs \
+             storage/framework/sessions \
+             storage/framework/views \
+             storage/framework/cache/data \
+             bootstrap/cache
 
-# Configuration PHP-FPM pour écouter sur 127.0.0.1:9000
-RUN sed -i 's|;listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
+# Installation des dépendances Composer
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Permissions Laravel (après composer pour ne pas être écrasées)
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage/framework/cache/data
+
+# Configuration PHP-FPM
+RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
     && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf || true
 
-# Script de démarrage exécutable
+# Script de démarrage
 RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
 
 # Configuration Nginx
 COPY docker/nginx.conf /etc/nginx/sites-enabled/default
 
-# Exposition du port
 EXPOSE 80
 
-# Démarrage
 CMD ["/var/www/html/scripts/00-laravel-deploy.sh"]

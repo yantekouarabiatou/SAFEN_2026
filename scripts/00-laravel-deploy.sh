@@ -3,35 +3,20 @@ set -euo pipefail
 
 cd /var/www/html
 
-echo "==> Création des dossiers nécessaires"
-mkdir -p storage/logs \
-         storage/framework/sessions \
-         storage/framework/views \
-         storage/framework/cache/data \
-         bootstrap/cache
-
-echo "==> Création du fichier de log"
-touch storage/logs/laravel.log
-
-echo "==> Permissions storage & cache"
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-
-echo "==> Cache config Laravel"
+echo "==> Clear des caches"
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
 
-echo "==> Migrations (fresh + seeds)"
+echo "==> Migrations + Seeds"
 php artisan migrate:fresh --seed --force
 
 echo "==> Lien storage"
 php artisan storage:link --force || true
 
-echo "==> Démarrage PHP-FPM en arrière-plan"
+echo "==> Démarrage PHP-FPM"
 php-fpm -D
 
-echo "==> Attente PHP-FPM..."
 sleep 3
 
 echo "==> Démarrage Nginx"
