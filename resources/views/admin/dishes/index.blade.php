@@ -1,261 +1,303 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion de la gastronomie')
+@section('title', 'Liste des Plats')
+
+@push('styles')
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+
+    <!-- Boutons DataTables (export) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+
+    <style>
+        .table th, .table td {
+            vertical-align: middle !important;
+        }
+
+        .dish-img {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .dish-img-placeholder {
+            width: 60px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--benin-green), #006d40);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.4rem 0.8rem !important;
+            margin: 0 2px !important;
+            border-radius: 6px !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: var(--benin-green) !important;
+            color: white !important;
+            border-color: var(--benin-green) !important;
+        }
+
+        .toggle-featured-label {
+            cursor: pointer;
+        }
+    </style>
+@endpush
 
 @section('content')
-<div class="section-header">
-    <h1>Gastronomie</h1>
-    <div class="section-header-breadcrumb">
-        <div class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></div>
-        <div class="breadcrumb-item active">Gastronomie</div>
+    <div class="section-header">
+        <h1>
+            <i data-feather="coffee" class="mr-2"></i> Liste des Plats
+        </h1>
+        <div class="section-header-breadcrumb">
+            <div class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></div>
+            <div class="breadcrumb-item active">Plats</div>
+        </div>
     </div>
-</div>
 
-<div class="section-body">
-    {{-- Filtres --}}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-filter"></i> Filtres</h4>
-                    <div class="card-header-action">
-                        <a href="{{ route('admin.dishes.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Ajouter un plat
+    <div class="section-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>Plats enregistrés</h4>
+                        <a href="{{ route('admin.dishes.create') }}" class="btn btn-benin-green btn-icon icon-left">
+                            <i data-feather="plus-circle"></i> Ajouter un plat
                         </a>
                     </div>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.dishes.index') }}" method="GET" class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Recherche</label>
-                                <input type="text" name="search" class="form-control" 
-                                       value="{{ request('search') }}" placeholder="Nom du plat...">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Catégorie</label>
-                                <select name="category" class="form-control">
-                                    <option value="">Toutes</option>
-                                    @foreach($categories as $key => $label)
-                                        <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Région</label>
-                                <select name="region" class="form-control">
-                                    <option value="">Toutes</option>
-                                    @foreach($regions as $region)
-                                        <option value="{{ $region }}" {{ request('region') == $region ? 'selected' : '' }}>
-                                            {{ $region }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Vedette</label>
-                                <select name="featured" class="form-control">
-                                    <option value="">Tous</option>
-                                    <option value="1" {{ request('featured') == '1' ? 'selected' : '' }}>Oui</option>
-                                    <option value="0" {{ request('featured') == '0' ? 'selected' : '' }}>Non</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="fas fa-search"></i> Filtrer
-                                </button>
-                                <a href="{{ route('admin.dishes.index') }}" class="btn btn-secondary">
-                                    <i class="fas fa-undo"></i> Réinitialiser
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    {{-- Liste des plats --}}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Liste des plats ({{ $dishes->total() }})</h4>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Plat</th>
-                                    <th>Catégorie</th>
-                                    <th>Région</th>
-                                    <th>Prix</th>
-                                    <th>Préparation</th>
-                                    <th>Vedette</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($dishes as $dish)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            @php
-                                                $image = $dish->images->where('is_primary', true)->first() ?? $dish->images->first();
-                                            @endphp
-                                            <img src="{{ $image ? asset($image->image_url) : asset('admin-assets/img/example-image.jpg') }}" 
-                                                 alt="{{ $dish->name }}" 
-                                                 class="rounded mr-3" width="60" height="45" style="object-fit: cover;">
-                                            <div>
-                                                <strong>{{ $dish->name }}</strong>
-                                                @if($dish->name_local)
-                                                    <br><small class="text-muted">{{ $dish->name_local }}</small>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="dishesTable" class="table table-striped table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Nom</th>
+                                        <th>Catégorie</th>
+                                        <th>Région</th>
+                                        <th>Prix (FCFA)</th>
+                                        <th>Préparation</th>
+                                        <th>Vedette</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($dishes as $dish)
+                                        @php
+                                            $image = $dish->images->where('is_primary', true)->first() ?? $dish->images->first();
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                @if($image)
+                                                    <img src="{{ asset($image->image_url) }}"
+                                                         alt="{{ $dish->name }}"
+                                                         class="dish-img">
+                                                @else
+                                                    <div class="dish-img-placeholder">
+                                                        {{ strtoupper(substr($dish->name, 0, 2)) }}
+                                                    </div>
                                                 @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge badge-info">{{ $dish->category }}</span></td>
-                                    <td>{{ $dish->region ?? '-' }}</td>
-                                    <td>
-                                        <span class="font-weight-bold">{{ number_format($dish->price, 0, ',', ' ') }} FCFA</span>
-                                    </td>
-                                    <td>
-                                        @if($dish->preparation_time)
-                                            <i class="fas fa-clock"></i> {{ $dish->preparation_time }} min
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <label class="custom-switch">
-                                            <input type="checkbox" class="custom-switch-input toggle-featured" 
-                                                   data-id="{{ $dish->id }}" {{ $dish->featured ? 'checked' : '' }}>
-                                            <span class="custom-switch-indicator"></span>
-                                        </label>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.dishes.show', $dish) }}" 
-                                               class="btn btn-sm btn-info" title="Voir">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.dishes.edit', $dish) }}" 
-                                               class="btn btn-sm btn-warning" title="Modifier">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger btn-delete" 
-                                                    data-id="{{ $dish->id }}" title="Supprimer">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon bg-light">
-                                                <i class="fas fa-utensils"></i>
-                                            </div>
-                                            <h2>Aucun plat</h2>
-                                            <p class="lead">Aucun plat ne correspond à vos critères.</p>
-                                            <a href="{{ route('admin.dishes.create') }}" class="btn btn-primary">
-                                                <i class="fas fa-plus"></i> Ajouter un plat
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                            </td>
+                                            <td>
+                                                <div class="font-weight-bold">{{ $dish->name }}</div>
+                                                @if($dish->name_local)
+                                                    <small class="text-muted">{{ $dish->name_local }}</small>
+                                                @endif
+                                                @if($dish->vendor)
+                                                    <br><small class="text-muted">
+                                                        <i data-feather="store" style="width:12px;height:12px;"></i>
+                                                        {{ $dish->vendor->name }}
+                                                    </small>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ $dish->category }}</span>
+                                            </td>
+                                            <td>{{ $dish->region ?? '-' }}</td>
+                                            <td>
+                                                <span class="font-weight-bold">
+                                                    {{ number_format($dish->price, 0, ',', ' ') }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($dish->preparation_time)
+                                                    <i data-feather="clock" style="width:14px;height:14px;"></i>
+                                                    {{ $dish->preparation_time }} min
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <label class="custom-switch toggle-featured-label mb-0">
+                                                    <input type="checkbox"
+                                                           class="custom-switch-input toggle-featured"
+                                                           data-id="{{ $dish->id }}"
+                                                           {{ $dish->featured ? 'checked' : '' }}>
+                                                    <span class="custom-switch-indicator"></span>
+                                                </label>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ route('admin.dishes.show', $dish) }}"
+                                                       class="btn btn-info"
+                                                       title="Voir">
+                                                        <i data-feather="eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('admin.dishes.edit', $dish) }}"
+                                                       class="btn btn-warning"
+                                                       title="Modifier">
+                                                        <i data-feather="edit"></i>
+                                                    </a>
+                                                    <button type="button"
+                                                            class="btn btn-danger delete-dish-btn"
+                                                            data-id="{{ $dish->id }}"
+                                                            data-name="{{ $dish->name }}"
+                                                            title="Supprimer">
+                                                        <i data-feather="trash-2"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                @if($dishes->hasPages())
-                <div class="card-footer">
-                    {{ $dishes->withQueryString()->links() }}
-                </div>
-                @endif
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    // Toggle featured
-    $('.toggle-featured').change(function() {
-        var dishId = $(this).data('id');
-        var featured = $(this).is(':checked') ? 1 : 0;
-        
-        $.ajax({
-            url: '{{ route("admin.dishes.index") }}/' + dishId + '/toggle-featured',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                featured: featured
-            },
-            success: function(response) {
-                iziToast.success({
-                    title: 'Succès',
-                    message: response.message,
-                    position: 'topRight'
-                });
-            },
-            error: function() {
-                iziToast.error({
-                    title: 'Erreur',
-                    message: 'Une erreur est survenue.',
-                    position: 'topRight'
-                });
-            }
-        });
-    });
-    
-    // Delete
-    $('.btn-delete').click(function() {
-        var dishId = $(this).data('id');
-        
-        Swal.fire({
-            title: 'Supprimer ce plat ?',
-            text: "Cette action est irréversible !",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Oui, supprimer',
-            cancelButtonText: 'Annuler'
-        }).then((result) => {
-            if (result.isConfirmed) {
+    <!-- DataTables JS -->
+    <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
+
+    <!-- DataTables Buttons (export) -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // ─── DataTable ────────────────────────────────────────────────────
+            let table = $('#dishesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
+                },
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: '<i data-feather="copy"></i> Copier',
+                        className: 'btn btn-secondary btn-sm'
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i data-feather="file-text"></i> Excel',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i data-feather="file"></i> PDF',
+                        className: 'btn btn-danger btn-sm'
+                    },
+                    
+                ],
+                columnDefs: [
+                    { orderable: false, targets: [0, 6, 7] } // Image, Vedette, Actions non triables
+                ]
+            });
+
+            // ─── Toggle Vedette ───────────────────────────────────────────────
+            $('#dishesTable').on('change', '.toggle-featured', function () {
+                const dishId  = $(this).data('id');
+                const featured = $(this).is(':checked') ? 1 : 0;
+                const $toggle  = $(this);
+
                 $.ajax({
-                    url: '{{ route("admin.dishes.index") }}/' + dishId,
-                    type: 'DELETE',
+                    url: '/admin/dishes/' + dishId + '/toggle-featured',
+                    type: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}'
+                        _token: '{{ csrf_token() }}',
+                        featured: featured
                     },
-                    success: function(response) {
-                        Swal.fire('Supprimé!', 'Le plat a été supprimé.', 'success')
-                            .then(() => location.reload());
+                    success: function (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Mis à jour',
+                            text: response.message ?? 'Statut vedette modifié.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                     },
-                    error: function(xhr) {
-                        Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue.', 'error');
+                    error: function () {
+                        // Remettre le toggle à son état initial en cas d'erreur
+                        $toggle.prop('checked', !featured);
+                        Swal.fire('Erreur', 'Impossible de modifier le statut.', 'error');
                     }
                 });
-            }
+            });
+
+            // ─── Suppression ──────────────────────────────────────────────────
+            $('#dishesTable').on('click', '.delete-dish-btn', function () {
+                const id   = $(this).data('id');
+                const name = $(this).data('name');
+
+                Swal.fire({
+                    title: 'Supprimer ce plat ?',
+                    text: `Le plat "${name}" sera supprimé définitivement.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Oui, supprimer',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '{{ route("admin.dishes.destroy", ":id") }}'.replace(':id', id),
+                            type: 'DELETE',
+                            data: { _token: '{{ csrf_token() }}' },
+                            success: function () {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Supprimé !',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => location.reload());
+                            },
+                            error: function (xhr) {
+                                Swal.fire('Erreur', xhr.responseJSON?.message ?? 'Impossible de supprimer.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // ─── Rafraîchir Feather icons après rendu DataTables ─────────────
+            table.on('draw', function () {
+                feather.replace();
+            });
+
+            feather.replace();
         });
-    });
-});
-</script>
+    </script>
 @endpush

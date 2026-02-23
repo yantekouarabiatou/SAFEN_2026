@@ -443,6 +443,62 @@
             background-color: rgba(0, 135, 81, 0.1);
             color: var(--benin-green);
         }
+        /* ── Popup Bénin ───────────────────────────────── */
+        .swal-benin-popup {
+            border-radius: 14px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            padding: 28px 24px 20px !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,.14) !important;
+            border-top: 4px solid var(--benin-green, #008751) !important;
+        }
+
+        .swal-benin-title {
+            font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif !important;
+            font-size: 1.35rem !important;
+            color: #181a18 !important;
+        }
+
+        /* Bouton succès vert */
+        .swal-benin-confirm {
+            background: #008751 !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            box-shadow: 0 3px 12px rgba(0,135,81,.25) !important;
+            border: none !important;
+            color: #fff !important;
+        }
+        .swal-benin-confirm:hover { opacity: .88 !important; }
+
+        /* Bouton erreur rouge */
+        .swal-benin-confirm-danger {
+            background: #e8112d !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        /* Bouton warning jaune */
+        .swal-benin-confirm-warning {
+            background: #fcd116 !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            border: none !important;
+            color: #181a18 !important;
+        }
+
+        /* Bordure top adaptée à l'icône */
+        .swal2-icon.swal2-error   ~ .swal-benin-popup { border-top-color: #e8112d !important; }
+        .swal2-icon.swal2-warning ~ .swal-benin-popup { border-top-color: #fcd116 !important; }
     </style>
 </head>
 
@@ -533,17 +589,17 @@
                     <li class="dropdown">
                         <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-user">
                             @php
-                            $user = auth()->user();
-                            $initials = strtoupper(substr($user->prenom ?? 'U', 0, 1) . substr($user->nom ?? '', 0, 1));
-                            $bgColor = substr(md5($user->email), 0, 6);
+                                $user = auth()->user();
+                                $initials = strtoupper(substr($user->prenom ?? 'U', 0, 1) . substr($user->nom ?? '', 0, 1));
+                                $bgColor = substr(md5($user->email), 0, 6);
                             @endphp
 
                             @if($user->profile_photo_url ?? false)
-                            <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
+                                <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
                             @else
-                            <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor,0,6) }}, #{{ substr($bgColor,2,6) }});">
-                                {{ $initials }}
-                            </div>
+                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor, 0, 6) }}, #{{ substr($bgColor, 2, 6) }});">
+                                    {{ $initials }}
+                                </div>
                             @endif
 
                             <div class="d-none d-lg-inline-block">
@@ -653,9 +709,93 @@
             }
         });
     </script>
+    {{--
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  ALERTS FLASH — à inclure dans layouts/admin.blade.php       ║
+    ║  juste avant </body>, après le chargement de SweetAlert2     ║
+    ╚══════════════════════════════════════════════════════════════╝
 
+    Le controller renvoie :
+      ->with('success', '...')   succès création / mise à jour
+      ->with('error',   '...')   erreur DB / exception
+      + $errors (validation Laravel automatique)
+--}}
+
+    @if(session('success') || session('error') || $errors->any())
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            @if(session('success'))
+                // ── Succès ───────────────────────────────────────────────────
+                Swal.fire({
+                    title: 'Opération réussie',
+                    html: `<span style="font-size:.95rem;color:#3a3d38;">{{ session('success') }}</span>`,
+                    icon: 'success',
+                    confirmButtonColor: '#008751',
+                    confirmButtonText: 'Continuer',
+                    iconColor: '#008751',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm',
+                    }
+                });
+            @endif
+
+            @if(session('error'))
+                // ── Erreur serveur ───────────────────────────────────────────
+                Swal.fire({
+                    title: 'Une erreur est survenue',
+                    html: `<span style="font-size:.95rem;color:#3a3d38;">{{ session('error') }}</span>`,
+                    icon: 'error',
+                    confirmButtonColor: '#e8112d',
+                    confirmButtonText: 'Fermer',
+                    iconColor: '#e8112d',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm-danger',
+                    }
+                });
+            @endif
+
+            @if($errors->any())
+                // ── Erreurs de validation ────────────────────────────────────
+                const validationErrors = {!! json_encode($errors->all()) !!};
+                const errorList = validationErrors
+                    .map(e => `<li style="text-align:left;margin-bottom:4px;">• ${e}</li>`)
+                    .join('');
+
+                Swal.fire({
+                    title: 'Formulaire invalide',
+                    html: `
+                        <p style="font-size:.9rem;color:#6b7068;margin-bottom:10px;">
+                            Veuillez corriger les erreurs suivantes :
+                        </p>
+                        <ul style="list-style:none;padding:0;font-size:.88rem;color:#3a3d38;max-height:220px;overflow-y:auto;">
+                            ${errorList}
+                        </ul>
+                    `,
+                    icon: 'warning',
+                    confirmButtonColor: '#fcd116',
+                    confirmButtonText: 'Corriger',
+                    iconColor: '#fcd116',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm-warning',
+                    }
+                });
+            @endif
+
+        });
+        </script>
+
+
+    @endif
     <!-- Scripts pushés par les vues -->
     @stack('scripts')
+
 </body>
 
 </html>

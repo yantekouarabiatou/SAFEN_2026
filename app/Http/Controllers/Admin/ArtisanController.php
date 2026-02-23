@@ -17,30 +17,42 @@ class ArtisanController extends Controller
     {
         $query = Artisan::with(['user', 'photos', 'products']);
 
-        // Filtres
+        // ── Recherche (nom / email utilisateur ou métier artisan) ──
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            })->orWhere('specialty', 'like', "%{$search}%");
-        }
-
-        if ($request->filled('specialty')) {
-            $query->where('specialty', $request->specialty);
-        }
-
-        if ($request->filled('status')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('status', $request->status);
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                    ->orWhere('craft', 'like', "%{$search}%")
+                    ->orWhere('business_name', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
             });
         }
 
-        $artisans = $query->latest()->paginate(15);
-        
-        $specialties = Artisan::distinct()->pluck('specialty');
+        // ── Filtre par métier (craft) ──────────────────────────────
+        if ($request->filled('craft')) {
+            $query->where('craft', $request->craft);
+        }
 
-        return view('admin.artisans.index', compact('artisans', 'specialties'));
+        // ── Filtre par statut (colonne sur artisans, pas sur users) ─
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // ── Filtre par ville ───────────────────────────────────────
+        if ($request->filled('city')) {
+            $query->where('city', $request->city);
+        }
+
+        $artisans = $query->latest()->paginate(15);
+
+        // Listes pour les selects — colonne "craft" et non "specialty"
+        $crafts = Artisan::distinct()->pluck('craft')->filter()->sort()->values();
+        $cities = Artisan::distinct()->pluck('city')->filter()->sort()->values();
+
+        return view('admin.artisans.index', compact('artisans', 'crafts', 'cities'));
     }
 
     public function create()
@@ -101,7 +113,6 @@ class ArtisanController extends Controller
             return redirect()
                 ->route('admin.artisans.index')
                 ->with('success', 'Artisan créé avec succès.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
@@ -170,7 +181,6 @@ class ArtisanController extends Controller
             return redirect()
                 ->route('admin.artisans.index')
                 ->with('success', 'Artisan mis à jour avec succès.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
@@ -186,7 +196,7 @@ class ArtisanController extends Controller
             foreach ($artisan->photos as $photo) {
                 Storage::disk('public')->delete($photo->photo_url);
             }
-            
+
             $user = $artisan->user;
             $artisan->delete();
             $user->delete();
@@ -194,7 +204,6 @@ class ArtisanController extends Controller
             return redirect()
                 ->route('admin.artisans.index')
                 ->with('success', 'Artisan supprimé avec succès.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
         }

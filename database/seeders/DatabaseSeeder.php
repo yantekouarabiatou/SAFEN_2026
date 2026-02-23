@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             VendorSeeder::class,         // avant DishSeeder (clé étrangère)
             ProductSeeder::class,
             CulturalEventSeeder::class,
+            ReviewSeeder::class,         // après UserSeeder, ArtisanSeeder, VendorSeeder, ProductSeeder
         ]);
     }
 }

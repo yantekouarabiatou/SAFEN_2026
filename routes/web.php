@@ -17,15 +17,16 @@ use App\Http\Controllers\{
     CheckoutController,
     OrderController,
     FavoriteController,
+    FrontReviewController,
     GastronomieController,
     QuoteController,
-    FrontReviewController,
     MessageController,
     NotificationController,
     ProfileController,
 };
-use App\Http\Controllers\Admin\ContactController as AdminContactController;
+use App\Http\Controllers\Admin\ArtisanController as AdminArtisanController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Auth\{
@@ -80,7 +81,7 @@ Route::get('/products/{product}/reviews', [ProductController::class, 'reviews'])
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 // ===== Artisans (public) =====
-Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
+//Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
 Route::get('/artisans/{artisan}/reviews', [ArtisanController::class, 'reviews'])->name('artisans.reviews');
 Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
 Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
@@ -228,7 +229,7 @@ Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageControll
 
     // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-    Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('products', ProductController::class)->only(['store', 'edit', 'update', 'destroy']);
 
     // ===== Routes Admin spéciales (approbation, vérification) =====
     Route::middleware('role_or_permission:admin|super-admin')->group(function () {
@@ -264,8 +265,8 @@ Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageControll
 
     // ===== Espace Vendeur =====
     Route::prefix('vendor')->name('vendor.')->group(function () {
-        Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
-        Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+        Route::post('/dishes/quick-store', [VendorController::class, 'quickStore'])->name('dishes.quick-store');
+        Route::delete('/dishes/{dish}/detach', [VendorController::class, 'detach'])->name('dishes.detach');
     });
 });
 
@@ -280,8 +281,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
 
     // Ressources
-    Route::resource('artisans', ArtisanController::class);
-    Route::resource('products', ProductController::class);
+    Route::resource('artisans', AdminArtisanController::class);
+    Route::resource('products', AdminProductController::class);
     Route::resource('vendors', AdminVendorController::class);
     Route::resource('users', UserController::class);
     Route::resource('quotes', QuoteController::class);
@@ -306,7 +307,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageController::class, 'conversations'])->name('messages.conversations');
 
     Route::resource('contacts', App\Http\Controllers\Admin\ContactController::class);
-    
+
     // Plats (vendeurs)
     Route::resource('dishes', App\Http\Controllers\Admin\DishController::class);
     Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');

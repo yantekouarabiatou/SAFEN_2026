@@ -9,7 +9,7 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ReviewController extends Controller
+class FrontReviewController extends Controller
 {
     /**
      * Afficher le formulaire pour créer un avis
@@ -67,14 +67,14 @@ class ReviewController extends Controller
         $review->rating = $validated['rating'];
         $review->comment = $validated['comment'];
         $review->status = 'pending'; // En attente de modération
-        
+
         // Si l'utilisateur veut être anonyme, on pourrait stocker une information
         // mais garder l'ID utilisateur pour le traçage
         if ($request->has('anonymous')) {
             // Vous pouvez ajouter un champ 'is_anonymous' dans votre table reviews
             // $review->is_anonymous = true;
         }
-        
+
         $review->save();
 
         // Rediriger avec un message de succès

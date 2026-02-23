@@ -118,18 +118,6 @@ class ProductController extends Controller
         return view('products.show', compact('product', 'similarProducts', 'sameArtisanProducts'));
     }
 
-
-    public function create()
-    {
-        // Vérifier que l'utilisateur a un profil artisan
-        if (!auth()->user()->artisan) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Vous devez avoir un profil artisan pour ajouter des produits.');
-        }
-
-        return view('products.create');
-    }
-
     public function store(Request $request)
     {
         // LOG DE DÉBOGAGE SIMPLE

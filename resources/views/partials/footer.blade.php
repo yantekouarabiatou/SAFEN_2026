@@ -23,7 +23,7 @@
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="Instagram">
                         <i class="bi bi-instagram"></i>
                     </a>
-                    
+
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                     </a>
@@ -35,7 +35,7 @@
                 <h6 class="text-benin-yellow fw-bold mb-3">{{ __('messages.home') }}</h6>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="{{ route('home') }}">{{ __('footer.home') }}</a></li>
-                    <li class="mb-2"><a href="{{ route('artisans.index') }}">{{ __('footer.artisans') }}</a></li>
+                    <li class="mb-2"><a href="{{ route('admin.artisans.index') }}">{{ __('footer.artisans') }}</a></li>
                     <li class="mb-2"><a href="{{ route('gastronomie.index') }}">{{ __('footer.gastronomy') }}</a></li>
                     <li class="mb-2"><a href="{{ route('products.index') }}">{{ __('footer.marketplace') }}</a></li>
                     <li class="mb-2"><a href="{{ route('culture.index') }}">{{ __('footer.culture') }}</a></li>
