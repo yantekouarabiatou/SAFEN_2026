@@ -96,8 +96,8 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Recherche</label>
-                                <input type="text" name="search" class="form-control" 
-                                       value="{{ request('search') }}" placeholder="Message, utilisateur...">
+                                <input type="text" name="search" class="form-control"
+                                    value="{{ request('search') }}" placeholder="Message, utilisateur...">
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -129,23 +129,23 @@
                                 <select name="user" class="form-control">
                                     <option value="">Tous</option>
                                     @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ request('user') == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
+                                    <option value="{{ $user->id }}" {{ request('user') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                    <div class="col-md-2 d-flex align-items-end">
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary mr-2">
-            <i class="fas fa-search"></i> Filtrer
-        </button>
-        <a href="{{ route('admin.messages.index') }}" class="btn btn-secondary">
-            <i class="fas fa-undo"></i> Réinitialiser
-        </a>
-    </div>
-</div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Filtrer
+                                </button>
+                                <a href="{{ route('admin.messages.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> Réinitialiser
+                                </a>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -191,14 +191,14 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($message->sender && $message->sender->avatar)
-                                                <img src="{{ $message->sender->avatar }}" 
-                                                     alt="{{ $message->sender->name }}" 
-                                                     class="rounded-circle mr-2" width="35" height="35">
+                                            <img src="{{ $message->sender->avatar }}"
+                                                alt="{{ $message->sender->name }}"
+                                                class="rounded-circle mr-2" width="35" height="35">
                                             @else
-                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2" 
-                                                     style="width: 35px; height: 35px; font-size: 14px;">
-                                                    {{ $message->sender ? strtoupper(substr($message->sender->name, 0, 1)) : '?' }}
-                                                </div>
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2"
+                                                style="width: 35px; height: 35px; font-size: 14px;">
+                                                {{ $message->sender ? strtoupper(substr($message->sender->name, 0, 1)) : '?' }}
+                                            </div>
                                             @endif
                                             <div>
                                                 <strong>{{ $message->sender->name ?? 'Utilisateur supprimé' }}</strong>
@@ -210,14 +210,14 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($message->receiver && $message->receiver->avatar)
-                                                <img src="{{ $message->receiver->avatar }}" 
-                                                     alt="{{ $message->receiver->name }}" 
-                                                     class="rounded-circle mr-2" width="35" height="35">
+                                            <img src="{{ $message->receiver->avatar }}"
+                                                alt="{{ $message->receiver->name }}"
+                                                class="rounded-circle mr-2" width="35" height="35">
                                             @else
-                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2" 
-                                                     style="width: 35px; height: 35px; font-size: 14px;">
-                                                    {{ $message->receiver ? strtoupper(substr($message->receiver->name, 0, 1)) : '?' }}
-                                                </div>
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2"
+                                                style="width: 35px; height: 35px; font-size: 14px;">
+                                                {{ $message->receiver ? strtoupper(substr($message->receiver->name, 0, 1)) : '?' }}
+                                            </div>
                                             @endif
                                             <div>
                                                 <strong>{{ $message->receiver->name ?? 'Utilisateur supprimé' }}</strong>
@@ -231,14 +231,14 @@
                                             {{ Str::limit($message->message, 50) }}
                                         </span>
                                         @if(strlen($message->message) > 50)
-                                            <br>
-                                            <a href="#" class="text-primary read-more" data-content="{{ $message->message }}">Lire plus</a>
+                                        <br>
+                                        <a href="#" class="text-primary read-more" data-content="{{ $message->message }}">Lire plus</a>
                                         @endif
                                         @if($message->reference_id)
-                                            <br>
-                                            <small class="text-info">
-                                                <i class="fas fa-reply"></i> Réponse
-                                            </small>
+                                        <br>
+                                        <small class="text-info">
+                                            <i class="fas fa-reply"></i> Réponse
+                                        </small>
                                         @endif
                                     </td>
                                     <td>
@@ -252,49 +252,50 @@
                                     </td>
                                     <td>
                                         @if($message->read_at)
-                                            <span class="badge badge-success">Lu</span>
-                                            <br>
-                                            <small class="text-muted">{{ $message->read_at->format('d/m H:i') }}</small>
+                                        <span class="badge badge-success">Lu</span>
+                                        <br>
+                                        <small class="text-muted">{{ $message->read_at->format('d/m H:i') }}</small>
                                         @else
-                                            <span class="badge badge-warning">Non lu</span>
+                                        <span class="badge badge-warning">Non lu</span>
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.messages.show', $message) }}" 
-                                               class="btn btn-sm btn-info mx-1 rounded" 
-                                               title="Voir détails">
+                                            <a href="{{ route('admin.messages.show', $message) }}"
+                                                class="btn btn-sm btn-info mx-1 rounded"
+                                                title="Voir détails">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+@if(!$message->read_at)
+    {{-- Message non lu : bouton actif --}}
+    <button type="button"
+        class="btn btn-sm btn-success mx-1 rounded btn-mark-read"
+        data-id="{{ $message->id }}"
+        title="Marquer comme lu">
+        <i class="fas fa-check"></i>
+    </button>
+@else
+    {{-- Message déjà lu : bouton désactivé --}}
+    <button type="button"
+        class="btn btn-sm btn-secondary mx-1 rounded"
+        disabled
+        title="Déjà lu">
+        <i class="fas fa-check"></i>
+    </button>
+@endif
 
-                                            @if(!$message->read_at)
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-success mx-1 rounded btn-mark-read" 
-                                                        data-id="{{ $message->id }}"
-                                                        title="Marquer comme lu">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            @else
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-warning mx-1 rounded btn-mark-unread" 
-                                                        data-id="{{ $message->id }}"
-                                                        title="Marquer comme non lu">
-                                                    <i class="fas fa-envelope"></i>
-                                                </button>
-                                            @endif
-
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-primary mx-1 rounded btn-reply" 
-                                                    data-id="{{ $message->id }}"
-                                                    data-sender="{{ $message->sender->name ?? 'Utilisateur' }}"
-                                                    title="Répondre">
+                                            <button type="button"
+                                                class="btn btn-sm btn-primary mx-1 rounded btn-reply"
+                                                data-id="{{ $message->id }}"
+                                                data-sender="{{ $message->sender->name ?? 'Utilisateur' }}"
+                                                title="Répondre">
                                                 <i class="fas fa-reply"></i>
                                             </button>
 
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-secondary mx-1 rounded btn-delete" 
-                                                    data-id="{{ $message->id }}"
-                                                    title="Supprimer">
+                                            <button type="button"
+                                                class="btn btn-sm btn-secondary mx-1 rounded btn-delete"
+                                                data-id="{{ $message->id }}"
+                                                title="Supprimer">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -310,9 +311,9 @@
                                             <h4 class="mt-3">Aucun message trouvé</h4>
                                             <p class="text-muted">
                                                 @if(request()->anyFilled(['search', 'status', 'type', 'user']))
-                                                    Aucun message ne correspond à vos critères.
+                                                Aucun message ne correspond à vos critères.
                                                 @else
-                                                    Il n'y a pas encore de messages.
+                                                Il n'y a pas encore de messages.
                                                 @endif
                                             </p>
                                         </div>
@@ -339,16 +340,16 @@
         justify-content: flex-end;
         margin-top: 20px;
     }
-    
+
     .dataTables_paginate .pagination {
         margin: 0;
         border-radius: 4px;
     }
-    
+
     .dataTables_paginate .paginate_button {
         margin: 0 2px;
     }
-    
+
     .dataTables_paginate .paginate_button a {
         border: 1px solid #dee2e6;
         padding: 8px 12px;
@@ -357,38 +358,38 @@
         background: #fff;
         transition: all 0.3s;
     }
-    
+
     .dataTables_paginate .paginate_button a:hover {
         background: #6777ef;
         color: #fff;
         border-color: #6777ef;
     }
-    
+
     .dataTables_paginate .paginate_button.active a {
         background: #6777ef;
         color: #fff;
         border-color: #6777ef;
     }
-    
+
     .dataTables_paginate .paginate_button.disabled a {
         color: #6c757d;
         pointer-events: none;
         background: #f8f9fa;
         border-color: #dee2e6;
     }
-    
+
     /* Style pour les messages non lus */
     .font-weight-bold {
         font-weight: 600 !important;
         background-color: #f8f9ff;
     }
-    
+
     /* Badges */
     .badge {
         padding: 5px 10px;
         font-size: 12px;
     }
-    
+
     /* Style pour le sélecteur de longueur */
     .dataTables_length select {
         border: 1px solid #dee2e6;
@@ -396,7 +397,7 @@
         padding: 5px;
         margin: 0 5px;
     }
-    
+
     /* Style pour la recherche DataTables */
     .dataTables_filter input {
         border: 1px solid #dee2e6;
@@ -404,7 +405,7 @@
         padding: 5px 10px;
         margin-left: 5px;
     }
-    
+
     .dataTables_filter input:focus {
         outline: none;
         border-color: #6777ef;
@@ -422,218 +423,234 @@
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Initialisation de DataTables
-    var table = $('#messages-table').DataTable({
-        "columnDefs": [
-            { "sortable": false, "targets": [0, 7] }, // Checkbox et actions non triables
-            { "type": "date", "targets": [5] } // Date
-        ],
-        "order": [[5, "desc"]], // Tri par date décroissante
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
-        },
-        "pageLength": 10,
-        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
-        "autoWidth": false,
-        "drawCallback": function() {
-            attachEvents();
+    $(document).ready(function() {
+        // Initialisation de DataTables
+        var table = $('#messages-table').DataTable({
+            "columnDefs": [{
+                    "sortable": false,
+                    "targets": [0, 7]
+                }, // Checkbox et actions non triables
+                {
+                    "type": "date",
+                    "targets": [5]
+                } // Date
+            ],
+            "order": [
+                [5, "desc"]
+            ], // Tri par date décroissante
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+            },
+            "pageLength": 10,
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, "Tous"]
+            ],
+            "autoWidth": false,
+            "drawCallback": function() {
+                attachEvents();
+            }
+        });
+
+        function attachEvents() {
+            // Checkboxes
+            $("[data-checkboxes]").each(function() {
+                var me = $(this),
+                    group = me.data('checkboxes'),
+                    role = me.data('checkbox-role');
+
+                me.off('change').on('change', function() {
+                    var all = $('[data-checkboxes="' + group + '"]:not([data-checkbox-role="dad"])'),
+                        checked = $('[data-checkboxes="' + group + '"]:not([data-checkbox-role="dad"]):checked'),
+                        dad = $('[data-checkboxes="' + group + '"][data-checkbox-role="dad"]'),
+                        total = all.length,
+                        checked_length = checked.length;
+
+                    if (role == 'dad') {
+                        if (me.is(':checked')) {
+                            all.prop('checked', true);
+                        } else {
+                            all.prop('checked', false);
+                        }
+                    } else {
+                        if (checked_length >= total) {
+                            dad.prop('checked', true);
+                        } else {
+                            dad.prop('checked', false);
+                        }
+                    }
+                    toggleBulkDelete();
+                });
+            });
+
+            // Lire plus
+            $('.read-more').off('click').on('click', function(e) {
+                e.preventDefault();
+                var content = $(this).data('content');
+
+                Swal.fire({
+                    title: 'Message complet',
+                    html: `<div style="max-height: 300px; overflow-y: auto; text-align: left; padding: 10px;">${content}</div>`,
+                    confirmButtonText: 'Fermer',
+                    confirmButtonColor: '#6777ef',
+                    width: '500px'
+                });
+            });
+
+            // Marquer comme lu
+            $('.btn-mark-read').off('click').on('click', function() {
+                var messageId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Marquer comme lu ?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/messages/${messageId}/mark-read`,
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                Swal.fire('Succès!', response.message, 'success')
+                                    .then(() => location.reload());
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Marquer comme non lu
+            $('.btn-mark-unread').off('click').on('click', function() {
+                var messageId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Marquer comme non lu ?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/messages/${messageId}/mark-unread`,
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                Swal.fire('Succès!', response.message, 'success')
+                                    .then(() => location.reload());
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Répondre
+            $('.btn-reply').off('click').on('click', function() {
+                var messageId = $(this).data('id');
+                var senderName = $(this).data('sender');
+
+                Swal.fire({
+                    title: `Répondre à ${senderName}`,
+                    input: 'textarea',
+                    inputLabel: 'Votre message',
+                    inputPlaceholder: 'Écrivez votre réponse...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6777ef',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Envoyer',
+                    cancelButtonText: 'Annuler',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Le message ne peut pas être vide'
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/messages/${messageId}/reply`,
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                content: result.value
+                            },
+                            success: function(response) {
+                                Swal.fire('Envoyé!', response.message, 'success')
+                                    .then(() => location.reload());
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Supprimer
+            $('.btn-delete').off('click').on('click', function() {
+                var messageId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Supprimer ce message ?',
+                    text: "Cette action est irréversible !",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Oui, supprimer',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/messages/${messageId}`,
+                            type: 'DELETE',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                table.row($('#message-' + messageId)).remove().draw();
+                                Swal.fire('Supprimé!', response.message, 'success');
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
+                            }
+                        });
+                    }
+                });
+            });
         }
-    });
 
-    function attachEvents() {
-        // Checkboxes
-        $("[data-checkboxes]").each(function () {
-            var me = $(this),
-                group = me.data('checkboxes'),
-                role = me.data('checkbox-role');
+        function toggleBulkDelete() {
+            $('#bulkDeleteBtn').toggle($('.message-checkbox:checked').length > 0);
+        }
 
-            me.off('change').on('change', function () {
-                var all = $('[data-checkboxes="' + group + '"]:not([data-checkbox-role="dad"])'),
-                    checked = $('[data-checkboxes="' + group + '"]:not([data-checkbox-role="dad"]):checked'),
-                    dad = $('[data-checkboxes="' + group + '"][data-checkbox-role="dad"]'),
-                    total = all.length,
-                    checked_length = checked.length;
+        // Actions groupées
+        $('#bulkDeleteBtn').click(function() {
+            var ids = $('.message-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
 
-                if (role == 'dad') {
-                    if (me.is(':checked')) {
-                        all.prop('checked', true);
-                    } else {
-                        all.prop('checked', false);
-                    }
-                } else {
-                    if (checked_length >= total) {
-                        dad.prop('checked', true);
-                    } else {
-                        dad.prop('checked', false);
-                    }
-                }
-                toggleBulkDelete();
-            });
-        });
+            if (ids.length === 0) return;
 
-        // Lire plus
-        $('.read-more').off('click').on('click', function(e) {
-            e.preventDefault();
-            var content = $(this).data('content');
-            
             Swal.fire({
-                title: 'Message complet',
-                html: `<div style="max-height: 300px; overflow-y: auto; text-align: left; padding: 10px;">${content}</div>`,
-                confirmButtonText: 'Fermer',
-                confirmButtonColor: '#6777ef',
-                width: '500px'
-            });
-        });
-
-        // Marquer comme lu
-        $('.btn-mark-read').off('click').on('click', function() {
-            var messageId = $(this).data('id');
-            
-            Swal.fire({
-                title: 'Marquer comme lu ?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Oui',
-                cancelButtonText: 'Annuler'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/messages/${messageId}/mark-read`,
-                        type: 'POST',
-                        data: { _token: '{{ csrf_token() }}' },
-                        success: function(response) {
-                            Swal.fire('Succès!', response.message, 'success')
-                                .then(() => location.reload());
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
-                        }
-                    });
-                }
-            });
-        });
-
-        // Marquer comme non lu
-        $('.btn-mark-unread').off('click').on('click', function() {
-            var messageId = $(this).data('id');
-            
-            Swal.fire({
-                title: 'Marquer comme non lu ?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Oui',
-                cancelButtonText: 'Annuler'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/messages/${messageId}/mark-unread`,
-                        type: 'POST',
-                        data: { _token: '{{ csrf_token() }}' },
-                        success: function(response) {
-                            Swal.fire('Succès!', response.message, 'success')
-                                .then(() => location.reload());
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
-                        }
-                    });
-                }
-            });
-        });
-
-        // Répondre
-        $('.btn-reply').off('click').on('click', function() {
-            var messageId = $(this).data('id');
-            var senderName = $(this).data('sender');
-            
-            Swal.fire({
-                title: `Répondre à ${senderName}`,
-                input: 'textarea',
-                inputLabel: 'Votre message',
-                inputPlaceholder: 'Écrivez votre réponse...',
-                showCancelButton: true,
-                confirmButtonColor: '#6777ef',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Envoyer',
-                cancelButtonText: 'Annuler',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Le message ne peut pas être vide'
-                    }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/messages/${messageId}/reply`,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            content: result.value
-                        },
-                        success: function(response) {
-                            Swal.fire('Envoyé!', response.message, 'success')
-                                .then(() => location.reload());
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
-                        }
-                    });
-                }
-            });
-        });
-
-        // Supprimer
-        $('.btn-delete').off('click').on('click', function() {
-            var messageId = $(this).data('id');
-            
-            Swal.fire({
-                title: 'Supprimer ce message ?',
-                text: "Cette action est irréversible !",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Oui, supprimer',
-                cancelButtonText: 'Annuler'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/messages/${messageId}`,
-                        type: 'DELETE',
-                        data: { _token: '{{ csrf_token() }}' },
-                        success: function(response) {
-                            table.row($('#message-' + messageId)).remove().draw();
-                            Swal.fire('Supprimé!', response.message, 'success');
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
-                        }
-                    });
-                }
-            });
-        });
-    }
-
-    function toggleBulkDelete() {
-        $('#bulkDeleteBtn').toggle($('.message-checkbox:checked').length > 0);
-    }
-
-    // Actions groupées
-    $('#bulkDeleteBtn').click(function() {
-        var ids = $('.message-checkbox:checked').map(function() {
-            return $(this).val();
-        }).get();
-
-        if (ids.length === 0) return;
-
-        Swal.fire({
-            title: 'Actions groupées',
-            html: `
+                title: 'Actions groupées',
+                html: `
                 <p>Que voulez-vous faire avec les ${ids.length} messages sélectionnés ?</p>
                 <div class="d-flex justify-content-center mt-3">
                     <button class="btn btn-success mx-1" id="bulk-mark-read">
@@ -647,45 +664,45 @@ $(document).ready(function() {
                     </button>
                 </div>
             `,
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Annuler',
-            didOpen: () => {
-                $('#bulk-mark-read').click(function() {
-                    performBulkAction('mark-read', ids);
-                });
-                $('#bulk-mark-unread').click(function() {
-                    performBulkAction('mark-unread', ids);
-                });
-                $('#bulk-delete-confirm').click(function() {
-                    performBulkAction('delete', ids);
-                });
-            }
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Annuler',
+                didOpen: () => {
+                    $('#bulk-mark-read').click(function() {
+                        performBulkAction('mark-read', ids);
+                    });
+                    $('#bulk-mark-unread').click(function() {
+                        performBulkAction('mark-unread', ids);
+                    });
+                    $('#bulk-delete-confirm').click(function() {
+                        performBulkAction('delete', ids);
+                    });
+                }
+            });
         });
+
+        function performBulkAction(action, ids) {
+            Swal.close();
+
+            $.ajax({
+                url: '/admin/messages/bulk-action',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    action: action,
+                    ids: ids
+                },
+                success: function(response) {
+                    Swal.fire('Succès!', response.message, 'success')
+                        .then(() => location.reload());
+                },
+                error: function(xhr) {
+                    Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
+                }
+            });
+        }
+
+        attachEvents();
     });
-
-    function performBulkAction(action, ids) {
-        Swal.close();
-        
-        $.ajax({
-            url: '/admin/messages/bulk-action',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                action: action,
-                ids: ids
-            },
-            success: function(response) {
-                Swal.fire('Succès!', response.message, 'success')
-                    .then(() => location.reload());
-            },
-            error: function(xhr) {
-                Swal.fire('Erreur', xhr.responseJSON?.message || 'Une erreur est survenue', 'error');
-            }
-        });
-    }
-
-    attachEvents();
-});
 </script>
 @endpush

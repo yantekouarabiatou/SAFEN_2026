@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
@@ -171,13 +171,57 @@ class MessageController extends Controller
         ]);
     }
 
-    public function conversations()
-    {
-        $conversations = Conversation::with(['participants', 'lastMessage'])
-            ->withCount('unreadMessages')
-            ->latest()
-            ->paginate(15);
-
-        return view('admin.messages.conversations', compact('conversations'));
+public function conversations()
+{
+    // Récupérer toutes les conversations
+    $allConversations = Conversation::with(['user1', 'user2'])->get();
+    
+    $conversationsData = [];
+    
+    foreach ($allConversations as $conversation) {
+        // Récupérer les messages de cette conversation
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->with(['sender', 'receiver'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        if ($messages->count() > 0) {
+            $lastMessage = $messages->first();
+            
+            $conversationsData[] = (object)[
+                'id' => $conversation->id,
+                'user1' => $conversation->user1,
+                'user2' => $conversation->user2,
+                'last_message' => $lastMessage,
+                'last_message_at' => $lastMessage->created_at,
+                'messages_count' => $messages->count(),
+                'unread_count' => $messages
+                    ->where('receiver_id', auth()->id())
+                    ->whereNull('read_at')
+                    ->count()
+            ];
+        }
     }
+    
+    // Trier par date du dernier message
+    usort($conversationsData, function($a, $b) {
+        return $b->last_message_at->timestamp <=> $a->last_message_at->timestamp;
+    });
+    
+    // Pagination manuelle
+    $page = request()->get('page', 1);
+    $perPage = 15;
+    $total = count($conversationsData);
+    $items = array_slice($conversationsData, ($page - 1) * $perPage, $perPage);
+    
+    $conversations = new \Illuminate\Pagination\LengthAwarePaginator(
+        $items,
+        $total,
+        $perPage,
+        $page,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+    
+    return view('admin.messages.conversations', compact('conversations'));
+}
 }

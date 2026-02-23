@@ -38,52 +38,52 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @php
-                                                $participants = [$conversation->user1, $conversation->user2];
+                                            $participants = [$conversation->user1, $conversation->user2];
                                             @endphp
                                             @foreach($participants as $participant)
-                                                @if($participant)
-                                                <div class="d-flex align-items-center mr-3">
-                                                    @if($participant->avatar)
-                                                        <img src="{{ $participant->avatar }}" 
-                                                             alt="{{ $participant->name }}" 
-                                                             class="rounded-circle mr-1" width="30" height="30">
-                                                    @else
-                                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-1" 
-                                                             style="width: 30px; height: 30px; font-size: 12px;">
-                                                            {{ strtoupper(substr($participant->name, 0, 1)) }}
-                                                        </div>
-                                                    @endif
-                                                    <small>{{ $participant->name }}</small>
+                                            @if($participant)
+                                            <div class="d-flex align-items-center mr-3">
+                                                @if($participant->avatar)
+                                                <img src="{{ $participant->avatar }}"
+                                                    alt="{{ $participant->name }}"
+                                                    class="rounded-circle mr-1" width="30" height="30">
+                                                @else
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-1"
+                                                    style="width: 30px; height: 30px; font-size: 12px;">
+                                                    {{ strtoupper(substr($participant->name, 0, 1)) }}
                                                 </div>
                                                 @endif
+                                                <small>{{ $participant->name }}</small>
+                                            </div>
+                                            @endif
                                             @endforeach
                                         </div>
                                     </td>
                                     <td>
                                         @if($conversation->last_message)
-                                            {{ Str::limit($conversation->last_message->message, 50) }}
+                                        {{ Str::limit($conversation->last_message->message, 50) }}
                                         @else
-                                            <em>Aucun message</em>
+                                        <em>Aucun message</em>
                                         @endif
                                     </td>
                                     <td>
                                         @if($conversation->last_message_at)
-                                            {{ \Carbon\Carbon::parse($conversation->last_message_at)->format('d/m/Y H:i') }}
+                                        {{ \Carbon\Carbon::parse($conversation->last_message_at)->format('d/m/Y H:i') }}
                                         @else
-                                            -
+                                        -
                                         @endif
                                     </td>
                                     <td class="text-center">{{ $conversation->messages_count }}</td>
                                     <td class="text-center">
                                         @if($conversation->unread_count > 0)
-                                            <span class="badge badge-danger">{{ $conversation->unread_count }}</span>
+                                        <span class="badge badge-danger">{{ $conversation->unread_count }}</span>
                                         @else
-                                            <span class="badge badge-success">0</span>
+                                        <span class="badge badge-success">0</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.messages.index', ['user' => $conversation->user1_id ?? $conversation->user2_id]) }}" 
-                                           class="btn btn-sm btn-info">
+                                        <a href="{{ route('admin.messages.index', ['user' => $conversation->user1->id ?? $conversation->user2->id]) }}"
+                                            class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i> Voir
                                         </a>
                                     </td>
