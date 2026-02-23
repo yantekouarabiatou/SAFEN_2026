@@ -430,7 +430,7 @@
                         @auth
                             @if(auth()->id() != $artisan->user_id)
                                 <div class="mt-4 pt-3 border-top">
-                                    <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#reviewModal">
+                                    <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#reviewModal1">
                                         <i class="fas fa-star mr-2"></i> Laisser un avis
                                     </button>
                                 </div>
@@ -501,52 +501,172 @@
 @endif
 @endauth
 
-<!-- Modal d'avis -->
-@auth
-@if(auth()->id() != $artisan->user_id)
-<div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content" style="border-top: 3px solid #dc3545;">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="fas fa-star mr-2"></i> Laisser un avis</h5>
+{{-- Modal pour laisser un avis --}}
+<div class="modal fade" id="reviewModal1" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-benin-green text-white">
+                <h5 class="modal-title" id="reviewModalLabel">
+                    <i class="fas fa-star mr-2"></i>
+                    Laisser un avis pour {{ $artisan->user->name ?? $artisan->business_name }}
+                </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('reviews.store') }}" method="POST">
+            <form action="{{ route('reviews.store') }}" method="POST" id="reviewForm">
                 @csrf
-                <input type="hidden" name="reviewable_type" value="artisan">
-                <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
                 <div class="modal-body">
-                    <div class="form-group text-center">
-                        <label class="text-danger mb-3">Votre note</label>
-                        <div class="rating-input">
+                    {{-- Informations cachées --}}
+                    <input type="hidden" name="reviewable_type" value="App\Models\Artisan">
+                    <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
+
+                    {{-- Note par étoiles --}}
+                    <div class="form-group text-center mb-4">
+                        <label class="form-label fw-bold d-block">Votre note</label>
+                        <div class="rating-stars d-inline-block">
                             @for($i = 1; $i <= 5; $i++)
-                                <i class="fas fa-star fa-2x rating-star" data-rating="{{ $i }}"></i>
+                                <span class="star" data-rating="{{ $i }}">
+                                    <i class="far fa-star fa-2x text-warning" style="cursor: pointer; margin: 0 3px;"></i>
+                                </span>
                             @endfor
-                            <input type="hidden" name="rating" id="ratingValue" value="5">
+                            <input type="hidden" name="rating" id="rating" value="" required>
                         </div>
+                        <small class="text-muted d-block mt-2">Cliquez sur les étoiles pour donner votre note</small>
                     </div>
-                    <div class="form-group">
-                        <label class="text-danger">Votre commentaire</label>
-                        <textarea name="comment" class="form-control border-danger" rows="4" 
+
+                    {{-- Commentaire --}}
+                    <div class="form-group mb-4">
+                        <label for="comment" class="form-label fw-bold">Votre commentaire</label>
+                        <textarea name="comment" id="comment" rows="4" class="form-control" 
                                   placeholder="Partagez votre expérience avec cet artisan..." required></textarea>
+                    </div>
+
+                    {{-- Options supplémentaires --}}
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" name="anonymous" id="anonymous">
+                            <label class="custom-control-label" for="anonymous">
+                                Publier anonymement
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox mt-2">
+                            <input type="checkbox" class="custom-control-input" name="terms" id="terms" required>
+                            <label class="custom-control-label" for="terms">
+                                Je certifie que cet avis est basé sur mon expérience réelle
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-1"></i> Annuler
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Annuler
                     </button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-star mr-1"></i> Publier l'avis
+                    <button type="submit" class="btn btn-benin-green" id="submitReview">
+                        <i class="fas fa-paper-plane"></i> Publier mon avis
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-@endif
-@endauth
+
+@push('styles')
+<style>
+    .star {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+    
+    .star:hover {
+        transform: scale(1.2);
+    }
+    
+    .star.active i,
+    .star.active ~ .star i {
+        font-weight: 900;
+    }
+    
+    .modal-header .close {
+        color: white;
+        opacity: 0.8;
+    }
+    
+    .modal-header .close:hover {
+        opacity: 1;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Gestion des étoiles
+    $('.star').click(function() {
+        var rating = $(this).data('rating');
+        $('#rating').val(rating);
+        
+        $('.star i').removeClass('fas').addClass('far');
+        $('.star').each(function(index) {
+            if (index < rating) {
+                $(this).find('i').removeClass('far').addClass('fas');
+            }
+        });
+    });
+
+    // Réinitialiser les étoiles quand le modal se ferme
+    $('#reviewModal1').on('hidden.bs.modal', function() {
+        $('#rating').val('');
+        $('.star i').removeClass('fas').addClass('far');
+        $('#comment').val('');
+        $('#anonymous').prop('checked', false);
+        $('#terms').prop('checked', false);
+    });
+
+    // Validation du formulaire
+    $('#reviewForm').submit(function(e) {
+        if (!$('#rating').val()) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Veuillez donner une note'
+            });
+            return false;
+        }
+        
+        if (!$('#terms').prop('checked')) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Vous devez accepter les conditions'
+            });
+            return false;
+        }
+    });
+
+    // Afficher un message de succès si présent
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Succès !',
+            text: '{{ session('success') }}',
+            timer: 3000
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: '{{ session('error') }}'
+        });
+    @endif
+});
+</script>
+@endpush
 @endsection
 
 @section('styles')

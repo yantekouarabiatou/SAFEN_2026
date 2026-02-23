@@ -58,7 +58,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
     Route::post('reviews/{review}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
 
-    // Contacts/Messages
+    // Messages
+    Route::resource('messages', \App\Http\Controllers\Admin\MessageController::class)->only(['index', 'show', 'destroy']);
+
+    // Contacts
     Route::resource('contacts', ContactController::class)->only(['index', 'show', 'destroy']);
     Route::patch('contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('contacts.status');
 });
