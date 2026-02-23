@@ -27,7 +27,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Nom complet <span class="text-danger">*</span></label>
-                                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
+                                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                                            value="{{ old('name', $user->name) }}" required>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -37,7 +37,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Email <span class="text-danger">*</span></label>
-                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
+                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                            value="{{ old('email', $user->email) }}" required>
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -45,27 +45,27 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Téléphone</label>
-                                    <input type="text" name="phone" class="form-control" 
+                                    <input type="text" name="phone" class="form-control"
                                            value="{{ old('phone', $user->phone) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Adresse</label>
-                                    <input type="text" name="address" class="form-control" 
+                                    <input type="text" name="address" class="form-control"
                                            value="{{ old('address', $user->address) }}">
                                 </div>
                             </div>
                         </div>
-                        
+
                         <hr>
                         <h6 class="text-muted">Changer le mot de passe (optionnel)</h6>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -87,29 +87,32 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h4>Profil</h4>
                     </div>
                     <div class="card-body text-center">
-                        <img src="{{ $user->profile_photo_url ?? asset('admin-assets/img/avatar/avatar-1.png') }}" 
-                             alt="{{ $user->name }}" 
+                        @php
+                            $avatarUrl = $user->avatar_url ?? asset('admin-assets/img/avatar/avatar-1.png');
+                        @endphp
+                        <img src="{{ $avatarUrl }}"
+                             alt="{{ $user->name }}"
                              class="rounded-circle mb-3" width="100" height="100" style="object-fit: cover;">
                         <h5>{{ $user->name }}</h5>
                         <p class="text-muted">{{ $user->email }}</p>
                         <p class="text-muted">
                             Inscrit le {{ $user->created_at->format('d/m/Y') }}
                         </p>
-                        
+
                         <div class="form-group mt-3">
                             <label>Changer la photo</label>
                             <input type="file" name="profile_photo" class="form-control" accept="image/*">
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-header">
                         <h4>Rôles</h4>
@@ -118,7 +121,7 @@
                         <div class="form-group">
                             @foreach($roles as $role)
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" name="roles[]" value="{{ $role->name }}" 
+                                <input type="checkbox" name="roles[]" value="{{ $role->name }}"
                                        class="custom-control-input" id="role-{{ $role->id }}"
                                        {{ $user->hasRole($role->name) ? 'checked' : '' }}
                                        @if($user->id === auth()->id() && $role->name === 'admin') disabled @endif>
@@ -133,7 +136,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-body">
                         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-block">Annuler</a>

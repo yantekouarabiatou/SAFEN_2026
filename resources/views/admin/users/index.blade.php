@@ -36,7 +36,7 @@
                 </div>
                 <div class="card-wrap">
                     <div class="card-header">
-                        <h4>Actifs ce mois</h4>
+                        <h4>Nouveaux ce mois</h4>
                     </div>
                     <div class="card-body">
                         {{ $stats['active_this_month'] ?? 0 }}
@@ -115,19 +115,51 @@
 
 @push('styles')
 <!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+<style>
+    .badge-success { background-color: #28a745; color: #fff; }
+    .badge-danger { background-color: #dc3545; color: #fff; }
+    .badge-warning { background-color: #ffc107; color: #212529; }
+    .badge-info { background-color: #17a2b8; color: #fff; }
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #6777ef;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+    .user-info img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    .user-info .avatar-circle {
+        margin-right: 10px;
+    }
+</style>
 @endpush
 
 @push('scripts')
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
@@ -139,7 +171,20 @@ $(document).ready(function() {
         ajax: "{{ route('admin.users.index') }}",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'full_name', name: 'name' },
+            {
+                data: 'full_name',
+                name: 'name',
+                render: function(data, type, row) {
+                    // Afficher l'avatar ou les initiales
+                    if (row.avatar) {
+                        return '<div class="user-info"><img src="' + row.avatar_url + '" alt=""><span>' + data + '</span></div>';
+                    } else {
+                        // Calculer les initiales (on suppose que le backend fournit aussi les initiales ou on les calcule ici)
+                        var initials = (row.name || '').split(' ').map(word => word.charAt(0).toUpperCase()).join('').substring(0,2);
+                        return '<div class="user-info"><div class="avatar-circle">' + initials + '</div><span>' + data + '</span></div>';
+                    }
+                }
+            },
             { data: 'email', name: 'email' },
             { data: 'roles', name: 'roles.name' },
             { data: 'status', name: 'is_active' },
@@ -149,11 +194,14 @@ $(document).ready(function() {
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
         },
-        order: [[5, 'desc']], // Tri par date d'inscription par défaut
+        order: [[5, 'desc']],
         pageLength: 10,
         dom: 'Bfrtip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
+            { extend: 'copy', text: '<i class="fas fa-copy"></i> Copier', className: 'btn btn-sm btn-secondary' },
+            { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-sm btn-success' },
+            { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-sm btn-danger' },
+            { extend: 'print', text: '<i class="fas fa-print"></i> Imprimer', className: 'btn btn-sm btn-info' }
         ]
     });
 
