@@ -326,7 +326,7 @@
             {{-- ══════════════════════════════════════════
                  FAVORIS (client)
             ══════════════════════════════════════════ --}}
-            @if($isClient && $user->can('gérer favoris'))
+            @if($user->can('gérer favoris'))
             <li class="menu-header">Favoris</li>
             <li class="{{ request()->routeIs('client.favorites.*') ? 'active' : '' }}">
                 <a href="{{ route('client.favorites.index') }}" class="nav-link">
