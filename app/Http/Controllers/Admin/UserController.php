@@ -95,6 +95,24 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
+    public function show(User $user)
+    {
+        // Charger les relations nécessaires pour la vue
+        $user->load([
+            'roles',
+            'artisan',
+            'orders' => function ($q) {
+                $q->latest()->limit(5); // Dernières 5 commandes
+            },
+            'reviews' => function ($q) {
+                $q->latest()->limit(5); // Derniers 5 avis
+            },
+        ])->loadCount(['orders', 'favorites', 'reviews']); // Pour les compteurs rapides
+
+        return view('admin.users.show', compact('user'));
+    }
+
+
     public function update(Request $request, User $user)
     {
         $request->validate([

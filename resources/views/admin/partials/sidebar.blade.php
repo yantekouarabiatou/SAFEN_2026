@@ -305,8 +305,8 @@
                 @endif
 
                 @if($user->can('voir devis') || $user->can('gérer devis'))
-                <li class="{{ request()->routeIs('admin.quotes.*','client.quotes.*','quotes.*') ? 'active' : '' }}">
-                    <a href="{{ $isAdmin ? route('admin.quotes.index') : ($isClient ? route('client.quotes.index') : route('quotes.index')) }}"
+                <li class="{{ request()->routeIs('quotes.*','client.quotes.*','quotes.*') ? 'active' : '' }}">
+                    <a href="{{ $isAdmin ? route('quotes.index') : ($isClient ? route('quotes.index') : route('quotes.index')) }}"
                        class="nav-link">
                         <i data-feather="file-text"></i>
                         <span>Devis</span>
@@ -315,13 +315,11 @@
                         @endif
                     </a>
                 </li>
-                @if($isClient)
                 <li>
                     <a href="{{ route('client.quotes.create') }}" class="nav-link">
                         <i data-feather="plus-circle"></i><span>Demander un devis</span>
                     </a>
                 </li>
-                @endif
                 @endif
             @endif
 

@@ -318,7 +318,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
     Route::post('orders/{order}/reject', [App\Http\Controllers\Admin\OrderController::class, 'rejectOrder'])->name('orders.reject');
 });
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
 
+    // Gestion des devis (admin)
+    Route::resource('quotes', QuoteController::class)->except(['create', 'store']);
+    Route::post('quotes/{quote}/respond', [QuoteController::class, 'respond'])->name('quotes.respond');
+    Route::post('quotes/{quote}/update-status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
+});
 /*
 |--------------------------------------------------------------------------
 | ROUTES API (AJAX)
