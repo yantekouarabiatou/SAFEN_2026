@@ -3,25 +3,30 @@ set -euo pipefail
 
 cd /var/www/html
 
-# === On fait le minimum pour démarrer vite ===
+echo "Création du fichier SQLite si inexistant"
+mkdir -p database
+touch database/database.sqlite
 
-echo "Création dossier logs (rapide)"
+echo "Création dossier logs"
 mkdir -p storage/logs
 touch storage/logs/laravel.log
 chmod 666 storage/logs/laravel.log || true
 
-echo "Lien storage (rapide)"
+echo "Migrations + Seeds"
+php artisan migrate --seed --force
+
+echo "Lien storage"
 php artisan storage:link --force || true
 
-echo "Permissions rapides"
-chown -R www-data:www-data storage bootstrap/cache || true
+echo "Permissions"
+chown -R www-data:www-data storage bootstrap/cache database || true
 chmod -R 775 storage bootstrap/cache || true
+chmod 664 database/database.sqlite || true
 
-echo "Démarrage PHP-FPM en arrière-plan"
+echo "Démarrage PHP-FPM"
 php-fpm -D
 
-# On attend seulement 5 secondes (pas 20)
-echo "Attente très courte PHP-FPM..."
+echo "Attente PHP-FPM..."
 sleep 5
 
 echo "Démarrage Nginx"
