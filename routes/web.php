@@ -17,14 +17,16 @@ use App\Http\Controllers\{
     CheckoutController,
     OrderController,
     FavoriteController,
+    FrontReviewController,
     GastronomieController,
     QuoteController,
-    ReviewController,
     MessageController,
     NotificationController,
     ProfileController,
 };
+use App\Http\Controllers\Admin\ArtisanController as AdminArtisanController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Auth\{
@@ -79,7 +81,7 @@ Route::get('/products/{product}/reviews', [ProductController::class, 'reviews'])
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 // ===== Artisans (public) =====
-Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
+//Route::get('/artisans', [ArtisanController::class, 'index'])->name('artisans.index');
 Route::get('/artisans/{artisan}/reviews', [ArtisanController::class, 'reviews'])->name('artisans.reviews');
 Route::get('/artisans/{artisan}', [ArtisanController::class, 'show'])->name('artisans.show');
 Route::get('/artisan/vue', [ArtisanController::class, 'index'])->name('artisans.vue');
@@ -198,22 +200,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/{quote}/reject', 'reject')->name('reject');
     });
 
-    // ===== Avis =====
-    Route::prefix('reviews')->name('reviews.')->controller(ReviewController::class)->group(function () {
-        Route::post('/', 'store')->name('store');
-        Route::put('/{review}', 'update')->name('update');
-        Route::delete('/{review}', 'destroy')->name('destroy');
-    });
+  // ===== Avis =====
+    Route::prefix('reviews')->name('reviews.')->controller(FrontReviewController::class)->group(function () {
+    Route::get('/create', 'create')->name('create');
+    Route::post('/', 'store')->name('store');
+    Route::get('/{type}/{id}', 'index')->name('index');
+    Route::get('/{review}', 'show')->name('show');
+    Route::put('/{review}', 'update')->name('update');
+    Route::delete('/{review}', 'destroy')->name('destroy');
+});
 
-    // ===== Messages =====
-    Route::prefix('messages')->name('messages.')->controller(MessageController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/mark-all-read', 'markAllRead')->name('markAllRead');
-        Route::delete('/clear-all', 'clearAll')->name('clearAll');
-        Route::get('/{user}', 'show')->name('show');
-        Route::post('/{user}', 'send')->name('send');
-        Route::delete('/{message}', 'destroy')->name('destroy');
-    });
+    // Messages
+Route::resource('messages', App\Http\Controllers\Admin\MessageController::class);
+Route::post('messages/{message}/mark-read', [App\Http\Controllers\Admin\MessageController::class, 'markAsRead'])->name('messages.mark-read');
+Route::post('messages/{message}/mark-unread', [App\Http\Controllers\Admin\MessageController::class, 'markAsUnread'])->name('messages.mark-unread');
+Route::post('messages/{message}/reply', [App\Http\Controllers\Admin\MessageController::class, 'reply'])->name('messages.reply');
+Route::post('messages/bulk-action', [App\Http\Controllers\Admin\MessageController::class, 'bulkAction'])->name('messages.bulk');
+Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageController::class, 'conversations'])->name('messages.conversations');
 
     // ===== Contact (authentifié) =====
     Route::post('/contact/artisan/{artisan}', [ContactController::class, 'contactArtisan'])->name('contact.artisan');
@@ -226,13 +229,12 @@ Route::middleware('auth')->group(function () {
 
     // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-    Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('products', ProductController::class)->only(['store', 'edit', 'update', 'destroy']);
 
     // ===== Routes Admin spéciales (approbation, vérification) =====
     Route::middleware('role_or_permission:admin|super-admin')->group(function () {
         Route::post('/admin/artisans/{artisan}/verify', [ArtisanController::class, 'verify'])->name('admin.artisans.verify');
         Route::post('/admin/products/{product}/feature', [ProductController::class, 'feature'])->name('admin.products.feature');
-        Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
         Route::get('/admin/artisans/pending', [ArtisanController::class, 'pendingList'])->name('admin.artisans.pending');
         Route::post('/admin/artisans/{artisan}/approve', [ArtisanController::class, 'approve'])->name('admin.artisans.approve');
         Route::post('/admin/artisans/{artisan}/reject', [ArtisanController::class, 'reject'])->name('admin.artisans.reject');
@@ -255,17 +257,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/favorites/toggle/{product}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
         // Messages
-        Route::resource('messages', MessageController::class)->only(['index', 'show', 'store']);
-        Route::get('/contacts/create/{artisan?}', [ContactController::class, 'create'])->name('contacts.create');
-        Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
-        Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
-
-            });
+        // Route::resource('message', ContactController::class)->only(['index', 'show', 'store']);
+        // Route::get('/messages/create/{artisan?}', [ContactController::class, 'create'])->name('contacts.create');
+        // Route::post('/messages', [ContactController::class, 'store'])->name('contacts.store');
+        // Route::get('/messages', [ContactController::class, 'index'])->name('.index');
+    });
 
     // ===== Espace Vendeur =====
     Route::prefix('vendor')->name('vendor.')->group(function () {
-        Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
-        Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+        Route::post('/dishes/quick-store', [VendorController::class, 'quickStore'])->name('dishes.quick-store');
+        Route::delete('/dishes/{dish}/detach', [VendorController::class, 'detach'])->name('dishes.detach');
     });
 });
 
@@ -280,38 +281,49 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
 
     // Ressources
-    Route::resource('artisans', ArtisanController::class);
-    Route::resource('products', ProductController::class);
+    Route::resource('artisans', AdminArtisanController::class);
+    Route::resource('products', AdminProductController::class);
     Route::resource('vendors', AdminVendorController::class);
     Route::resource('users', UserController::class);
     Route::resource('quotes', QuoteController::class);
     Route::resource('events', CulturalEventController::class);
-    Route::resource('reviews', ReviewController::class);
-    Route::resource('contacts', ContactController::class);
+
+    // REVIEWS
+    Route::controller(App\Http\Controllers\Admin\ReviewController::class)->prefix('reviews')->name('reviews.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{review}', 'show')->name('show');
+        Route::post('/{review}/approve', 'approve')->name('approve');
+        Route::post('/{review}/reject', 'reject')->name('reject');
+        Route::delete('/{review}', 'destroy')->name('destroy');
+        Route::post('/bulk-action', 'bulkAction')->name('bulk');
+    });
+
+    // MESSAGES - AJOUTER ICI
+    Route::resource('messages', App\Http\Controllers\Admin\MessageController::class);
+    Route::post('messages/{message}/mark-read', [App\Http\Controllers\Admin\MessageController::class, 'markAsRead'])->name('messages.mark-read');
+    Route::post('messages/{message}/mark-unread', [App\Http\Controllers\Admin\MessageController::class, 'markAsUnread'])->name('messages.mark-unread');
+    Route::post('messages/{message}/reply', [App\Http\Controllers\Admin\MessageController::class, 'reply'])->name('messages.reply');
+    Route::post('messages/bulk-action', [App\Http\Controllers\Admin\MessageController::class, 'bulkAction'])->name('messages.bulk');
+    Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageController::class, 'conversations'])->name('messages.conversations');
+
+    Route::resource('contacts', App\Http\Controllers\Admin\ContactController::class);
+
+    // Plats (vendeurs)
     Route::resource('dishes', App\Http\Controllers\Admin\DishController::class);
+    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
+    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
+
     // Commandes admin
     Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
     Route::post('orders/{order}/validate', [App\Http\Controllers\Admin\OrderController::class, 'validateOrder'])->name('orders.validate');
     Route::post('orders/{order}/reject', [App\Http\Controllers\Admin\OrderController::class, 'rejectOrder'])->name('orders.reject');
-
-    // Plats (vendeurs)
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
 });
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-    //Route::resource('dishes', DishController::class)->only('create','store','show','update');
-    Route::resource('vendors', AdminVendorController::class);
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('vendor.dishes.quick-store');
-
-    // Détacher un plat du vendeur
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('vendor.dishes.detach');
-});
-Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
-    // ...
-    Route::post('/dishes/quick-store', [AdminVendorController::class, 'quickStore'])->name('dishes.quick-store');
-    Route::delete('/dishes/{dish}/detach', [AdminVendorController::class, 'detach'])->name('dishes.detach');
+    // Gestion des devis (admin)
+    Route::resource('quotes', QuoteController::class)->except(['create', 'store']);
+    Route::post('quotes/{quote}/respond', [QuoteController::class, 'respond'])->name('quotes.respond');
+    Route::post('quotes/{quote}/update-status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
 });
 /*
 |--------------------------------------------------------------------------
@@ -328,6 +340,10 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::post('/ai/description', [ProductController::class, 'generateDescription'])->name('ai.description');
     Route::post('/ai/translate', [ProductController::class, 'translate'])->name('ai.translate');
 });
+
+Route::get('/admin/messages-test', function() {
+    return view('admin.messages.test');
+})->middleware('auth')->name('admin.messages.test');
 
 /*
 |--------------------------------------------------------------------------

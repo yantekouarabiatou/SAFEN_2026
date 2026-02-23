@@ -2,303 +2,226 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Récupérer toutes les conversations de l'utilisateur
-        $conversations = Conversation::where(function($query) {
-                $query->where('user1_id', Auth::id())
-                      ->orWhere('user2_id', Auth::id());
-            })
-            ->with(['user1', 'user2', 'lastMessage'])
-            ->withCount(['messages as unread_count' => function($query) {
-                $query->where('read_at', null)
-                      ->where('receiver_id', Auth::id());
-            }])
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20);
+        // Statistiques
+        $stats = [
+            'total' => Message::count(),
+            'unread' => Message::whereNull('read_at')->count(),
+            'read' => Message::whereNotNull('read_at')->count(),
+            'conversations' => Conversation::count() // ou Message::distinct('conversation_id')->count('conversation_id')
+        ];
 
-        // Marquer les notifications comme lues
-        Auth::user()->unreadNotifications()
-            ->where('type', 'App\Notifications\NewMessage')
-            ->update(['read_at' => now()]);
+        $query = Message::with(['sender', 'receiver', 'conversation']);
 
-        return view('messages.index', compact('conversations'));
+        // Filtres
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('message', 'like', "%{$search}%")
+                  ->orWhereHas('sender', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('receiver', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status == 'read') {
+                $query->whereNotNull('read_at');
+            } elseif ($request->status == 'unread') {
+                $query->whereNull('read_at');
+            }
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('user')) {
+            $userId = $request->user;
+            $query->where(function($q) use ($userId) {
+                $q->where('sender_id', $userId)
+                  ->orWhere('receiver_id', $userId);
+            });
+        }
+
+        // Tri
+        $query->latest();
+
+        // Pagination
+        $messages = $query->paginate(15);
+
+        // Liste des utilisateurs pour le filtre
+        $users = User::orderBy('name')->get(['id', 'name', 'email']);
+
+        // Types de messages pour le filtre
+        $types = Message::distinct('type')->pluck('type');
+
+        return view('admin.messages.index', compact('messages', 'stats', 'users', 'types'));
     }
 
-    public function show(User $user)
+    public function show(Message $message)
     {
-        // Vérifier qu'on ne peut pas s'envoyer de message à soi-même
-        if ($user->id === Auth::id()) {
-            abort(403, 'Vous ne pouvez pas vous envoyer de message à vous-même.');
+        $message->load(['sender', 'receiver', 'conversation', 'reference', 'replies']);
+
+        // Marquer comme lu si ce n'est pas le cas
+        if (!$message->read_at) {
+            $message->markAsRead();
         }
 
-        // Trouver ou créer une conversation
-        $conversation = Conversation::where(function($query) use ($user) {
-                $query->where('user1_id', Auth::id())
-                      ->where('user2_id', $user->id);
-            })
-            ->orWhere(function($query) use ($user) {
-                $query->where('user1_id', $user->id)
-                      ->where('user2_id', Auth::id());
-            })
-            ->first();
-
-        if (!$conversation) {
-            $conversation = Conversation::create([
-                'user1_id' => Auth::id(),
-                'user2_id' => $user->id,
-            ]);
-        }
-
-        // Récupérer les messages
-        $messages = Message::where('conversation_id', $conversation->id)
-            ->with('sender')
-            ->orderBy('created_at', 'asc')
-            ->paginate(50);
-
-        // Marquer les messages comme lus
-        Message::where('conversation_id', $conversation->id)
-            ->where('receiver_id', Auth::id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
-
-        // Récupérer toutes les conversations de l'utilisateur pour la sidebar
-        $conversations = Conversation::where(function($query) {
-                $query->where('user1_id', Auth::id())
-                      ->orWhere('user2_id', Auth::id());
-            })
-            ->with(['user1', 'user2', 'lastMessage'])
-            ->withCount(['messages as unread_count' => function($query) {
-                $query->where('read_at', null)
-                      ->where('receiver_id', Auth::id());
-            }])
-            ->orderBy('updated_at', 'desc')
-            ->get();
-
-        return view('messages.show', compact('conversation', 'messages', 'user', 'conversations'));
+        return view('admin.messages.show', compact('message'));
     }
 
-    public function send(Request $request, User $user)
+    public function markAsRead(Message $message)
     {
-        $request->validate([
-            'message' => 'required|string|max:2000',
-            'type' => 'nullable|in:text,quote,order',
-            'reference_id' => 'nullable|integer',
-        ]);
-
-        // Vérifier qu'on ne peut pas s'envoyer de message à soi-même
-        if ($user->id === Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vous ne pouvez pas vous envoyer de message à vous-même.'
-            ], 403);
-        }
-
-        // Trouver ou créer une conversation
-        $conversation = Conversation::where(function($query) use ($user) {
-                $query->where('user1_id', Auth::id())
-                      ->where('user2_id', $user->id);
-            })
-            ->orWhere(function($query) use ($user) {
-                $query->where('user1_id', $user->id)
-                      ->where('user2_id', Auth::id());
-            })
-            ->first();
-
-        if (!$conversation) {
-            $conversation = Conversation::create([
-                'user1_id' => Auth::id(),
-                'user2_id' => $user->id,
-            ]);
-        }
-
-        // Créer le message
-        $message = Message::create([
-            'conversation_id' => $conversation->id,
-            'sender_id' => Auth::id(),
-            'receiver_id' => $user->id,
-            'message' => $request->message,
-            'type' => $request->type ?? 'text',
-            'reference_id' => $request->reference_id,
-        ]);
-
-        // Mettre à jour la conversation
-        $conversation->update(['updated_at' => now()]);
-
-        // Notifier le destinataire
-        $user->notify(new \App\Notifications\NewMessage($message));
-
-        // Envoyer une notification push (si configuré)
-        if ($user->fcm_token) {
-            $this->sendPushNotification($user, 'Nouveau message', $request->message);
-        }
+        $message->markAsRead();
 
         return response()->json([
             'success' => true,
-            'message' => $message->load('sender'),
+            'message' => 'Message marqué comme lu'
+        ]);
+    }
+
+    public function markAsUnread(Message $message)
+    {
+        $message->update(['read_at' => null]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Message marqué comme non lu'
+        ]);
+    }
+
+    public function reply(Request $request, Message $message)
+    {
+        $request->validate([
+            'content' => 'required|string|max:5000'
+        ]);
+
+        $reply = Message::create([
+            'conversation_id' => $message->conversation_id,
+            'sender_id' => auth()->id(),
+            'receiver_id' => $message->sender_id,
+            'message' => $request->content,
+            'type' => 'reply',
+            'reference_id' => $message->id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réponse envoyée',
+            'data' => $reply
         ]);
     }
 
     public function destroy(Message $message)
     {
-        // Vérifier que l'utilisateur est l'expéditeur
-        if ($message->sender_id !== Auth::id()) {
-            abort(403);
-        }
-
         $message->delete();
 
-        return redirect()->back()
-            ->with('success', 'Message supprimé avec succès.');
-    }
-
-    public function markAsRead(Message $message)
-    {
-        // Vérifier que l'utilisateur est le destinataire
-        if ($message->receiver_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $message->update(['read_at' => now()]);
-
-        return response()->json(['success' => true]);
-    }
-
-    public function search(Request $request)
-    {
-        $search = $request->get('search');
-
-        // Rechercher des utilisateurs
-        $users = User::where('id', '!=', Auth::id())
-            ->where(function($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                      ->orWhere('email', 'like', "%$search%");
-            })
-            ->where('is_active', true)
-            ->limit(10)
-            ->get();
-
-        // Rechercher dans les conversations existantes
-        $conversations = Conversation::where(function($query) {
-                $query->where('user1_id', Auth::id())
-                      ->orWhere('user2_id', Auth::id());
-            })
-            ->whereHas('messages', function($query) use ($search) {
-                $query->where('message', 'like', "%$search%");
-            })
-            ->with(['user1', 'user2'])
-            ->limit(10)
-            ->get();
-
         return response()->json([
-            'users' => $users,
-            'conversations' => $conversations,
+            'success' => true,
+            'message' => 'Message supprimé avec succès'
         ]);
     }
 
-    public function unreadCount()
+    public function bulkAction(Request $request)
     {
-        $count = Message::where('receiver_id', Auth::id())
-            ->whereNull('read_at')
-            ->count();
+        $request->validate([
+            'action' => 'required|in:delete,mark-read,mark-unread',
+            'ids' => 'required|array',
+            'ids.*' => 'exists:messages,id'
+        ]);
 
-        return response()->json(['count' => $count]);
-    }
+        $count = count($request->ids);
 
-    protected function sendPushNotification($user, $title, $body)
-    {
-        // Implémentation avec Firebase Cloud Messaging
-        // Nécessite le package firebase/php-jwt et une configuration Firebase
-
-        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $serverKey = config('services.fcm.server_key');
-
-        if (!$serverKey || !$user->fcm_token) {
-            return;
+        switch($request->action) {
+            case 'delete':
+                Message::whereIn('id', $request->ids)->delete();
+                $message = "$count messages supprimés";
+                break;
+                
+            case 'mark-read':
+                Message::whereIn('id', $request->ids)->update(['read_at' => now()]);
+                $message = "$count messages marqués comme lus";
+                break;
+                
+            case 'mark-unread':
+                Message::whereIn('id', $request->ids)->update(['read_at' => null]);
+                $message = "$count messages marqués comme non lus";
+                break;
         }
 
-        $notification = [
-            'title' => $title,
-            'body' => $body,
-            'icon' => asset('images/logo.png'),
-            'click_action' => url('/messages'),
-        ];
-
-        $data = [
-            'type' => 'message',
-            'sender_id' => Auth::id(),
-            'sender_name' => Auth::user()->name,
-        ];
-
-        $fcmNotification = [
-            'to' => $user->fcm_token,
-            'notification' => $notification,
-            'data' => $data,
-            'priority' => 'high',
-        ];
-
-        $headers = [
-            'Authorization: key=' . $serverKey,
-            'Content-Type: application/json',
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
-        $result = curl_exec($ch);
-        curl_close($ch);
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
     }
 
-    public function sendToArtisan(Request $request, $artisanId)
-    {
-        $artisan = \App\Models\Artisan::findOrFail($artisanId);
-        $user = $artisan->user;
-
-        return $this->send($request, $user);
-    }
-
-    public function sendToVendor(Request $request, $vendorId)
-    {
-        $vendor = \App\Models\Vendor::findOrFail($vendorId);
-        $user = $vendor->user;
-
-        return $this->send($request, $user);
-    }
-
-    public function markAllRead(Request $request)
-    {
-        Message::where('receiver_id', Auth::id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
-
-        return response()->json(['success' => true]);
-    }
-
-    public function clearAll(Request $request)
-    {
-        // Supprimer toutes les conversations de l'utilisateur
-        $conversations = Conversation::where(function($query) {
-            $query->where('user1_id', Auth::id())
-                  ->orWhere('user2_id', Auth::id());
-        })->get();
-
-        foreach ($conversations as $conversation) {
-            $conversation->messages()->delete();
-            $conversation->delete();
+public function conversations()
+{
+    // Récupérer toutes les conversations
+    $allConversations = Conversation::with(['user1', 'user2'])->get();
+    
+    $conversationsData = [];
+    
+    foreach ($allConversations as $conversation) {
+        // Récupérer les messages de cette conversation
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->with(['sender', 'receiver'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        if ($messages->count() > 0) {
+            $lastMessage = $messages->first();
+            
+            $conversationsData[] = (object)[
+                'id' => $conversation->id,
+                'user1' => $conversation->user1,
+                'user2' => $conversation->user2,
+                'last_message' => $lastMessage,
+                'last_message_at' => $lastMessage->created_at,
+                'messages_count' => $messages->count(),
+                'unread_count' => $messages
+                    ->where('receiver_id', auth()->id())
+                    ->whereNull('read_at')
+                    ->count()
+            ];
         }
-
-        return response()->json(['success' => true]);
     }
+    
+    // Trier par date du dernier message
+    usort($conversationsData, function($a, $b) {
+        return $b->last_message_at->timestamp <=> $a->last_message_at->timestamp;
+    });
+    
+    // Pagination manuelle
+    $page = request()->get('page', 1);
+    $perPage = 15;
+    $total = count($conversationsData);
+    $items = array_slice($conversationsData, ($page - 1) * $perPage, $perPage);
+    
+    $conversations = new \Illuminate\Pagination\LengthAwarePaginator(
+        $items,
+        $total,
+        $perPage,
+        $page,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+    
+    return view('admin.messages.conversations', compact('conversations'));
+}
 }

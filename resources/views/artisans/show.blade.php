@@ -362,8 +362,18 @@
                                         <div class="card border-0 shadow-sm mb-3 rounded-4">
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
-                                                    <img src="{{ $review->user->avatar_url ?? asset('images/default-avatar.jpg') }}"
-                                                        class="rounded-circle me-3" width="50" height="50">
+                                                    @php
+    $user = $review->user;
+    $hasAvatar = !is_null($user->avatar);
+@endphp
+
+@if($hasAvatar)
+    <img src="{{ $user->avatar_url }}" class="rounded-circle me-3" width="50" height="50">
+@else
+    <div class="rounded-circle d-flex align-items-center justify-content-center me-3 bg-benin-green text-white fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">
+        {{ getInitials($user->name) }}
+    </div>
+@endif
                                                     <div>
                                                         <h6 class="fw-bold mb-0">{{ $review->user->name }}</h6>
                                                         <div class="text-warning">
@@ -389,27 +399,49 @@
                                     @if(auth()->user()->id !== $artisan->user_id)
                                         <div class="card border-0 shadow-sm rounded-4">
                                             <div class="card-body">
-                                                <h5 class="fw-bold mb-4">Laisser un avis</h5>
-                                                <form action="{{ route('reviews.store') }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="reviewable_type" value="App\Models\Artisan">
-                                                    <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Note</label>
-                                                        <div class="rating-input">
-                                                            @for($i = 5; $i >= 1; $i--)
-                                                                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}"
-                                                                    required>
-                                                                <label for="star{{ $i }}"><i class="bi bi-star-fill"></i></label>
-                                                            @endfor
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Commentaire</label>
-                                                        <textarea name="comment" rows="4" class="form-control" required></textarea>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-benin w-100">Envoyer</button>
-                                                </form>
+                                               <h5 class="fw-bold mb-4">Laisser un avis</h5>
+<form action="{{ route('reviews.store') }}" method="POST">
+    @csrf
+    <input type="hidden" name="reviewable_type" value="App\Models\Artisan">
+    <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
+
+    <div class="mb-3">
+        <label class="form-label">Note</label>
+        <div class="rating-input">
+            @for($i = 5; $i >= 1; $i--)
+                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" required>
+                <label for="star{{ $i }}"><i class="bi bi-star-fill"></i></label>
+            @endfor
+        </div>
+        @error('rating')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Commentaire</label>
+        <textarea name="comment" rows="4" class="form-control" required></textarea>
+        @error('comment')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    {{-- Champ caché pour anonymous (si vous ne voulez pas de case à cocher) --}}
+    <input type="hidden" name="anonymous" value="0">
+
+    {{-- Case à cocher pour accepter les conditions --}}
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="terms" id="terms" class="form-check-input" value="1" required>
+        <label for="terms" class="form-check-label">
+            J'accepte les <a href="#" target="_blank">conditions d'utilisation</a> *
+        </label>
+        @error('terms')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <button type="submit" class="btn btn-benin w-100">Envoyer</button>
+</form>
                                             </div>
                                         </div>
                                     @else

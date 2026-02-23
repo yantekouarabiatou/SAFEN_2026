@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
@@ -38,6 +39,9 @@
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets/bundles/select2/dist/css/select2.min.css') }}">
 
+    <!-- sweetalert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <!-- Styles pushés depuis les vues -->
     @stack('styles')
 
@@ -52,19 +56,28 @@
         }
 
         /* === Couleurs Bénin === */
-        .bg-benin-green { background-color: var(--benin-green) !important; }
-        .text-benin-green { color: var(--benin-green) !important; }
+        .bg-benin-green {
+            background-color: var(--benin-green) !important;
+        }
+
+        .text-benin-green {
+            color: var(--benin-green) !important;
+        }
+
         .btn-benin-green {
             background-color: var(--benin-green);
             border-color: var(--benin-green);
             color: white;
         }
+
         .btn-benin-green:hover {
             background-color: var(--benin-dark);
             border-color: var(--benin-dark);
         }
 
-        .sidebar-brand a { color: var(--benin-green) !important; }
+        .sidebar-brand a {
+            color: var(--benin-green) !important;
+        }
 
         .main-sidebar .sidebar-menu li.active a {
             background-color: var(--benin-green) !important;
@@ -80,13 +93,25 @@
         .main-navbar {
             height: var(--navbar-height);
             padding: 0 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
-        .main-navbar .form-inline { flex: 1; max-width: 600px; }
-        .main-navbar .navbar-nav { display: flex; align-items: center; gap: 8px; }
-        .main-navbar .navbar-nav.navbar-right { margin-left: auto; gap: 15px; }
+        .main-navbar .form-inline {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .main-navbar .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-navbar .navbar-nav.navbar-right {
+            margin-left: auto;
+            gap: 15px;
+        }
 
         .nav-link-lg {
             width: 42px;
@@ -99,8 +124,14 @@
             position: relative;
         }
 
-        .nav-link-lg:hover { background-color: rgba(0, 135, 81, 0.1); }
-        .nav-link-lg i { width: 20px; height: 20px; }
+        .nav-link-lg:hover {
+            background-color: rgba(0, 135, 81, 0.1);
+        }
+
+        .nav-link-lg i {
+            width: 20px;
+            height: 20px;
+        }
 
         /* Barre de recherche améliorée */
         .search-element {
@@ -149,7 +180,10 @@
         }
 
         /* Dropdowns notifications & messages */
-        .dropdown-list-toggle { position: relative; }
+        .dropdown-list-toggle {
+            position: relative;
+        }
+
         .dropdown-list-toggle .nav-link {
             width: 42px;
             height: 42px;
@@ -161,7 +195,9 @@
             position: relative;
         }
 
-        .dropdown-list-toggle .nav-link:hover { background-color: rgba(0, 135, 81, 0.1); }
+        .dropdown-list-toggle .nav-link:hover {
+            background-color: rgba(0, 135, 81, 0.1);
+        }
 
         /* Badge de compteur */
         .badge-sm {
@@ -190,7 +226,9 @@
             min-height: 52px;
         }
 
-        .nav-link-user:hover { background-color: rgba(0, 135, 81, 0.05); }
+        .nav-link-user:hover {
+            background-color: rgba(0, 135, 81, 0.05);
+        }
 
         .nav-link-user .rounded-circle,
         .nav-link-user .avatar-initial {
@@ -226,13 +264,13 @@
             font-size: 15px;
             color: white;
             text-transform: uppercase;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Dropdown menu amélioré */
         .dropdown-menu {
             border: none;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
             border-radius: 12px;
             padding: 8px;
             margin-top: 8px !important;
@@ -309,7 +347,9 @@
             text-decoration: none;
         }
 
-        .dropdown-footer a:hover { text-decoration: underline; }
+        .dropdown-footer a:hover {
+            text-decoration: underline;
+        }
 
         .dropdown-list-content {
             max-height: 320px;
@@ -318,41 +358,147 @@
         }
 
         /* Scroll personnalisé */
-        .dropdown-list-content::-webkit-scrollbar { width: 6px; }
-        .dropdown-list-content::-webkit-scrollbar-track { background: #f1f1f1; }
-        .dropdown-list-content::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
-        .dropdown-list-content::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        .dropdown-list-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .dropdown-list-content::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
 
         /* Responsive */
         @media (max-width: 991px) {
-            .main-navbar { padding: 0 15px; }
-            .search-element { max-width: 250px; }
-            .nav-link-user .d-lg-inline-block { display: none !important; }
-            .navbar-right { gap: 8px !important; }
+            .main-navbar {
+                padding: 0 15px;
+            }
+
+            .search-element {
+                max-width: 250px;
+            }
+
+            .nav-link-user .d-lg-inline-block {
+                display: none !important;
+            }
+
+            .navbar-right {
+                gap: 8px !important;
+            }
         }
 
         @media (max-width: 767px) {
-            .main-navbar { height: 60px; }
-            .nav-link-lg { width: 38px; height: 38px; }
+            .main-navbar {
+                height: 60px;
+            }
+
+            .nav-link-lg {
+                width: 38px;
+                height: 38px;
+            }
+
             .nav-link-user .avatar-initial,
-            .nav-link-user .rounded-circle { width: 36px; height: 36px; }
-            .dropdown-list { min-width: 300px; }
+            .nav-link-user .rounded-circle {
+                width: 36px;
+                height: 36px;
+            }
+
+            .dropdown-list {
+                min-width: 300px;
+            }
         }
 
         /* Animation des icônes */
         @keyframes bellRing {
-            0%, 100% { transform: rotate(0deg); }
-            10%, 30% { transform: rotate(-10deg); }
-            20%, 40% { transform: rotate(10deg); }
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            10%,
+            30% {
+                transform: rotate(-10deg);
+            }
+
+            20%,
+            40% {
+                transform: rotate(10deg);
+            }
         }
 
-        .notification-toggle:hover i { animation: bellRing 0.5s ease-in-out; }
+        .notification-toggle:hover i {
+            animation: bellRing 0.5s ease-in-out;
+        }
 
         /* État actif */
         .navbar-nav li.active .nav-link {
             background-color: rgba(0, 135, 81, 0.1);
             color: var(--benin-green);
         }
+        /* ── Popup Bénin ───────────────────────────────── */
+        .swal-benin-popup {
+            border-radius: 14px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            padding: 28px 24px 20px !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,.14) !important;
+            border-top: 4px solid var(--benin-green, #008751) !important;
+        }
+
+        .swal-benin-title {
+            font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif !important;
+            font-size: 1.35rem !important;
+            color: #181a18 !important;
+        }
+
+        /* Bouton succès vert */
+        .swal-benin-confirm {
+            background: #008751 !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            box-shadow: 0 3px 12px rgba(0,135,81,.25) !important;
+            border: none !important;
+            color: #fff !important;
+        }
+        .swal-benin-confirm:hover { opacity: .88 !important; }
+
+        /* Bouton erreur rouge */
+        .swal-benin-confirm-danger {
+            background: #e8112d !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        /* Bouton warning jaune */
+        .swal-benin-confirm-warning {
+            background: #fcd116 !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: .88rem !important;
+            padding: 9px 24px !important;
+            border: none !important;
+            color: #181a18 !important;
+        }
+
+        /* Bordure top adaptée à l'icône */
+        .swal2-icon.swal2-error   ~ .swal-benin-popup { border-top-color: #e8112d !important; }
+        .swal2-icon.swal2-warning ~ .swal-benin-popup { border-top-color: #fcd116 !important; }
     </style>
 </head>
 
@@ -373,7 +519,7 @@
                                 <i data-feather="align-justify"></i>
                             </a>
                         </li>
-                        
+
                         <!-- Bouton Plein écran -->
                         <li>
                             <a href="#" class="nav-link nav-link-lg fullscreen-btn" title="Plein écran">
@@ -414,7 +560,7 @@
                                 </div>
                             </div>
                             <div class="dropdown-footer text-center">
-                                <a href="#">Voir tous les messages</a>
+                                <a href="{{ route('admin.messages.index') }}">Voir tous les messages</a>
                             </div>
                         </div>
                     </li>
@@ -435,9 +581,7 @@
                                     <p class="text-muted mb-0">Chargement...</p>
                                 </div>
                             </div>
-                            <div class="dropdown-footer text-center">
-                                <a href="#">Voir toutes les notifications</a>
-                            </div>
+                            <a href="#" onclick="return false;">Voir toutes les notifications</a>
                         </div>
                     </li>
 
@@ -453,7 +597,7 @@
                             @if($user->profile_photo_url ?? false)
                                 <img alt="Profil" src="{{ $user->profile_photo_url }}" class="rounded-circle">
                             @else
-                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor,0,6) }}, #{{ substr($bgColor,2,6) }});">
+                                <div class="avatar-initial" style="background: linear-gradient(135deg, #{{ substr($bgColor, 0, 6) }}, #{{ substr($bgColor, 2, 6) }});">
                                     {{ $initials }}
                                 </div>
                             @endif
@@ -478,7 +622,7 @@
                             <a href="#" class="dropdown-item has-icon">
                                 <i data-feather="settings"></i> Paramètres
                             </a>
-                            
+
                             <div class="dropdown-divider"></div>
 
                             <a href="{{ url('/') }}" class="dropdown-item has-icon" target="_blank">
@@ -548,6 +692,8 @@
     <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
     <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Initialisation Feather Icons -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -563,8 +709,93 @@
             }
         });
     </script>
+    {{--
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  ALERTS FLASH — à inclure dans layouts/admin.blade.php       ║
+    ║  juste avant </body>, après le chargement de SweetAlert2     ║
+    ╚══════════════════════════════════════════════════════════════╝
 
+    Le controller renvoie :
+      ->with('success', '...')   succès création / mise à jour
+      ->with('error',   '...')   erreur DB / exception
+      + $errors (validation Laravel automatique)
+--}}
+
+    @if(session('success') || session('error') || $errors->any())
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            @if(session('success'))
+                // ── Succès ───────────────────────────────────────────────────
+                Swal.fire({
+                    title: 'Opération réussie',
+                    html: `<span style="font-size:.95rem;color:#3a3d38;">{{ session('success') }}</span>`,
+                    icon: 'success',
+                    confirmButtonColor: '#008751',
+                    confirmButtonText: 'Continuer',
+                    iconColor: '#008751',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm',
+                    }
+                });
+            @endif
+
+            @if(session('error'))
+                // ── Erreur serveur ───────────────────────────────────────────
+                Swal.fire({
+                    title: 'Une erreur est survenue',
+                    html: `<span style="font-size:.95rem;color:#3a3d38;">{{ session('error') }}</span>`,
+                    icon: 'error',
+                    confirmButtonColor: '#e8112d',
+                    confirmButtonText: 'Fermer',
+                    iconColor: '#e8112d',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm-danger',
+                    }
+                });
+            @endif
+
+            @if($errors->any())
+                // ── Erreurs de validation ────────────────────────────────────
+                const validationErrors = {!! json_encode($errors->all()) !!};
+                const errorList = validationErrors
+                    .map(e => `<li style="text-align:left;margin-bottom:4px;">• ${e}</li>`)
+                    .join('');
+
+                Swal.fire({
+                    title: 'Formulaire invalide',
+                    html: `
+                        <p style="font-size:.9rem;color:#6b7068;margin-bottom:10px;">
+                            Veuillez corriger les erreurs suivantes :
+                        </p>
+                        <ul style="list-style:none;padding:0;font-size:.88rem;color:#3a3d38;max-height:220px;overflow-y:auto;">
+                            ${errorList}
+                        </ul>
+                    `,
+                    icon: 'warning',
+                    confirmButtonColor: '#fcd116',
+                    confirmButtonText: 'Corriger',
+                    iconColor: '#fcd116',
+                    customClass: {
+                        popup:          'swal-benin-popup',
+                        title:          'swal-benin-title',
+                        confirmButton:  'swal-benin-confirm-warning',
+                    }
+                });
+            @endif
+
+        });
+        </script>
+
+
+    @endif
     <!-- Scripts pushés par les vues -->
     @stack('scripts')
+
 </body>
+
 </html>

@@ -18,22 +18,22 @@
         <div class="col-md-4">
             <div class="card profile-widget">
                 <div class="profile-widget-header">
-                    <img src="{{ $user->profile_photo_url ?? asset('admin-assets/img/avatar/avatar-1.png') }}" 
-                         alt="{{ $user->name }}" 
-                         class="rounded-circle profile-widget-picture" 
+                    <img src="{{ $user->avatar_url ?? asset('admin-assets/img/avatar/avatar-1.png') }}"
+                         alt="{{ $user->name }}"
+                         class="rounded-circle profile-widget-picture"
                          style="width: 100px; height: 100px; object-fit: cover;">
                     <div class="profile-widget-items">
                         <div class="profile-widget-item">
                             <div class="profile-widget-item-label">Commandes</div>
-                            <div class="profile-widget-item-value">{{ $user->orders->count() }}</div>
+                            <div class="profile-widget-item-value">{{ $user->orders_count ?? $user->orders->count() }}</div>
                         </div>
                         <div class="profile-widget-item">
                             <div class="profile-widget-item-label">Favoris</div>
-                            <div class="profile-widget-item-value">{{ $user->favorites->count() ?? 0 }}</div>
+                            <div class="profile-widget-item-value">{{ $user->favorites_count ?? $user->favorites->count() }}</div>
                         </div>
                         <div class="profile-widget-item">
                             <div class="profile-widget-item-label">Avis</div>
-                            <div class="profile-widget-item-value">{{ $user->reviews->count() ?? 0 }}</div>
+                            <div class="profile-widget-item-value">{{ $user->reviews_count ?? $user->reviews->count() }}</div>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                     </a>
                 </div>
             </div>
-            
+
             {{-- Informations de contact --}}
             <div class="card">
                 <div class="card-header">
@@ -97,6 +97,7 @@
                                 <div class="text-muted">{{ $user->created_at->format('d/m/Y à H:i') }}</div>
                             </div>
                         </li>
+                        {{-- Dernière connexion si la colonne existe --}}
                         @if($user->last_login_at)
                         <li class="media">
                             <div class="media-icon"><i class="fas fa-sign-in-alt"></i></div>
@@ -109,7 +110,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             {{-- Rôles --}}
             <div class="card">
                 <div class="card-header">
@@ -138,7 +139,7 @@
                 </div>
             </div>
         </div>
-        
+
         {{-- Activités --}}
         <div class="col-md-8">
             {{-- Profil artisan --}}
@@ -155,13 +156,13 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Spécialité:</strong> {{ $user->artisan->specialty }}</p>
-                            <p><strong>Expérience:</strong> {{ $user->artisan->experience_years ?? 0 }} ans</p>
+                            <p><strong>Spécialité:</strong> {{ $user->artisan->craft_label ?? $user->artisan->craft }}</p>
+                            <p><strong>Expérience:</strong> {{ $user->artisan->years_experience ?? 0 }} ans</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Produits:</strong> {{ $user->artisan->products->count() }}</p>
-                            <p><strong>Statut:</strong> 
-                                @if($user->artisan->is_verified)
+                            <p><strong>Statut:</strong>
+                                @if($user->artisan->verified)
                                     <span class="badge badge-success">Vérifié</span>
                                 @else
                                     <span class="badge badge-warning">En attente</span>
@@ -172,7 +173,7 @@
                 </div>
             </div>
             @endif
-            
+
             {{-- Dernières commandes --}}
             <div class="card">
                 <div class="card-header">
@@ -196,7 +197,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($user->orders->take(5) as $order)
+                                @forelse($user->orders as $order)
                                 <tr>
                                     <td>
                                         <a href="{{ route('admin.orders.show', $order) }}">
@@ -234,7 +235,7 @@
                     </div>
                 </div>
             </div>
-            
+
             {{-- Derniers avis --}}
             @if($user->reviews && $user->reviews->count() > 0)
             <div class="card">
@@ -243,7 +244,7 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled list-unstyled-border">
-                        @foreach($user->reviews->take(5) as $review)
+                        @foreach($user->reviews as $review)
                         <li class="media">
                             <div class="media-body">
                                 <div class="float-right">
@@ -275,7 +276,7 @@
                 </div>
             </div>
             @endif
-            
+
             {{-- Statistiques d'achat --}}
             <div class="card">
                 <div class="card-header">
@@ -284,7 +285,7 @@
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-md-3">
-                            <h4 class="text-primary">{{ $user->orders->count() }}</h4>
+                            <h4 class="text-primary">{{ $user->orders_count ?? $user->orders->count() }}</h4>
                             <p class="text-muted">Commandes</p>
                         </div>
                         <div class="col-md-3">
@@ -296,7 +297,7 @@
                             <p class="text-muted">Livrées</p>
                         </div>
                         <div class="col-md-3">
-                            <h4 class="text-warning">{{ $user->reviews->count() ?? 0 }}</h4>
+                            <h4 class="text-warning">{{ $user->reviews_count ?? $user->reviews->count() }}</h4>
                             <p class="text-muted">Avis donnés</p>
                         </div>
                     </div>

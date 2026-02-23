@@ -2,25 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use App\Models\Artisan as ModelsArtisan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Artisan;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles; // ✅ HasRoles gère hasRole() nativement
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -32,43 +23,31 @@ class User extends Authenticatable
         'language',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
+    // ─────────────────────────────────────────────
+    // RELATIONS
+    // ─────────────────────────────────────────────
 
     public function artisan()
     {
         return $this->hasOne(ModelsArtisan::class);
     }
 
-    /**
-     * Vérifie si l'utilisateur est administrateur
-     */
-    public function isAdmin()
+    public function vendor()
     {
-        // Adaptez cette logique selon votre système de rôles
-        // Par exemple, si vous avez une colonne 'role' dans la table users
-        return $this->role === 'admin' || $this->role === 'super_admin';
+        return $this->hasOne(Vendor::class);
     }
 
     public function favorites()
@@ -81,25 +60,19 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
-    public function vendor()
-    {
-        return $this->hasOne(Vendor::class);
-    }
-
-    public function isArtisan()
-    {
-        return $this->role === 'artisan';
-    }
-
-    public function getAvatarUrlAttribute()
-    {
-        return $this->avatar ? asset('storage/' . $this->avatar) : asset('images/default-avatar.png');
-    }
-
-
     public function quotes()
     {
         return $this->hasMany(Quote::class);
+    }
+
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
     }
 
     public function cartItems()
@@ -107,22 +80,14 @@ class User extends Authenticatable
         return $this->hasMany(CartItem::class);
     }
 
-    public function hasRole($role)
+    public function orders()
     {
-        if ($this->role === $role) {
-            return true;
-        }
-
-        if ($role === 'artisan' && $this->artisan) {
-            return true;
-        }
-
-        return false;
+        return $this->hasMany(GuestOrder::class, 'user_id');
     }
 
-    public function contacts()
+    public function dishes()
     {
-        return $this->hasMany(Contact::class);
+        return $this->hasMany(Dish::class);
     }
 
     public function sentMessages()
@@ -133,6 +98,19 @@ class User extends Authenticatable
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->whereNull('read_at');
+    }
+
+    public function recentMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')
+            ->latest()
+            ->with('sender');
     }
 
     public function conversations()
@@ -147,43 +125,58 @@ class User extends Authenticatable
         return $this->hasMany(Location::class);
     }
 
-    public function cart()
+    // ─────────────────────────────────────────────
+    // HELPERS — utilisent Spatie nativement
+    // ─────────────────────────────────────────────
+
+    /**
+     * ✅ Utilise Spatie (HasRoles) — NE PAS réécrire hasRole()
+     * Exemples d'utilisation :
+     *   $user->hasRole('admin')
+     *   $user->hasAnyRole(['admin', 'super-admin'])
+     *   $user->can('voir produits')
+     */
+
+    public function isAdmin(): bool
     {
-        return $this->hasOne(Cart::class);
+        // ✅ Utilise la méthode Spatie, pas une colonne 'role'
+        return $this->hasRole(['admin', 'super-admin']);
     }
 
-     public function dishes()
+    public function isSuperAdmin(): bool
     {
-        return $this->hasMany(Dish::class);
+        return $this->hasRole('super-admin');
     }
 
-    // Dans User.php
-    public function unreadMessages()
+    public function isArtisan(): bool
     {
-        return $this->hasMany(Message::class, 'receiver_id')
-            ->whereNull('read_at');
+        return $this->hasRole('artisan');
     }
 
-    public function recentMessages()
+    public function isVendor(): bool
     {
-        return $this->hasMany(Message::class, 'receiver_id')
-            ->latest()
-            ->with('sender');
+        return $this->hasRole('vendor');
     }
 
-    public function isOnline()
+    public function isClient(): bool
+    {
+        return $this->hasRole('client');
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        return $this->avatar
+            ? asset('storage/' . $this->avatar)
+            : asset('images/default-avatar.png');
+    }
+
+    public function isOnline(): bool
     {
         return $this->last_seen && $this->last_seen->diffInMinutes(now()) < 5;
     }
 
-    public function cartTotal()
+    public function cartTotal(): float|int
     {
         return $this->cartItems()->sum('total');
     }
-    public function orders()
-    {
-        return $this->hasMany(GuestOrder::class, 'user_id');
-    }
-
-
 }

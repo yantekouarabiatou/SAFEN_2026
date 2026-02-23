@@ -533,7 +533,7 @@ nav[aria-label] ul.pagination li.disabled a {
 
         {{-- ── Sidebar filtres ──────────────────────────────── --}}
         <div class="col-lg-3">
-            <form method="GET" action="{{ route('artisans.index') }}">
+            <form method="GET" action="{{ route('artisans.vue') }}">
 
                 @if(request('latitude') && request('longitude'))
                     <input type="hidden" name="latitude"  value="{{ request('latitude') }}">
@@ -605,7 +605,7 @@ nav[aria-label] ul.pagination li.disabled a {
                     <button type="submit" class="btn-filter">
                         <i class="bi bi-search me-1"></i> {{ __('messages.filter') }}
                     </button>
-                    <a href="{{ route('artisans.index') }}" class="btn-reset-filter">
+                    <a href="{{ route('artisans.vue') }}" class="btn-reset-filter">
                         <i class="bi bi-x-lg me-1"></i> Réinitialiser
                     </a>
                 </div>

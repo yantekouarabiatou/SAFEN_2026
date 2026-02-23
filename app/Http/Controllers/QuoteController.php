@@ -18,7 +18,7 @@ class QuoteController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('quotes.index', compact('quotes'));
+        return view('admin.quotes.index', compact('quotes'));
     }
 
     /**
@@ -68,7 +68,7 @@ class QuoteController extends Controller
             abort(403);
         }
 
-        return view('quotes.show', compact('quote'));
+        return view('admin.quotes.show', compact('quote'));
     }
 
     /**
@@ -138,5 +138,47 @@ class QuoteController extends Controller
 
         return redirect()->route('client.quotes.index')
             ->with('success', 'Devis supprimé.');
+    }
+
+
+    /**
+     * Répondre à une demande de devis.
+     */
+    public function respond(Request $request, Quote $quote)
+    {
+        $request->validate([
+            'amount'       => 'nullable|numeric|min:0',
+            'delivery_time' => 'nullable|string|max:255',
+            'response'     => 'nullable|string',
+            'valid_until'  => 'nullable|date',
+        ]);
+
+        $quote->update([
+            'quoted_amount' => $request->amount,
+            'delivery_time' => $request->delivery_time,
+            'response'      => $request->response,
+            'valid_until'   => $request->valid_until,
+            'status'        => 'sent', // ou conservez le statut existant
+        ]);
+
+        // Vous pouvez ajouter ici une notification au client
+
+        return redirect()->route('admin.quotes.show', $quote)
+            ->with('success', 'Réponse envoyée avec succès.');
+    }
+
+    /**
+     * Mettre à jour le statut d'un devis.
+     */
+    public function updateStatus(Request $request, Quote $quote)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,sent,accepted,rejected,expired',
+        ]);
+
+        $quote->update(['status' => $request->status]);
+
+        return redirect()->back()
+            ->with('success', 'Statut mis à jour.');
     }
 }
