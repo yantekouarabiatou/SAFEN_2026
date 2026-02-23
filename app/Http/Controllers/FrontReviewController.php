@@ -9,7 +9,7 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ReviewController extends Controller
+class FrontReviewController extends Controller
 {
     /**
      * Afficher le formulaire pour créer un avis

@@ -14,20 +14,62 @@ class MessageController extends Controller
     /**
      * Afficher la liste des messages
      */
- public function index(Request $request)
+public function index(Request $request)
 {
-    // Récupérer les données
-    $messages = Message::with(['sender', 'receiver'])->paginate(15);
+    // Statistiques
     $stats = [
         'total' => Message::count(),
         'unread' => Message::whereNull('read_at')->count(),
         'read' => Message::whereNotNull('read_at')->count(),
         'conversations' => Conversation::count()
     ];
+
+    $query = Message::with(['sender', 'receiver', 'conversation']);
+
+    // Filtres
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('message', 'like', "%{$search}%")
+              ->orWhereHas('sender', function($userQuery) use ($search) {
+                  $userQuery->where('name', 'like', "%{$search}%")
+                           ->orWhere('email', 'like', "%{$search}%");
+              })
+              ->orWhereHas('receiver', function($userQuery) use ($search) {
+                  $userQuery->where('name', 'like', "%{$search}%")
+                           ->orWhere('email', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    if ($request->filled('status')) {
+        if ($request->status == 'read') {
+            $query->whereNotNull('read_at');
+        } elseif ($request->status == 'unread') {
+            $query->whereNull('read_at');
+        }
+    }
+
+    if ($request->filled('user')) {
+        $userId = $request->user;
+        $query->where(function($q) use ($userId) {
+            $q->where('sender_id', $userId)
+              ->orWhere('receiver_id', $userId);
+        });
+    }
+
+    // Tri
+    $query->latest();
+
+    // Pagination
+    $messages = $query->paginate(15);
+
+    // Liste des utilisateurs pour le filtre
     $users = User::orderBy('name')->get(['id', 'name', 'email']);
+
+    // Types de messages pour le filtre
     $types = Message::distinct('type')->pluck('type');
-    
-    // Retourner la vue avec les données
+
     return view('admin.messages.index', compact('messages', 'stats', 'users', 'types'));
 }
     /**
@@ -82,37 +124,27 @@ class MessageController extends Controller
     /**
      * Répondre à un message
      */
-    public function reply(Request $request, Message $message)
-    {
-        $request->validate([
-            'content' => 'required|string|max:5000'
-        ]);
+   public function reply(Request $request, Message $message)
+{
+    $request->validate([
+        'content' => 'required|string|max:5000'
+    ]);
 
-        // Créer la réponse
-        $reply = Message::create([
-            'conversation_id' => $message->conversation_id,
-            'sender_id' => auth()->id(),
-            'receiver_id' => $message->sender_id,
-            'message' => $request->content,
-            'type' => 'reply',
-            'reference_id' => $message->id
-        ]);
+    $reply = Message::create([
+        'conversation_id' => $message->conversation_id,
+        'sender_id' => auth()->id(),
+        'receiver_id' => $message->sender_id,
+        'message' => $request->content,
+        'type' => 'text', // Changé de 'reply' à 'text'
+        'reference_id' => $message->id
+    ]);
 
-        // Mettre à jour la conversation
-        if ($message->conversation) {
-            $message->conversation->update(['last_message_at' => now()]);
-        }
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Réponse envoyée',
-                'data' => $reply->load('sender')
-            ]);
-        }
-
-        return back()->with('success', 'Réponse envoyée');
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Réponse envoyée',
+        'data' => $reply
+    ]);
+}
 
     /**
      * Supprimer un message
@@ -170,26 +202,57 @@ class MessageController extends Controller
     /**
      * Afficher les conversations
      */
-    public function conversations()
-    {
-        $conversations = Conversation::with(['user1', 'user2'])
-            ->withCount(['messages'])
-            ->withMax('messages', 'created_at as last_message_at')
-            ->latest('last_message_at')
-            ->paginate(15);
-
-        // Ajouter le nombre de messages non lus pour chaque conversation
-        foreach ($conversations as $conversation) {
-            $conversation->unread_count = Message::where('conversation_id', $conversation->id)
-                ->where('receiver_id', auth()->id())
-                ->whereNull('read_at')
-                ->count();
+   public function conversations()
+{
+    // Récupérer toutes les conversations
+    $allConversations = Conversation::with(['user1', 'user2'])->get();
+    
+    $conversationsData = [];
+    
+    foreach ($allConversations as $conversation) {
+        // Récupérer les messages de cette conversation
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->with(['sender', 'receiver'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        if ($messages->count() > 0) {
+            $lastMessage = $messages->first();
             
-            $conversation->last_message = Message::where('conversation_id', $conversation->id)
-                ->latest()
-                ->first();
+            $conversationsData[] = (object)[
+                'id' => $conversation->id,
+                'user1' => $conversation->user1,
+                'user2' => $conversation->user2,
+                'last_message' => $lastMessage,
+                'last_message_at' => $lastMessage->created_at,
+                'messages_count' => $messages->count(),
+                'unread_count' => $messages
+                    ->where('receiver_id', auth()->id())
+                    ->whereNull('read_at')
+                    ->count()
+            ];
         }
-
-        return view('admin.messages.conversations', compact('conversations'));
     }
+    
+    // Trier par date du dernier message
+    usort($conversationsData, function($a, $b) {
+        return $b->last_message_at->timestamp <=> $a->last_message_at->timestamp;
+    });
+    
+    // Pagination manuelle
+    $page = request()->get('page', 1);
+    $perPage = 15;
+    $total = count($conversationsData);
+    $items = array_slice($conversationsData, ($page - 1) * $perPage, $perPage);
+    
+    $conversations = new \Illuminate\Pagination\LengthAwarePaginator(
+        $items,
+        $total,
+        $perPage,
+        $page,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+    
+    return view('admin.messages.conversations', compact('conversations'));
+}
 }

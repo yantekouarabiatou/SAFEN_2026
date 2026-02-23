@@ -1,18 +1,18 @@
-@extends('layouts.admin')
 
-@section('title', 'Gestion des avis et évaluations')
 
-@section('content')
+<?php $__env->startSection('title', 'Gestion des avis et évaluations'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="section-header">
     <h1>Avis clients</h1>
     <div class="section-header-breadcrumb">
-        <div class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></div>
+        <div class="breadcrumb-item"><a href="<?php echo e(route('admin.dashboard')); ?>">Dashboard</a></div>
         <div class="breadcrumb-item active">Avis</div>
     </div>
 </div>
 
 <div class="section-body">
-    {{-- Statistiques avec flexbox --}}
+    
     <div class="row" style="display: flex; flex-wrap: wrap;">
         <div class="col" style="flex: 1 1 180px; min-width: 160px;">
             <div class="card card-statistic-1">
@@ -24,7 +24,8 @@
                         <h4>Total</h4>
                     </div>
                     <div class="card-body">
-                        {{ $stats['total'] }}
+                        <?php echo e($stats['total']); ?>
+
                     </div>
                 </div>
             </div>
@@ -39,7 +40,8 @@
                         <h4>En attente</h4>
                     </div>
                     <div class="card-body">
-                        {{ $stats['pending'] }}
+                        <?php echo e($stats['pending']); ?>
+
                     </div>
                 </div>
             </div>
@@ -54,7 +56,8 @@
                         <h4>Approuvés</h4>
                     </div>
                     <div class="card-body">
-                        {{ $stats['approved'] }}
+                        <?php echo e($stats['approved']); ?>
+
                     </div>
                 </div>
             </div>
@@ -69,7 +72,8 @@
                         <h4>Rejetés</h4>
                     </div>
                     <div class="card-body">
-                        {{ $stats['rejected'] }}
+                        <?php echo e($stats['rejected']); ?>
+
                     </div>
                 </div>
             </div>
@@ -84,13 +88,14 @@
                         <h4>Note moy.</h4>
                     </div>
                     <div class="card-body">
-                        {{ number_format($stats['average_rating'], 1) }}
+                        <?php echo e(number_format($stats['average_rating'], 1)); ?>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {{-- Filtres --}}
+    
     <div class="row mt-0">
         <div class="col-12">
             <div class="card">
@@ -103,12 +108,12 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.reviews.index') }}" method="GET" class="row">
+                    <form action="<?php echo e(route('admin.reviews.index')); ?>" method="GET" class="row">
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Recherche</label>
                                 <input type="text" name="search" class="form-control"
-                                    value="{{ request('search') }}" placeholder="Utilisateur, commentaire...">
+                                    value="<?php echo e(request('search')); ?>" placeholder="Utilisateur, commentaire...">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -116,9 +121,9 @@
                                 <label>Type</label>
                                 <select name="type" class="form-control">
                                     <option value="">Tous</option>
-                                    <option value="product" {{ request('type') == 'product' ? 'selected' : '' }}>Produits</option>
-                                    <option value="artisan" {{ request('type') == 'artisan' ? 'selected' : '' }}>Artisans</option>
-                                    <option value="vendor" {{ request('type') == 'vendor' ? 'selected' : '' }}>Vendeurs</option>
+                                    <option value="product" <?php echo e(request('type') == 'product' ? 'selected' : ''); ?>>Produits</option>
+                                    <option value="artisan" <?php echo e(request('type') == 'artisan' ? 'selected' : ''); ?>>Artisans</option>
+                                    <option value="vendor" <?php echo e(request('type') == 'vendor' ? 'selected' : ''); ?>>Vendeurs</option>
                                 </select>
                             </div>
                         </div>
@@ -127,9 +132,9 @@
                                 <label>Statut</label>
                                 <select name="status" class="form-control">
                                     <option value="">Tous</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
-                                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approuvé</option>
-                                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejeté</option>
+                                    <option value="pending" <?php echo e(request('status') == 'pending' ? 'selected' : ''); ?>>En attente</option>
+                                    <option value="approved" <?php echo e(request('status') == 'approved' ? 'selected' : ''); ?>>Approuvé</option>
+                                    <option value="rejected" <?php echo e(request('status') == 'rejected' ? 'selected' : ''); ?>>Rejeté</option>
                                 </select>
                             </div>
                         </div>
@@ -138,7 +143,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search"></i> Filtrer
                                 </button>
-                                <a href="{{ route('admin.reviews.index') }}" class="btn btn-secondary">
+                                <a href="<?php echo e(route('admin.reviews.index')); ?>" class="btn btn-secondary">
                                     <i class="fas fa-undo"></i> Réinitialiser
                                 </a>
                             </div>
@@ -149,12 +154,12 @@
         </div>
     </div>
 
-    {{-- Liste des avis avec DataTables --}}
+    
     <div class="row mt-0">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4>Liste des avis ({{ $reviews->total() }})</h4>
+                    <h4>Liste des avis (<?php echo e($reviews->total()); ?>)</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -177,91 +182,95 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($reviews as $review)
-                                @php
+                                <?php $__empty_1 = true; $__currentLoopData = $reviews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
                                 $type = class_basename($review->reviewable_type);
                                 $item = $review->reviewable;
                                 $itemName = $item->name ?? $item->business_name ?? $item->user->name ?? 'N/A';
                                 $commentLength = strlen($review->comment);
-                                @endphp
-                                <tr id="review-{{ $review->id }}">
+                                ?>
+                                <tr id="review-<?php echo e($review->id); ?>">
                                     <td>
                                         <div class="custom-checkbox custom-control">
-                                            <input type="checkbox" data-checkboxes="mygroup" class="custom-control-input review-checkbox" value="{{ $review->id }}" id="review-{{ $review->id }}-cb">
-                                            <label for="review-{{ $review->id }}-cb" class="custom-control-label">&nbsp;</label>
+                                            <input type="checkbox" data-checkboxes="mygroup" class="custom-control-input review-checkbox" value="<?php echo e($review->id); ?>" id="review-<?php echo e($review->id); ?>-cb">
+                                            <label for="review-<?php echo e($review->id); ?>-cb" class="custom-control-label">&nbsp;</label>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($review->user->avatar)
-                                            <img src="{{ $review->user->avatar }}"
-                                                alt="{{ $review->user->name }}"
+                                            <?php if($review->user->avatar): ?>
+                                            <img src="<?php echo e($review->user->avatar); ?>"
+                                                alt="<?php echo e($review->user->name); ?>"
                                                 class="rounded-circle mr-2" width="35" height="35">
-                                            @else
+                                            <?php else: ?>
                                             <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2"
                                                 style="width: 35px; height: 35px; font-size: 14px;">
-                                                {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                                                <?php echo e(strtoupper(substr($review->user->name, 0, 1))); ?>
+
                                             </div>
-                                            @endif
+                                            <?php endif; ?>
                                             <div>
-                                                <strong>{{ $review->user->name }}</strong>
+                                                <strong><?php echo e($review->user->name); ?></strong>
                                                 <br>
-                                                <small class="text-muted">{{ $review->user->email }}</small>
+                                                <small class="text-muted"><?php echo e($review->user->email); ?></small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ $type == 'Product' ? 'info' : ($type == 'Artisan' ? 'warning' : 'success') }} mb-1">
-                                            {{ $type }}
+                                        <span class="badge badge-<?php echo e($type == 'Product' ? 'info' : ($type == 'Artisan' ? 'warning' : 'success')); ?> mb-1">
+                                            <?php echo e($type); ?>
+
                                         </span>
                                         <br>
-                                        <span title="{{ $itemName }}">
-                                            {{ Str::limit($itemName, 20) }}
+                                        <span title="<?php echo e($itemName); ?>">
+                                            <?php echo e(Str::limit($itemName, 20)); ?>
+
                                         </span>
                                     </td>
                                     <td>
                                         <div class="text-warning">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                @if($i <=$review->rating)
+                                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                                <?php if($i <=$review->rating): ?>
                                                 <i class="fas fa-star"></i>
-                                                @else
+                                                <?php else: ?>
                                                 <i class="far fa-star"></i>
-                                                @endif
-                                                @endfor
+                                                <?php endif; ?>
+                                                <?php endfor; ?>
                                         </div>
-                                        <small class="text-muted">{{ $review->rating }}/5</small>
+                                        <small class="text-muted"><?php echo e($review->rating); ?>/5</small>
                                     </td>
                                     <td>
-                                        <span class="review-comment" data-full="{{ $review->comment }}">
-                                            {{ Str::limit($review->comment, 30) }}
+                                        <span class="review-comment" data-full="<?php echo e($review->comment); ?>">
+                                            <?php echo e(Str::limit($review->comment, 30)); ?>
+
                                         </span>
-                                        @if($commentLength > 30)
+                                        <?php if($commentLength > 30): ?>
                                         <br>
-                                        <a href="#" class="text-primary read-more" data-comment="{{ $review->comment }}">Lire plus</a>
-                                        @endif
+                                        <a href="#" class="text-primary read-more" data-comment="<?php echo e($review->comment); ?>">Lire plus</a>
+                                        <?php endif; ?>
                                     </td>
-                                    <td data-order="{{ $review->created_at->timestamp }}">
-                                        {{ $review->created_at->format('d/m/Y') }}<br>
-                                        <small class="text-muted">{{ $review->created_at->format('H:i') }}</small>
+                                    <td data-order="<?php echo e($review->created_at->timestamp); ?>">
+                                        <?php echo e($review->created_at->format('d/m/Y')); ?><br>
+                                        <small class="text-muted"><?php echo e($review->created_at->format('H:i')); ?></small>
                                     </td>
                                     <td>
-                                        @switch($review->status)
-                                        @case('approved')
+                                        <?php switch($review->status):
+                                        case ('approved'): ?>
                                         <span class="badge badge-success">Approuvé</span>
-                                        @break
-                                        @case('pending')
+                                        <?php break; ?>
+                                        <?php case ('pending'): ?>
                                         <span class="badge badge-warning">En attente</span>
-                                        @break
-                                        @case('rejected')
+                                        <?php break; ?>
+                                        <?php case ('rejected'): ?>
                                         <span class="badge badge-danger">Rejeté</span>
-                                        @break
-                                        @endswitch
+                                        <?php break; ?>
+                                        <?php endswitch; ?>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
                                             <button type="button"
                                                 class="btn btn-sm btn-info mx-1 rounded btn-view"
-                                                data-view-info='{{ json_encode([
+                                                data-view-info='<?php echo e(json_encode([
                     'user_name' => $review->user->name,
                     'user_email' => $review->user->email,
                     'rating' => $review->rating,
@@ -269,39 +278,41 @@
                     'date' => $review->created_at->format('d/m/Y H:i'),
                     'item_type' => $type,
                     'item_name' => $itemName
-                ]) }}'
+                ])); ?>'
                                                 title="Voir détails">
                                                 <i class="fas fa-eye"></i>
                                             </button>
 
-                                            {{-- Bouton Approuver : actif uniquement si en attente --}}
+                                            
                                             <button type="button"
-                                                class="btn btn-sm {{ $review->status === 'pending' ? 'btn-success btn-approve' : 'btn-secondary' }} mx-1 rounded"
-                                                data-id="{{ $review->id }}"
-                                                {{ $review->status !== 'pending' ? 'disabled' : '' }}
-                                                title="{{ $review->status === 'pending' ? 'Approuver' : 'Action non disponible' }}">
+                                                class="btn btn-sm <?php echo e($review->status === 'pending' ? 'btn-success btn-approve' : 'btn-secondary'); ?> mx-1 rounded"
+                                                data-id="<?php echo e($review->id); ?>"
+                                                <?php echo e($review->status !== 'pending' ? 'disabled' : ''); ?>
+
+                                                title="<?php echo e($review->status === 'pending' ? 'Approuver' : 'Action non disponible'); ?>">
                                                 <i class="fas fa-check"></i>
                                             </button>
 
-                                            {{-- Bouton Rejeter : actif uniquement si en attente --}}
+                                            
                                             <button type="button"
-                                                class="btn btn-sm {{ $review->status === 'pending' ? 'btn-danger btn-reject' : 'btn-secondary' }} mx-1 rounded"
-                                                data-id="{{ $review->id }}"
-                                                {{ $review->status !== 'pending' ? 'disabled' : '' }}
-                                                title="{{ $review->status === 'pending' ? 'Rejeter' : 'Action non disponible' }}">
+                                                class="btn btn-sm <?php echo e($review->status === 'pending' ? 'btn-danger btn-reject' : 'btn-secondary'); ?> mx-1 rounded"
+                                                data-id="<?php echo e($review->id); ?>"
+                                                <?php echo e($review->status !== 'pending' ? 'disabled' : ''); ?>
+
+                                                title="<?php echo e($review->status === 'pending' ? 'Rejeter' : 'Action non disponible'); ?>">
                                                 <i class="fas fa-times"></i>
                                             </button>
 
                                             <button type="button"
                                                 class="btn btn-sm btn-secondary mx-1 rounded btn-delete"
-                                                data-id="{{ $review->id }}"
+                                                data-id="<?php echo e($review->id); ?>"
                                                 title="Supprimer">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="8" class="text-center py-5">
                                         <div class="empty-state">
@@ -310,16 +321,16 @@
                                             </div>
                                             <h4 class="mt-3">Aucun avis trouvé</h4>
                                             <p class="text-muted">
-                                                @if(request()->anyFilled(['search', 'type', 'status']))
+                                                <?php if(request()->anyFilled(['search', 'type', 'status'])): ?>
                                                 Aucun avis ne correspond à vos critères.
-                                                @else
+                                                <?php else: ?>
                                                 Il n'y a pas encore d'avis.
-                                                @endif
+                                                <?php endif; ?>
                                             </p>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -328,9 +339,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
 <style>
@@ -446,9 +457,9 @@
         text-decoration: underline;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -609,7 +620,7 @@
                             url: `/admin/reviews/${reviewId}/approve`,
                             type: 'POST',
                             data: {
-                                _token: '{{ csrf_token() }}'
+                                _token: '<?php echo e(csrf_token()); ?>'
                             },
                             success: function(response) {
                                 Swal.fire('Approuvé!', response.message, 'success')
@@ -648,7 +659,7 @@
                             url: `/admin/reviews/${reviewId}/reject`,
                             type: 'POST',
                             data: {
-                                _token: '{{ csrf_token() }}',
+                                _token: '<?php echo e(csrf_token()); ?>',
                                 reason: result.value
                             },
                             success: function(response) {
@@ -682,7 +693,7 @@
                             url: `/admin/reviews/${reviewId}`,
                             type: 'DELETE',
                             data: {
-                                _token: '{{ csrf_token() }}'
+                                _token: '<?php echo e(csrf_token()); ?>'
                             },
                             success: function(response) {
                                 table.row($('#review-' + reviewId)).remove().draw();
@@ -724,7 +735,7 @@
                         url: '/admin/reviews/bulk-action',
                         type: 'POST',
                         data: {
-                            _token: '{{ csrf_token() }}',
+                            _token: '<?php echo e(csrf_token()); ?>',
                             action: 'delete',
                             ids: ids
                         },
@@ -744,4 +755,5 @@
         attachEvents();
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\SAFEN_2026\resources\views/admin/reviews/index.blade.php ENDPATH**/ ?>

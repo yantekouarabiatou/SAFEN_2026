@@ -83,17 +83,17 @@
             </li>
 
             <li class="menu-header">TRANSACTIONS</li>
-        <li class="nav-item dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
-    <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="fas fa-shopping-cart"></i> Commandes
-    </a>
-    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="ordersDropdown">  {{-- Ajout de dropdown-menu-dark --}}
-        <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
-        <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a></li>
-        <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
-        <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
-    </ul>
-</li>
+            <li class="nav-item dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
+                <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-shopping-cart"></i> Commandes
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="ordersDropdown"> {{-- Ajout de dropdown-menu-dark --}}
+                    <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
+                    <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">En attente</a></li>
+                    <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
+                    <li><a class="dropdown-item text-white" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
+                </ul>
+            </li>
 
             <li class="{{ request()->is('admin/quotes*') ? 'active' : '' }}">
                 <a href="{{ route('admin.quotes.index') }}" class="nav-link">
@@ -118,15 +118,10 @@
                     <i class="fas fa-star"></i><span>Avis & évaluations</span>
                 </a>
             </li>
-            <li class="{{ request()->is('admin/contacts*') ? 'active' : '' }}">
-                <a href="{{ route('admin.contacts.index') }}" class="nav-link">
+            <li class="{{ request()->is('admin/messages*') ? 'active' : '' }}">
+                <a href="{{ route('admin.messages.index') }}" class="nav-link">
                     <i class="fas fa-envelope"></i><span>Messages</span>
-                    @php
-                    $unreadMessages = \App\Models\Contact::where('status','read')->count();
-                    @endphp
-                    @if($unreadMessages > 0)
-                    <span class="badge badge-danger">{{ $unreadMessages }}</span>
-                    @endif
+                    @php $unreadMessages = \App\Models\Message::whereNull('read_at')->count(); @endphp
                 </a>
             </li>
 

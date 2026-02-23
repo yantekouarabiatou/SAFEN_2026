@@ -61,9 +61,9 @@ $pendingQuotes = \App\Models\Quote::where('artisan_id', $user->artisan->id)
 
 $unreadMessages = 0;
 if ($isAdmin && $user->can('gérer messages')) {
-$unreadMessages = \App\Models\Message::whereNull('read_at')->count();
+    $unreadMessages = \App\Models\Message::whereNull('read_at')->count();
 } elseif (method_exists($user, 'unreadMessages')) {
-$unreadMessages = $user->unreadMessages()->count();
+    $unreadMessages = $user->unreadMessages()->count();
 }
 
 $favCount = ($isClient && method_exists($user, 'favorites'))
@@ -371,18 +371,20 @@ default => route('home'),
             </li>
             @endif
 
-            @if($user->can('voir messages') || $user->can('répondre messages'))
-            <li class="{{ request()->routeIs('admin.contacts.*','client.messages.*','dashboard.messages') ? 'active' : '' }}">
-                <a href="{{ $isAdmin ? route('admin.messages.index') : ($isClient ? route('client.messages.index') : route('dashboard.messages')) }}"
-                    class="nav-link">
-                    <i data-feather="mail"></i>
-                    <span>Messagerie</span>
-                    @if($unreadMessages > 0)
-                    <span class="badge badge-warning ml-auto">{{ $unreadMessages }}</span>
-                    @endif
-                </a>
-            </li>
-            @endif
+          @if($user->can('voir messages') || $user->can('répondre messages'))
+<li class="{{ request()->routeIs('admin.messages.*','client.messages.*','dashboard.messages') ? 'active' : '' }}">
+    <a href="{{ route('admin.messages.index') }}" class="nav-link">
+        <i data-feather="mail"></i>
+        <span>Messagerie</span>
+        @php
+            $unreadMessages = \App\Models\Message::whereNull('read_at')->count();
+        @endphp
+        @if($unreadMessages > 0)
+            <span class="badge badge-warning ml-auto">{{ $unreadMessages }}</span>
+        @endif
+    </a>
+</li>
+@endif
 
             @if($isClient)
             <li class="{{ request()->routeIs('client.contacts.create') ? 'active' : '' }}">
