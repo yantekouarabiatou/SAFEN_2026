@@ -3,31 +3,32 @@ set -euo pipefail
 
 cd /var/www/html
 
-echo "Création du fichier SQLite si inexistant"
-mkdir -p database
-touch database/database.sqlite
+echo "==> Création des dossiers nécessaires"
+mkdir -p storage/logs storage/framework/sessions storage/framework/views storage/framework/cache bootstrap/cache
 
-echo "Création dossier logs"
-mkdir -p storage/logs
+echo "==> Création du fichier de log"
 touch storage/logs/laravel.log
 chmod 666 storage/logs/laravel.log || true
 
-echo "Migrations + Seeds"
-php artisan migrate --seed --force
+echo "==> Permissions storage & cache"
+chown -R www-data:www-data storage bootstrap/cache || true
+chmod -R 775 storage bootstrap/cache || true
 
-echo "Lien storage"
+echo "==> Cache config Laravel"
+php artisan config:clear
+php artisan cache:clear
+
+echo "==> Migrations (fresh + seeds)"
+php artisan migrate:fresh --seed --force
+
+echo "==> Lien storage"
 php artisan storage:link --force || true
 
-echo "Permissions"
-chown -R www-data:www-data storage bootstrap/cache database || true
-chmod -R 775 storage bootstrap/cache || true
-chmod 664 database/database.sqlite || true
-
-echo "Démarrage PHP-FPM"
+echo "==> Démarrage PHP-FPM en arrière-plan"
 php-fpm -D
 
-echo "Attente PHP-FPM..."
-sleep 5
+echo "==> Attente PHP-FPM..."
+sleep 3
 
-echo "Démarrage Nginx"
+echo "==> Démarrage Nginx"
 exec nginx -g "daemon off;"
