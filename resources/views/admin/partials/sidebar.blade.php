@@ -373,7 +373,7 @@
 
                 @if($user->can('voir messages') || $user->can('répondre messages'))
                 <li class="{{ request()->routeIs('admin.contacts.*','client.messages.*','dashboard.messages') ? 'active' : '' }}">
-                    <a href="{{ $isAdmin ? route('admin.contacts.index') : ($isClient ? route('client.messages.index') : route('dashboard.messages')) }}"
+                    <a href="{{ $isAdmin ? route('admin.messages.index') : ($isClient ? route('client.messages.index') : route('dashboard.messages')) }}"
                        class="nav-link">
                         <i data-feather="mail"></i>
                         <span>Messagerie</span>
