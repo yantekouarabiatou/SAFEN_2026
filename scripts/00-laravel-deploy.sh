@@ -1,88 +1,70 @@
-#!/usr/bin/env bash
-set -euo pipefail
+FROM php:8.2-fpm
 
-cd /var/www/html || { echo "ERREUR : Impossible d'accéder à /var/www/html"; exit 1; }
+# ── Dépendances système ──────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y \
+    nginx curl zip unzip git netcat-openbsd \
+    libpng-dev libonig-dev libxml2-dev libzip-dev \
+    libicu-dev libgmp-dev libpq-dev \
+    && docker-php-ext-install \
+        pdo pdo_mysql pdo_pgsql mbstring exif \
+        pcntl bcmath gd zip intl gmp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-echo "=========================================="
-echo "   Démarrage de l'application Laravel    "
-echo "=========================================="
+# ── Composer ─────────────────────────────────────────────────────────────────────
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# ── 1. Permissions (priorité absolue) ────────────────────────────────────────────
-echo "→ Correction des permissions storage & cache..."
-mkdir -p storage/logs \
-         storage/framework/{cache,data,sessions,views} \
-         bootstrap/cache
+# ── Répertoire de travail ────────────────────────────────────────────────────────
+WORKDIR /var/www/html
 
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
+# ── Copie du code source ─────────────────────────────────────────────────────────
+COPY . .
 
-# Vérification
-if [ ! -w storage/framework/cache ]; then
-    echo "ERREUR : storage/framework/cache non accessible en écriture"
-    ls -la storage/framework/cache
-    exit 1
-fi
+# ── Création des répertoires nécessaires ─────────────────────────────────────────
+RUN mkdir -p storage/logs \
+             storage/framework/sessions \
+             storage/framework/views \
+             storage/framework/cache/data \
+             bootstrap/cache
 
-# ── 2. Nettoyage caches ──────────────────────────────────────────────────────────
-echo "→ Nettoyage des caches Laravel + Spatie..."
-php artisan config:clear  --no-interaction || true
-php artisan cache:clear   --no-interaction || true
-php artisan view:clear    --no-interaction || true
-php artisan route:clear   --no-interaction || true
+# ── .env minimal pour le build (sera écrasé au démarrage par les vars Render) ────
+RUN cp .env.example .env 2>/dev/null || cat <<'EOF' > .env
+APP_NAME=Laravel
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=http://localhost
+DB_CONNECTION=pgsql
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=
+EOF
 
-# Spatie spécifique
-php artisan permission:cache-reset --no-interaction || true
+# ── Installation des dépendances Composer ────────────────────────────────────────
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-# ── 3. Attente de la base de données PostgreSQL (méthode fiable) ────────────────
-echo "→ Attente de la connexion à PostgreSQL..."
+# ── Génération d'une clé temporaire pour le build ────────────────────────────────
+RUN php artisan key:generate --force
 
-MAX_ATTEMPTS=30
-SLEEP=3  # Augmenté un peu pour Postgres qui peut être lent au démarrage
+# ── Permissions ──────────────────────────────────────────────────────────────────
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage/framework/cache/data
 
-for i in $(seq 1 $MAX_ATTEMPTS); do
-    if php -r "require 'vendor/autoload.php'; echo (new Illuminate\Database\Capsule\Manager(require 'bootstrap/app.php'))->get('db')->connection()->getPdo() ? 'OK' : 'KO';" 2>/dev/null | grep -q "OK"; then
-        echo "→ Base de données connectée !"
-        break
-    fi
+# ── Configuration PHP-FPM : écoute sur 127.0.0.1:9000 ───────────────────────────
+RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf || true
 
-    echo "  Tentative $i/$MAX_ATTEMPTS - base indisponible, attente ${SLEEP}s..."
-    sleep $SLEEP
-done
+# ── Script de démarrage ──────────────────────────────────────────────────────────
+RUN chmod +x /var/www/html/scripts/00-laravel-deploy.sh
 
-if [ $i -eq $MAX_ATTEMPTS ]; then
-    echo "ERREUR : Impossible de se connecter à la base après ${MAX_ATTEMPTS} tentatives"
-    echo "Vérifiez :"
-    echo "  - DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD dans .env / Render env vars"
-    echo "  - Que le service PostgreSQL Render est bien lancé et accessible"
-    exit 1
-fi
+# ── Configuration Nginx ──────────────────────────────────────────────────────────
+COPY docker/nginx.conf /etc/nginx/sites-enabled/default
 
-# ── 4. Migrations (sécurisé : pas de fresh en prod par défaut) ───────────────────
-echo "→ Exécution des migrations..."
+# ── Port exposé ──────────────────────────────────────────────────────────────────
+EXPOSE 80
 
-# Option : activer fresh + seed seulement si variable d'env RUN_SEED=true
-if [ "${RUN_SEED:-false}" = "true" ]; then
-    echo "→ Mode seed activé : migrate:fresh + seed"
-    php artisan migrate:fresh --seed --force --no-interaction
-else
-    php artisan migrate --force --no-interaction
-fi
-
-# ── 5. Storage link ──────────────────────────────────────────────────────────────
-echo "→ Création du lien symbolique storage..."
-php artisan storage:link --force --no-interaction || true
-
-# ── 6. Optimisations prod (optionnel mais recommandé) ────────────────────────────
-echo "→ Optimisations production..."
-php artisan config:cache  --no-interaction || true
-php artisan route:cache   --no-interaction || true
-php artisan view:cache    --no-interaction || true
-
-# ── 7. Services ──────────────────────────────────────────────────────────────────
-echo "→ Démarrage PHP-FPM..."
-php-fpm -D
-
-sleep 3  # Laisser le temps à php-fpm de s'initialiser
-
-echo "→ Démarrage Nginx (processus principal)..."
-exec nginx -g "daemon off;"
+# ── Démarrage ────────────────────────────────────────────────────────────────────
+CMD ["/var/www/html/scripts/00-laravel-deploy.sh"]
