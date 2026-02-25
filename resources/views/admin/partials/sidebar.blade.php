@@ -80,24 +80,54 @@
 @endphp
 
 <div class="main-sidebar sidebar-style-2">
+    <style>
+        /* Align brand icon and text on a single line */
+        .sidebar-brand a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-brand .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .sidebar-brand .logo-name {
+            margin: 0;
+            padding: 0;
+            line-height: 1.05;
+        }
+
+        .sidebar-brand small {
+            margin: 0;
+            padding: 0;
+            font-size: 11px;
+            color: #6c757d;
+        }
+    </style>
+
     <aside id="sidebar-wrapper">
 
         {{-- ── BRAND ─────────────────────────────────── --}}
         <div class="sidebar-brand">
             <a href="{{ $dashRoute }}">
                 <div class="d-flex align-items-center justify-content-center"
-                     style="width:45px;height:45px;background:#008751;border-radius:50%;margin-right:10px;">
+                     style="width:45px;height:45px;background:#008751;border-radius:50%;">
                     <i class="bi bi-flower1 text-white fs-4"></i>
                 </div>
-                <span class="logo-name" style="font-weight:bold;font-size:1.1rem;">TOTCHEMEGNON</span>
-                <small class="d-block text-muted" style="font-size:11px;">
-                    @if($isSuperAdmin) Super Admin
-                    @elseif($isAdmin)  Administration
-                    @elseif($isArtisan) Espace Artisan
-                    @elseif($isVendor)  Espace Vendeur
-                    @else               Espace Client
-                    @endif
-                </small>
+                <div class="brand-text">
+                    <span class="logo-name">TOTCHEMEGNON</span>
+                    <small class="text-muted">
+                        @if($isSuperAdmin) Super Admin
+                        @elseif($isAdmin)  Administration
+                        @elseif($isArtisan) Espace Artisan
+                        @elseif($isVendor)  Espace Vendeur
+                        @else               Espace Client
+                        @endif
+                    </small>
+                </div>
             </a>
         </div>
 
@@ -413,15 +443,15 @@
                     <i data-feather="settings"></i><span>Configuration</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Général</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'general']) }}">Général</a></li>
                     @if($user->can('gérer paramètres paiement'))
-                    <li><a class="dropdown-item" href="#">Paiements</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'payments']) }}">Paiements</a></li>
                     @endif
                     @if($user->can('gérer paramètres notifications'))
-                    <li><a class="dropdown-item" href="#">Notifications</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'notifications']) }}">Notifications</a></li>
                     @endif
                     @if($user->can('gérer rôles et permissions'))
-                    <li><a class="dropdown-item" href="#">Rôles & permissions</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.roles.index') }}">Rôles & permissions</a></li>
                     @endif
                 </ul>
             </li>

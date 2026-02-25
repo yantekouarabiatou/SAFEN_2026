@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             CulturalEventSeeder::class,
             ReviewSeeder::class,         // après UserSeeder, ArtisanSeeder, VendorSeeder, ProductSeeder
+            MessageSeeder::class,        // Ajout du seeder pour les messages
+            DemoOrdersSeeder::class,     // Seeder de démonstration pour commandes + order_items
         ]);
     }
 }

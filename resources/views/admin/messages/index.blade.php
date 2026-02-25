@@ -332,7 +332,10 @@
 
 @push('styles')
 <!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+<link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+<!-- Boutons DataTables (export) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
 <style>
     /* Style pour la pagination */
     .dataTables_paginate {
@@ -418,36 +421,56 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- DataTables -->
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+<!-- DataTables JS -->
+<script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
+<!-- DataTables Buttons (export) -->
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        // Initialisation de DataTables
-        var table = $('#messages-table').DataTable({
-            "columnDefs": [{
-                    "sortable": false,
-                    "targets": [0, 7]
-                }, // Checkbox et actions non triables
-                {
-                    "type": "date",
-                    "targets": [5]
-                } // Date
-            ],
-            "order": [
-                [5, "desc"]
-            ], // Tri par date décroissante
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json"
+    $(document).ready(function () {
+        // ─── DataTable ────────────────────────────────────────────────────
+        let table = $('#messages-table').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
             },
-            "pageLength": 10,
-            "lengthMenu": [
-                [10, 25, 50, -1],
-                [10, 25, 50, "Tous"]
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="fas fa-copy"></i> Copier',
+                    className: 'btn btn-secondary btn-sm'
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger btn-sm'
+                },
             ],
-            "autoWidth": false,
-            "drawCallback": function() {
+            columnDefs: [
+                { orderable: false, targets: [0, 7] }, // Checkbox et actions non triables
+                { type: 'date', targets: [5] } // Date
+            ],
+            order: [[5, 'desc']], // Tri par date décroissante
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'Tous']
+            ],
+            autoWidth: false,
+            drawCallback: function() {
                 attachEvents();
             }
         });

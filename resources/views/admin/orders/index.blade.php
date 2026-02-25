@@ -52,11 +52,12 @@
                                             @endif
                                         </td>
                                         <td>{{ $order->formatted_total }}</td>
-                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getStatusBadge($order->order_status) !!}</td>
-                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getPaymentStatusBadge($order->payment_status) !!}</td>
+                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getStatusBadge($order->status ?? $order->order_status) !!}</td>
+                                        <td>{!! app('App\\Http\\Controllers\\Admin\\OrderController')->getPaymentStatusBadge($order->payment_status ?? $order->payment_status) !!}</td>
                                         <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                         <td>
-                                            @if($order->order_status === 'pending')
+                                            @php $orderStatus = $order->status ?? $order->order_status; @endphp
+                                            @if($orderStatus === 'pending')
                                                 <form action="{{ route('admin.orders.validate', $order->id) }}" method="POST" style="display:inline;">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-success" title="Valider" onclick="return confirm('Valider cette commande ?')">
@@ -81,9 +82,7 @@
                                 @endforeach
                             </tbody>
                         </table>
-                        <div class="mt-3">
-                            {{ $orders->links() }}
-                        </div>
+                        {{-- Pagination handled by DataTables (server-side) --}}
                     </div>
                 </div>
             </div>
@@ -93,37 +92,65 @@
 @endsection
 
 @push('styles')
-<!-- DataTables CSS -->
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css') }}">
+
+    <!-- Boutons DataTables (export) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
+
+    <style>
+        .dataTables_wrapper .dataTables_paginate .paginate_button { padding: 0.3rem 0.6rem !important; margin: 0 2px !important; border-radius:6px !important; }
+        .dt-buttons { margin-bottom: 0.5rem !important; }
+    </style>
 @endpush
 
 @push('scripts')
-<!-- DataTables JS -->
+    <!-- DataTables JS -->
+    <script src="{{ asset('admin-assets/bundles/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
 
-<script>
-$(function() {
-    $('#orders-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('admin.orders.index') }}",
-            data: function (d) {
-                // Ajouter le filtre status à la requête AJAX
-                d.status = new URLSearchParams(window.location.search).get('status');
-            }
-        },
-        columns: [
-            { data: 'order_number', name: 'order_number' },
-            { data: 'customer', name: 'customer' },
-            { data: 'total', name: 'total' },
-            { data: 'order_status', name: 'order_status' },
-            { data: 'payment_status', name: 'payment_status' },
-            { data: 'created_at', name: 'created_at' },
-            { data: 'action', name: 'action', orderable: false, searchable: false }
-        ],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json'
-        }
+    <!-- DataTables Buttons (export) -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <script>
+    $(function() {
+        $('#orders-table').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: '<i data-feather="copy"></i> Copier', className: 'btn btn-secondary btn-sm' },
+                { extend: 'excel', text: '<i data-feather="file-text"></i> Excel', className: 'btn btn-success btn-sm' },
+                { extend: 'pdf', text: '<i data-feather="file"></i> PDF', className: 'btn btn-danger btn-sm' }
+            ],
+            ajax: {
+                url: "{{ route('admin.orders.index') }}",
+                data: function (d) {
+                    d.status = new URLSearchParams(window.location.search).get('status');
+                }
+            },
+            columns: [
+                { data: 'order_number', name: 'order_number' },
+                { data: 'customer', name: 'customer' },
+                { data: 'total', name: 'total' },
+                { data: 'order_status', name: 'order_status' },
+                { data: 'payment_status', name: 'payment_status' },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json' }
+        });
+
+        // Refresh feather icons after DataTable renders buttons
+        $(document).on('draw.dt', function() { if (window.feather) feather.replace(); });
     });
-});
-</script>
+    </script>
 @endpush
