@@ -26,6 +26,7 @@ use App\Http\Controllers\{
 };
 use App\Http\Controllers\Admin\ArtisanController as AdminArtisanController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorController as AdminVendorController;
@@ -279,6 +280,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
+    // Configuration (Settings)
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
 
     // Ressources
     Route::resource('artisans', AdminArtisanController::class);

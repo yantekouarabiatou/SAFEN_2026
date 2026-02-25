@@ -16,6 +16,91 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * Page Rapport & Statistiques
+     */
+    public function analytics()
+    {
+        // Statistiques principales
+        $stats = [
+            'total_users' => User::count(),
+            'total_artisans' => Artisan::count(),
+            'total_products' => Product::count(),
+            'total_dishes' => Dish::count(),
+            'total_vendors' => Vendor::count(),
+            'total_orders' => Order::count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'total_revenue' => Order::where('status', 'completed')->sum('total'),
+            'new_contacts' => Contact::where('status', 'new')->count(),
+            'total_reviews' => Review::count(),
+        ];
+
+        // Graphique des ventes (30 derniers jours)
+        $salesChart = Order::where('status', 'completed')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(total) as total'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Inscriptions (30 derniers jours)
+        $usersChart = User::where('created_at', '>=', now()->subDays(30))
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Top 5 produits par ventes (somme des quantités dans order_items)
+        $popularProducts = Product::select(
+                'products.id',
+                'products.name',
+                'products.category',
+                'products.price',
+                DB::raw('COALESCE(SUM(order_items.quantity),0) as sales'),
+                DB::raw('COALESCE(SUM(order_items.quantity * order_items.unit_price),0) as revenue')
+            )
+            ->leftJoin('order_items', 'order_items.product_id', '=', 'products.id')
+            ->groupBy('products.id', 'products.name', 'products.category', 'products.price')
+            ->orderByDesc('sales')
+            ->take(5)
+            ->get();
+
+        // Top 5 artisans par nombre d'articles vendus (via order_items.artisan_id)
+        $topArtisans = Artisan::select(
+                'artisans.id',
+                'artisans.user_id',
+                'artisans.business_name',
+                'artisans.phone',
+                'artisans.created_at',
+                DB::raw('COALESCE(SUM(order_items.quantity),0) as orders_count')
+            )
+            ->leftJoin('order_items', 'order_items.artisan_id', '=', 'artisans.id')
+            ->groupBy('artisans.id', 'artisans.user_id', 'artisans.business_name', 'artisans.phone', 'artisans.created_at')
+            ->with('user')
+            ->orderByDesc('orders_count')
+            ->take(5)
+            ->get();
+
+        // Labels des métriques affichées
+        $productMetricLabel = 'Ventes (quantité)';
+        $artisanMetricLabel = 'Articles vendus';
+
+        return view('admin.dashboard.analytics', compact(
+            'stats',
+            'salesChart',
+            'usersChart',
+            'popularProducts',
+            'topArtisans'
+        ));
+    }
+
     public function index()
     {
         // Statistiques principales

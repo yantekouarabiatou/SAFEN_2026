@@ -4,6 +4,7 @@
 
 @section('content')
 <section class="section">
+    @if(isset($artisan))
     <div class="section-body">
         <!-- Breadcrumb -->
         <div class="row mb-4">
@@ -502,6 +503,10 @@
         </div>
     </div>
 </div>
+    @else
+        @include('profile.edit_user')
+    @endif
+</section>
 @endsection
 
 @section('styles')
