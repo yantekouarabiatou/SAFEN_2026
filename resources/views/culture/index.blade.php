@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Culture Béninoise - TOTCHEMEGNON')
+@section('title', __('culture.title'))
 
 @push('styles')
     <style>
@@ -156,12 +156,11 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <span class="badge bg-benin-yellow text-charcoal px-4 py-2 rounded-pill mb-3 fs-6">
-                        🇧🇯 Patrimoine Culturel
+                        {{ __('culture.hero_badge') }}
                     </span>
-                    <h1 class="display-4 fw-bold mb-4">Culture Béninoise</h1>
+                    <h1 class="display-4 fw-bold mb-4">{{ __('culture.hero_title') }}</h1>
                     <p class="lead mb-0" style="max-width: 700px; margin: 0 auto;">
-                        Découvrez la richesse du patrimoine culturel béninois : traditions, histoire, artisanat et
-                        gastronomie
+                        {{ __('culture.hero_subtitle') }}
                     </p>
                 </div>
             </div>
@@ -176,28 +175,28 @@
                     <i class="bi bi-people"></i>
                 </div>
                 <div class="stat-number" data-count="{{ $stats['artisans'] }}">0</div>
-                <p class="text-muted mb-0">Artisans inscrits</p>
+                <p class="text-muted mb-0">{{ __('culture.registered_artisans') }}</p>
             </div>
             <div class="stat-card">
                 <div class="stat-icon bg-benin-yellow text-charcoal">
                     <i class="bi bi-palette"></i>
                 </div>
                 <div class="stat-number" data-count="{{ $stats['products'] }}">0</div>
-                <p class="text-muted mb-0">Produits artisanaux</p>
+                <p class="text-muted mb-0">{{ __('culture.artisanal_products') }}</p>
             </div>
             <div class="stat-card">
                 <div class="stat-icon bg-benin-red text-white">
                     <i class="bi bi-egg-fried"></i>
                 </div>
                 <div class="stat-number" data-count="{{ $stats['dishes'] }}">0</div>
-                <p class="text-muted mb-0">Plats traditionnels</p>
+                <p class="text-muted mb-0">{{ __('culture.traditional_dishes') }}</p>
             </div>
             <div class="stat-card">
                 <div class="stat-icon bg-terracotta text-white">
                     <i class="bi bi-geo-alt"></i>
                 </div>
                 <div class="stat-number" data-count="{{ $stats['regions'] }}">0</div>
-                <p class="text-muted mb-0">Régions représentées</p>
+                <p class="text-muted mb-0">{{ __('culture.represented_regions') }}</p>
             </div>
         </div>
     </div>
@@ -209,13 +208,12 @@
             <div class="culture-card">
                 <img src="{{ asset('products/Calebasse1.jpg') }}" alt="Artisanat">
                 <div class="p-4">
-                    <h4 class="fw-bold mb-3">Artisanat Traditionnel</h4>
+                    <h4 class="fw-bold mb-3">{{ __('culture.traditional_craftsmanship') }}</h4>
                     <p class="text-muted mb-3">
-                        Découvrez les techniques ancestrales de fabrication des masques, sculptures, tissages et poteries
-                        béninois.
+                        {{ __('culture.traditional_craftsmanship_desc') }}
                     </p>
                     <a href="{{ route('products.index') }}" class="btn btn-benin-green rounded-pill">
-                        Explorer l'artisanat
+                        {{ __('culture.explore_craftsmanship') }}
                     </a>
                 </div>
             </div>
@@ -223,13 +221,12 @@
             <div class="culture-card">
                 <img src="{{ asset('dishes/ebaSauegombo.jpg') }}" alt="Gastronomie">
                 <div class="p-4">
-                    <h4 class="fw-bold mb-3">Gastronomie</h4>
+                    <h4 class="fw-bold mb-3">{{ __('culture.gastronomy') }}</h4>
                     <p class="text-muted mb-3">
-                        Explorez les saveurs authentiques du Bénin avec nos plats traditionnels et leurs histoires
-                        fascinantes.
+                        {{ __('culture.gastronomy_desc') }}
                     </p>
                     <a href="{{ route('gastronomie.index') }}" class="btn btn-benin-red rounded-pill">
-                        Découvrir les saveurs
+                        {{ __('culture.discover_flavors') }}
                     </a>
                 </div>
             </div>
@@ -237,13 +234,12 @@
             <div class="culture-card">
                 <img src="{{ asset('products/guedele.jpg') }}" alt="Traditions">
                 <div class="p-4">
-                    <h4 class="fw-bold mb-3">Traditions & Rituels</h4>
+                    <h4 class="fw-bold mb-3">{{ __('culture.traditions_rituals') }}</h4>
                     <p class="text-muted mb-3">
-                        Plongez dans les traditions ancestrales, cérémonies et rituels qui font la richesse culturelle du
-                        Bénin.
+                        {{ __('culture.traditions_rituals_desc') }}
                     </p>
                     <a href="{{ route('culture.traditions') }}" class="btn btn-benin-yellow rounded-pill">
-                        Explorer les traditions
+                        {{ __('culture.explore_traditions') }}
                     </a>
                 </div>
             </div>
@@ -252,7 +248,7 @@
         <!-- Cultural Facts -->
         <div class="row mt-5">
             <div class="col-12">
-                <h2 class="fw-bold mb-4">Faits Culturels</h2>
+                <h2 class="fw-bold mb-4">{{ __('culture.cultural_facts') }}</h2>
                 <div class="fact-grid">
                     @foreach($culturalFacts as $fact)
                         <div class="fact-card">
@@ -275,9 +271,9 @@
             <div class="row mt-5">
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="fw-bold mb-0">Objets Culturels en Vedette</h2>
+                        <h2 class="fw-bold mb-0">{{ __('culture.featured_cultural_objects') }}</h2>
                         <a href="{{ route('products.index') }}" class="btn btn-outline-benin-green rounded-pill">
-                            Voir tous
+                            {{ __('culture.see_all') }}
                         </a>
                     </div>
                     <div class="row g-4">
@@ -299,7 +295,7 @@
                                                 {{ $product->formatted_price }}
                                             </span>
                                             <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-benin-green">
-                                                Voir
+                                                {{ __('culture.see') }}
                                             </a>
                                         </div>
                                     </div>
@@ -316,9 +312,9 @@
             <div class="row mt-5">
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="fw-bold mb-0">Maîtres Artisans</h2>
+                        <h2 class="fw-bold mb-0">{{ __('culture.master_artisans') }}</h2>
                         <a href="{{ route('artisans.vue') }}" class="btn btn-outline-benin-green rounded-pill">
-                            Voir tous
+                            {{ __('culture.see_all') }}
                         </a>
                     </div>
                     <div class="row g-4">
@@ -340,7 +336,7 @@
                                         </div>
                                         <a href="{{ route('artisans.show', $artisan) }}"
                                             class="btn btn-benin-green btn-sm rounded-pill">
-                                            Voir le profil
+                                            {{ __('culture.view_profile') }}
                                         </a>
                                     </div>
                                 </div>
@@ -356,9 +352,9 @@
             <div class="row mt-5">
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="fw-bold mb-0">Plats Populaires</h2>
+                        <h2 class="fw-bold mb-0">{{ __('culture.popular_dishes') }}</h2>
                         <a href="{{ route('gastronomie.index') }}" class="btn btn-outline-benin-red rounded-pill">
-                            Voir tous
+                            {{ __('culture.see_all') }}
                         </a>
                     </div>
                     <div class="row g-4">
@@ -374,10 +370,10 @@
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="text-muted">
-                                                <i class="bi bi-eye me-1"></i> {{ $dish->views }} vues
+                                                <i class="bi bi-eye me-1"></i> {{ $dish->views }} {{ __('culture.views') }}
                                             </small>
                                             <a href="{{ route('gastronomie.show', $dish) }}" class="btn btn-sm btn-benin-red">
-                                                Découvrir
+                                                {{ __('culture.discover') }}
                                             </a>
                                         </div>
                                     </div>
@@ -396,11 +392,11 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="fw-bold mb-0">
                             <i class="bi bi-calendar-event text-benin-red"></i>
-                            Événements Culturels à Venir
+                            {{ __('culture.upcoming_cultural_events') }}
                         </h2>
                         <a href="{{ route('events.index') }}" class="btn btn-outline-benin-red rounded-pill">
                             <i class="bi bi-calendar-check me-1"></i>
-                            Voir tous les événements
+                            {{ __('culture.all_events') }}
                         </a>
                     </div>
                     <div class="row g-4">
@@ -421,7 +417,7 @@
                                             <span class="badge bg-benin-red">{{ ucfirst($event->type) }}</span>
                                             @if($event->days_until_event >= 0 && $event->days_until_event <= 7)
                                                 <span class="badge bg-warning text-dark">
-                                                    <i class="bi bi-clock"></i> {{ $event->days_until_event }}j
+                                                    <i class="bi bi-clock"></i> {{ $event->days_until_event }}{{ __('culture.days') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -441,14 +437,14 @@
                                         </div>
                                         <div class="d-grid gap-2">
                                             <a href="{{ route('events.show', $event) }}" class="btn btn-benin-green btn-sm">
-                                                <i class="bi bi-eye"></i> Voir détails
+                                                <i class="bi bi-eye"></i> {{ __('culture.view_details') }}
                                             </a>
                                             @auth
                                                 @if(!$event->subscribers->contains(auth()->id()))
                                                     <form action="{{ route('events.subscribe', $event) }}" method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-outline-benin-red btn-sm w-100">
-                                                            <i class="bi bi-bell"></i> Me notifier
+                                                            <i class="bi bi-bell"></i> {{ __('culture.notify_me') }}
                                                         </button>
                                                     </form>
                                                 @endif
@@ -466,39 +462,36 @@
         <!-- Historical Timeline -->
         <div class="row mt-5">
             <div class="col-12">
-                <h2 class="fw-bold mb-4">Histoire du Bénin</h2>
+                <h2 class="fw-bold mb-4">{{ __('culture.history_of_benin') }}</h2>
                 <div class="timeline">
                     <div class="timeline-item">
-                        <h5 class="fw-bold">Royaume du Dahomey (1600-1894)</h5>
+                        <h5 class="fw-bold">{{ __('culture.kingdom_dahomey') }}</h5>
                         <p class="text-muted">
-                            Puissant royaume africain connu pour ses guerrières Amazones et son commerce.
-                            Palais royaux classés au patrimoine mondial de l'UNESCO.
+                            {{ __('culture.kingdom_dahomey_desc') }}
                         </p>
                     </div>
                     <div class="timeline-item">
-                        <h5 class="fw-bold">Colonisation française (1894-1960)</h5>
+                        <h5 class="fw-bold">{{ __('culture.french_colonization') }}</h5>
                         <p class="text-muted">
-                            Devenu colonie française sous le nom de Dahomey. Influence sur l'administration,
-                            l'éducation et la culture.
+                            {{ __('culture.french_colonization_desc') }}
                         </p>
                     </div>
                     <div class="timeline-item">
-                        <h5 class="fw-bold">Indépendance (1960)</h5>
+                        <h5 class="fw-bold">{{ __('culture.independence') }}</h5>
                         <p class="text-muted">
-                            Le Dahomey obtient son indépendance de la France le 1er août 1960.
+                            {{ __('culture.independence_desc') }}
                         </p>
                     </div>
                     <div class="timeline-item">
-                        <h5 class="fw-bold">République du Bénin (1975)</h5>
+                        <h5 class="fw-bold">{{ __('culture.republic_benin') }}</h5>
                         <p class="text-muted">
-                            Changement de nom du Dahomey en République populaire du Bénin, inspiré
-                            par le Royaume du Bénin voisin.
+                            {{ __('culture.republic_benin_desc') }}
                         </p>
                     </div>
                     <div class="timeline-item">
-                        <h5 class="fw-bold">Démocratisation (1990)</h5>
+                        <h5 class="fw-bold">{{ __('culture.democratization') }}</h5>
                         <p class="text-muted">
-                            Transition vers la démocratie multipartite et adoption d'une nouvelle constitution.
+                            {{ __('culture.democratization_desc') }}
                         </p>
                     </div>
                 </div>

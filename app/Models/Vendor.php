@@ -45,7 +45,9 @@ class Vendor extends Model
 
     public function getLogoUrlAttribute()
     {
-        return $this->logo ? Storage::url($this->logo) : asset('images/default-vendor.jpg');
+        // Utilise asset() pour générer l'URL directement depuis le dossier public
+        $path = str_replace('vendors/', '', $this->logo);
+        return $this->logo ? asset('vendors/' . $path) : asset('images/default-vendor.jpg');
     }
 
     public function dishes()

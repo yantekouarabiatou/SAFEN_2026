@@ -15,4 +15,15 @@ return [
     'about_desc' => 'AFRI-HERITAGE is a cultural marketplace for Benin artisans and products powered by AI',
     'contact_us' => 'Contact Us',
     'footer_text' => 'All rights © 2026 AFRI-HERITAGE Benin',
+    // lang/fr/messages.php
+'gastronomy'  => 'Gastronomie',
+'marketplace' => 'Arts & Artisanat',
+'culture'     => 'Culture',
+'artisans'    => 'Artisans & services',
+
+// lang/fon/messages.php
+'gastronomy'  => 'Dìnù',
+'marketplace' => 'Arts & Àìkpó',
+'culture'     => 'Àìlú',
+'artisans'    => 'Àsòkú & sèwè',
 ];

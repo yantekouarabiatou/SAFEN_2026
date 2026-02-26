@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Arts & Artisanat - AFRI-HERITAGE Bénin',
+    'title' => 'Arts & Artisanat - TOTCHEMEGNON Bénin',
     'subtitle' => 'Zá àìkpó àsòkú òpítò mi',
     'featured_products' => 'Àìkpó énkúnà',
     'all_products' => 'Àìkpó gbùdó',

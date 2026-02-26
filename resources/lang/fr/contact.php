@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Mèìl sèwè - AFRI-HERITAGE Bénin',
+    'title' => 'Mèìl sèwè - TOTCHEMEGNON Bénin',
     'subject' => 'Súé',
     'name' => 'ORÍ',
     'email' => 'Mèìl',

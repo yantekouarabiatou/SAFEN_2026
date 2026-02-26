@@ -28,6 +28,8 @@ class DishImage extends Model
     // Accesseur pour l'URL
     public function getFullUrlAttribute()
     {
-        return Storage::url($this->image_url);
+        // Utilise asset() pour générer l'URL directement depuis le dossier public
+        $path = str_replace('dishes/', '', $this->image_url);
+        return asset('dishes/' . $path);
     }
 }

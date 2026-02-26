@@ -55,7 +55,7 @@ class SearchController extends Controller
                 ->where(function ($q) use ($query) {
                     $q->where('name', 'like', "%$query%")
                         ->orWhere('name_local', 'like', "%$query%")
-                        ->orWhere('cultural_description', 'like', "%$query%");
+                        ->orWhere('nutritional_info', 'like', "%$query%");
                 })
                 ->get();
             $results['dishes'] = $dishes;

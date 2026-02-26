@@ -14,7 +14,7 @@
                     </div>
                 </div>
                 <p class="text-white-50 mb-3">
-                    L'artisanat béninois à portée de clic. Découvrez, comprenez et acquérez l'artisanat béninois authentique grâce à l'intelligence artificielle.
+                    {{ __('footer.description') }}
                 </p>
                 <div class="d-flex gap-3">
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle" aria-label="Facebook">
@@ -69,7 +69,7 @@
 
                 <!-- Payment Methods -->
                 <div class="mt-4">
-                    <p class="text-white-50 small mb-2">Paiements acceptés :</p>
+                    <p class="text-white-50 small mb-2">{{ __('footer.payment_methods') }} :</p>
                     <div class="d-flex gap-2">
                         <span class="badge bg-light text-dark">Kkiapay</span>
                         <span class="badge bg-light text-dark">MTN MoMo</span>

@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'title' => 'Arts & Artisanat - AFRI-HERITAGE Bénin',
-    'subtitle' => 'Zá àìkpó àsòkú òpítò mi',
+    'title' => 'Arts & Artisanat - TOTCHEMEGNON Bénin',
+    'subtitle' => 'Zá àìkpó àsòkú òpítò Bénin',
     'featured_products' => 'Àìkpó énkúnà',
-    'all_products' => 'Àìkpó gbùdó',
+    'all_products' => 'Àìkpó gbɛ̀tɔ́',
     'price' => 'Zíngbá',
     'quantity' => 'Àkpá zèlè',
     'add_to_cart' => 'Kò nú tò kàrù',

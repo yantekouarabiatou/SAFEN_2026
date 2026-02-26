@@ -13,10 +13,12 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,           // ✅ 2. Utilisateurs avec rôles déjà définis
             ArtisanSeeder::class,
             DishSeeder::class,
-            VendorSeeder::class,        
+            VendorSeeder::class,
             ProductSeeder::class,
             CulturalEventSeeder::class,
             ReviewSeeder::class,
+            MessageSeeder::class,
+            DemoOrdersSeeder::class,
         ]);
     }
 }

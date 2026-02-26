@@ -20,4 +20,6 @@ return [
     'newsletter' => 'Newsletter',
     'subscribe' => 'Subscribe',
     'email' => 'Email',
+    'description' => 'Beninese craftsmanship at your fingertips. Discover, understand and acquire authentic Beninese craftsmanship thanks to artificial intelligence.',
+    'payment_methods' => 'Accepted payments',
 ];

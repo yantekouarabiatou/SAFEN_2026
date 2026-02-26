@@ -108,7 +108,9 @@ class Product extends Model
 
     public function getFullUrlAttribute()
     {
-        return $this->image_url ? Storage::url($this->image_url) : null;
+        // Utilise asset() pour générer l'URL directement depuis le dossier public
+        $path = str_replace('products/', '', $this->image_url);
+        return $this->image_url ? asset('products/' . $path) : null;
     }
 
 

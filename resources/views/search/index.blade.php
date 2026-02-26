@@ -111,7 +111,17 @@
     }
 </style>
 @endpush
+<?php
+// Helper function for highlighting in Blade
+if (!function_exists('highlightText')) {
+    function highlightText($text, $query) {
+        if (!$query) return e($text);
 
+        $pattern = '/' . preg_quote($query, '/') . '/i';
+        return preg_replace($pattern, '<span class="highlight">$0</span>', e($text));
+    }
+}
+?>
 @section('content')
 <!-- Header -->
 <section class="search-header">
@@ -403,14 +413,4 @@ function highlightText(text, query) {
 </script>
 @endpush
 
-<?php
-// Helper function for highlighting in Blade
-if (!function_exists('highlightText')) {
-    function highlightText($text, $query) {
-        if (!$query) return e($text);
 
-        $pattern = '/' . preg_quote($query, '/') . '/i';
-        return preg_replace($pattern, '<span class="highlight">$0</span>', e($text));
-    }
-}
-?>

@@ -16,8 +16,10 @@ return [
     'privacy' => 'Ìséwà pàpá',
     'terms' => 'Àkpá ìsè',
     'legal' => 'Àkpá síè',
-    'copyright' => 'Gbé mèdú © 2026 AFRI-HERITAGE Bénin',
+    'copyright' => 'Gbé mèdú © 2026 TOTCHEMEGNON Bénéin',
     'newsletter' => 'Ìsèwè mèsan',
     'subscribe' => 'Kò nú',
     'email' => 'Mèìl',
+    'description' => 'Àìkpó Bénéin tɔn sìn tó kàrù. Zá, mɔ̀, kò àìkpó Bénéin ganjí gbè IA.',
+    'payment_methods' => 'Kò ganjí kpó wlé',
 ];

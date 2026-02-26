@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Profil - AFRI-HERITAGE Bénin',
+    'title' => 'Profil - TOTCHEMEGNON Bénin',
     'edit_profile' => 'Éditer le profil',
     'dashboard' => 'Tableau de bord',
     'my_orders' => 'Mes commandes',

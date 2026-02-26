@@ -30,8 +30,9 @@ class ProductImage extends Model
     // Accesseur utile pour l'URL complète
     public function getFullUrlAttribute()
     {
-        return Storage::url($this->image_url);
-        // ou si tu préfères asset() pour les anciennes images :
-        // return asset('images/' . $this->image_url);
+        // Utilise asset() pour générer l'URL directement depuis le dossier public
+        // Enlève le préfixe "products/" si l'URL contient déjà ce chemin
+        $path = str_replace('products/', '', $this->image_url);
+        return asset('products/' . $path);
     }
 }

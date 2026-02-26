@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Gastronomie - AFRI-HERITAGE Bénin',
+    'title' => 'Gastronomie - TOTCHEMEGNON Bénin',
     'subtitle' => 'Zá dìnù àìkpó òpítò Bénin',
     'featured_dishes' => 'Dìnù énkúnà',
     'all_dishes' => 'Dìnù gbùdó',

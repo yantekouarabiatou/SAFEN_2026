@@ -4,33 +4,26 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Cookie;
 
 class SetLocale
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        $supportedLocales = ['en', 'fr', 'fon'];
-        $segment = $request->segment(1);
+        // Récupère la locale depuis la session, le cookie, ou la configuration par défaut
+        $locale = Session::get('locale', 
+                   Cookie::get('locale', 
+                   config('app.locale')));
 
-        // Si le segment est une langue supportée, on l'utilise
-        if (in_array($segment, $supportedLocales)) {
-            App::setLocale($segment);
-            Session::put('locale', $segment);
-        } else {
-            // Sinon, on utilise la session ou la langue par défaut
-            $locale = Session::get('locale', config('app.locale', 'fr'));
-            if (!in_array($locale, $supportedLocales)) {
-                $locale = 'fr';
-            }
+        // Vérifie que c'est une locale supportée
+        if (in_array($locale, ['fr', 'en', 'fon'])) {
             App::setLocale($locale);
+        } else {
+            // Si locale invalide, force le fallback
+            App::setLocale(config('app.fallback_locale', 'fr'));
         }
 
         return $next($request);
