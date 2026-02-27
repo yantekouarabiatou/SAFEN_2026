@@ -1,4 +1,5 @@
 FROM php:8.2-fpm
+# rebuild-2026-02-27-v2
 
 # ── Dépendances système ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
@@ -26,23 +27,16 @@ RUN mkdir -p storage/logs \
              storage/framework/cache/data \
              bootstrap/cache
 
-# ── .env minimal pour le build (sera écrasé au démarrage par les vars Render) ────
-RUN cp .env.example .env 2>/dev/null || cat <<'EOF' > .env
-APP_NAME=Laravel
-APP_ENV=production
-APP_KEY=
-APP_DEBUG=false
-APP_URL=http://localhost
-DB_CONNECTION=pgsql
-DB_HOST=localhost
-DB_PORT=5432
-DB_DATABASE=laravel
-DB_USERNAME=laravel
-DB_PASSWORD=
-EOF
+# ── .env BUILD ONLY : connexion BDD désactivée intentionnellement ────────────────
+# Ce .env est écrasé au démarrage par 00-laravel-deploy.sh
+RUN printf 'APP_NAME=Laravel\nAPP_ENV=production\nAPP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nAPP_DEBUG=false\nAPP_URL=http://localhost\nDB_CONNECTION=pgsql\nDB_HOST=127.0.0.1\nDB_PORT=5432\nDB_DATABASE=laravel\nDB_USERNAME=laravel\nDB_PASSWORD=\nCACHE_STORE=array\nSESSION_DRIVER=array\nQUEUE_CONNECTION=sync\n' > .env
 
 # ── Installation des dépendances Composer ────────────────────────────────────────
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# DB_CONNECTION=array empêche Spatie de toucher la BDD pendant package:discover
+RUN DB_CONNECTION=array \
+    CACHE_STORE=array \
+    SESSION_DRIVER=array \
+    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # ── Génération d'une clé temporaire pour le build ────────────────────────────────
 RUN php artisan key:generate --force
