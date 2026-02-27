@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\GuestOrder;
 use App\Models\Product;
+use App\Services\BeninCommunesService;
 use App\Services\DeliveryService;
 use App\Services\FedaPayService;
 use App\Notifications\OrderPlacedNotification;
@@ -39,13 +40,16 @@ class CheckoutController extends Controller
 
         $cart->load(['items.product.images', 'items.product.artisan']);
 
-        $deliveryFee = 2000;
-        $subtotal = $cart->total;
-        $total = $subtotal + $deliveryFee;
+        $subtotal    = $cart->total;
+        $deliveryFee = 2000; // frais par défaut (sera recalculé via AJAX)
+        $total       = $subtotal + $deliveryFee;
 
         $depositPercentage = 30;
-        $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
-        $remainingAmount = $total - $depositAmount;
+        $depositAmount     = GuestOrder::calculateDeposit($total, $depositPercentage);
+        $remainingAmount   = $total - $depositAmount;
+
+        // ✅ Communes groupées par département pour Select2
+        $communesGrouped = BeninCommunesService::getAllGrouped();
 
         return view('checkout.index', compact(
             'cart',
@@ -54,8 +58,49 @@ class CheckoutController extends Controller
             'total',
             'depositAmount',
             'remainingAmount',
-            'depositPercentage'
+            'depositPercentage',
+            'communesGrouped'   // ← nouveau
         ));
+    }
+
+    // ── Route AJAX pour recalculer les frais ──────────────────────────────────────
+    public function calculateDelivery(Request $request)
+    {
+        $request->validate([
+            'city'     => 'required|string',
+            'subtotal' => 'required|numeric',
+        ]);
+
+        $commune     = $request->city;
+        $subtotal    = (float) $request->subtotal;
+        $deliveryFee = BeninCommunesService::getDeliveryFee($commune);
+        $total       = $subtotal + $deliveryFee;
+        $deposit     = GuestOrder::calculateDeposit($total, 30);
+        $remaining   = $total - $deposit;
+
+        return response()->json([
+            'success'  => true,
+            'delivery' => [
+                'fee'                => $deliveryFee,
+                'formatted_fee'      => number_format($deliveryFee, 0, ',', ' ') . ' FCFA',
+                'estimated_delivery' => $this->getDeliveryEstimate($commune),
+            ],
+            'formatted_total'     => number_format($total,     0, ',', ' ') . ' FCFA',
+            'formatted_deposit'   => number_format($deposit,   0, ',', ' ') . ' FCFA',
+            'formatted_remaining' => number_format($remaining, 0, ',', ' '),
+        ]);
+    }
+
+    private function getDeliveryEstimate(string $commune): string
+    {
+        $sameDay  = ['Cotonou'];
+        $oneDay   = ['Abomey-Calavi', 'Sèmè-Podji', 'Porto-Novo', 'Ouidah'];
+        $twoDays  = ['Bohicon', 'Abomey', 'Lokossa', 'Grand-Popo', 'Allada'];
+
+        if (in_array($commune, $sameDay))  return 'Aujourd\'hui';
+        if (in_array($commune, $oneDay))   return '1 jour ouvrable';
+        if (in_array($commune, $twoDays))  return '2 jours ouvrables';
+        return '3 à 5 jours ouvrables';
     }
 
     public function store(Request $request)
@@ -65,33 +110,6 @@ class CheckoutController extends Controller
     /**
      * Calculer les frais de livraison en AJAX
      */
-    public function calculateDelivery(Request $request)
-    {
-        $request->validate([
-            'city' => 'required|string',
-            'subtotal' => 'required|numeric'
-        ]);
-
-        $deliveryDetails = DeliveryService::getDeliveryDetails(
-            $request->city,
-            $request->subtotal
-        );
-
-        $total = $request->subtotal + $deliveryDetails['fee'];
-        $depositPercentage = 30;
-        $depositAmount = GuestOrder::calculateDeposit($total, $depositPercentage);
-
-        return response()->json([
-            'success' => true,
-            'delivery' => $deliveryDetails,
-            'total' => $total,
-            'formatted_total' => number_format($total, 0, ',', ' ') . ' FCFA',
-            'deposit_amount' => $depositAmount,
-            'formatted_deposit' => number_format($depositAmount, 0, ',', ' ') . ' FCFA',
-            'remaining_amount' => $total - $depositAmount,
-            'formatted_remaining' => number_format($total - $depositAmount, 0, ',', ' ') . ' FCFA'
-        ]);
-    }
 
     public function process(Request $request)
     {

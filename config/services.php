@@ -14,7 +14,7 @@ return [
     |
     */
     'groq' => [
-    'key' => env('GROQ_API_KEY'),
+        'key' => env('GROQ_API_KEY'),
     ],
 
     'postmark' => [
@@ -38,7 +38,7 @@ return [
         ],
     ],
 
-        'openai' => [
+    'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4-turbo-preview'),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 500),
@@ -49,10 +49,13 @@ return [
     ],
 
     'fedapay' => [
-        'secret_key' => env('FEDAPAY_SECRET_KEY'),
-        'public_key' => env('FEDAPAY_PUBLIC_KEY'),
-        'sandbox' => env('FEDAPAY_SANDBOX', true),
+        'secret_key'     => env('FEDAPAY_SECRET_KEY'),
+        'public_key'     => env('FEDAPAY_PUBLIC_KEY'),
+        'environment'    => env('FEDAPAY_ENVIRONMENT', 'sandbox'),
         'webhook_secret' => env('FEDAPAY_WEBHOOK_SECRET'),
+        'sandbox_url'    => 'https://sandbox-api.fedapay.com/v1',
+        'live_url'       => 'https://api.fedapay.com/v1',
     ],
+
 
 ];

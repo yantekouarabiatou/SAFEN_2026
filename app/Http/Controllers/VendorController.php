@@ -78,44 +78,16 @@ class VendorController extends Controller
 
     /**
      * Affichage d'un vendeur spécifique
-     */
-    public function show(Vendor $vendor)
+     */ public function show(Vendor $vendor)
     {
+        // Charger toutes les relations nécessaires
         $vendor->load([
             'user',
-            'dishes' => function ($query) {
-                $query->with(['images', 'reviews' => function ($q) {
-                    $q->select('id', 'reviewable_id', 'reviewable_type', 'rating');
-                }]);
-            }
+            'dishes.images',
+            'reviews.user',
         ]);
 
-        $dishes = $vendor->dishes()->paginate(12);
-
-        // Plats paginés
-        $dishes = $vendor->dishes()->paginate(12);
-
-        // Vendeurs similaires (même ville + même type)
-        $similarVendors = Vendor::where('city', $vendor->city)
-            ->where('type', $vendor->type)
-            ->where('id', '!=', $vendor->id)
-            ->withCount('dishes')
-            ->limit(4)
-            ->get();
-
-        // Statistiques rapides
-        $stats = [
-            'dish_count' => $vendor->dishes_count ?? $vendor->dishes()->count(),
-            'avg_rating' => $vendor->reviews_avg_rating ?? 0,
-            'review_count' => $vendor->reviews_count ?? 0,
-        ];
-
-        return view('admin.vendors.show', compact(
-            'vendor',
-            'dishes',
-            'similarVendors',
-            'stats'
-        ));
+        return view('vendors.show', compact('vendor'));
     }
     /**
      * Enregistrement d'un nouveau vendeur

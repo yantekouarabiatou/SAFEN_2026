@@ -2,163 +2,164 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class FedaPayService
 {
-    private $baseUrl = 'https://api.fedapay.com';
-    private $secretKey;
-    private $publicKey;
-    private $sandbox;
+    protected string $secretKey;
+    protected string $publicKey;
+    protected string $environment;
+    protected string $baseUrl;
 
     public function __construct()
     {
-        $this->secretKey = config('services.fedapay.secret_key');
-        $this->publicKey = config('services.fedapay.public_key');
-        $this->sandbox = config('services.fedapay.sandbox', true);
-        
-        if ($this->sandbox) {
-            $this->baseUrl = 'https://sandbox-api.fedapay.com';
-        }
+        $this->secretKey   = config('services.fedapay.secret_key');
+        $this->publicKey   = config('services.fedapay.public_key');
+        $this->environment = config('services.fedapay.environment', 'sandbox');
+        $this->baseUrl     = $this->environment === 'sandbox'
+            ? config('services.fedapay.sandbox_url')
+            : config('services.fedapay.live_url');
     }
 
-    /**
-     * Créer une transaction FedaPay
-     */
-    public function createTransaction($orderNumber, $amount, $customerData, $description = null)
-    {
+    // =========================================================================
+    //  CRÉER UNE TRANSACTION
+    // =========================================================================
+
+    public function createTransaction(
+        string $orderNumber,
+        float  $amount,
+        array  $customerData,
+        string $description = ''
+    ): array {
         try {
+            $callbackUrl = route('checkout.fedapay.callback');
+            $cancelUrl   = route('checkout.cancel');
+
             $payload = [
-                'description' => $description ?? "Acompte commande #{$orderNumber}",
-                'amount' => $amount,
-                'currency' => ['iso' => 'XOF'], // Franc CFA
-                'callback_url' => route('fedapay.callback'),
-                'customer' => [
+                'description'     => $description ?: "Commande #{$orderNumber}",
+                'amount'          => (int) $amount,
+                'currency'        => ['iso' => 'XOF'],
+                'callback_url'    => $callbackUrl,
+                'cancel_url'      => $cancelUrl,
+                'custom_metadata' => ['order_number' => $orderNumber],
+                'customer'        => [
                     'firstname' => $customerData['firstname'] ?? '',
-                    'lastname' => $customerData['lastname'] ?? '',
-                    'email' => $customerData['email'],
+                    'lastname'  => $customerData['lastname']  ?? '',
+                    'email'     => $customerData['email']     ?? '',
                     'phone_number' => [
-                        'number' => $customerData['phone'],
-                        'country' => 'bj'
-                    ]
+                        'number'  => $customerData['phone'] ?? '',
+                        'country' => 'BJ',
+                    ],
                 ],
-                'custom_metadata' => [
-                    'order_number' => $orderNumber,
-                    'order_type' => 'deposit'
-                ]
             ];
 
-            $response = Http::withBasicAuth($this->secretKey, '')
-                ->post("{$this->baseUrl}/v1/transactions", $payload);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type'  => 'application/json',
+            ])->post("{$this->baseUrl}/transactions", $payload);
 
-            if ($response->failed()) {
-                Log::error('FedaPay Transaction Error: ' . $response->body());
-                return [
-                    'success' => false,
-                    'message' => 'Erreur lors de la création de la transaction'
-                ];
+            if ($response->successful()) {
+                $data        = $response->json();
+                $transaction = $data['v1/transaction'] ?? $data['transaction'] ?? null;
+
+                if (!$transaction) {
+                    Log::error('FedaPay: structure de réponse inattendue', ['data' => $data]);
+                    return ['success' => false, 'message' => 'Réponse FedaPay invalide.'];
+                }
+
+                // Générer le token de paiement
+                $tokenResponse = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->secretKey,
+                    'Content-Type'  => 'application/json',
+                ])->post("{$this->baseUrl}/transactions/{$transaction['id']}/token");
+
+                if ($tokenResponse->successful()) {
+                    $tokenData = $tokenResponse->json();
+                    $token     = $tokenData['token'] ?? null;
+
+                    return [
+                        'success'        => true,
+                        'transaction_id' => $transaction['id'],
+                        'token'          => $token,
+                        'payment_url'    => "https://checkout" . ($this->environment === 'sandbox' ? '-sandbox' : '') . ".fedapay.com/checkout/v2/" . $token,
+                    ];
+                }
+
+                return ['success' => false, 'message' => 'Impossible de générer le token de paiement.'];
             }
 
-            $transaction = $response->json()['data'] ?? null;
-
-            if (!$transaction || !isset($transaction['id'])) {
-                Log::error('FedaPay Transaction: Invalid response format');
-                return [
-                    'success' => false,
-                    'message' => 'Réponse invalide du serveur FedaPay'
-                ];
-            }
-
-            // Générer le token de paiement
-            $tokenResponse = Http::withBasicAuth($this->secretKey, '')
-                ->post("{$this->baseUrl}/v1/transactions/{$transaction['id']}/token");
-
-            if ($tokenResponse->failed()) {
-                Log::error('FedaPay Token Error: ' . $tokenResponse->body());
-                return [
-                    'success' => false,
-                    'message' => 'Erreur lors de la génération du token de paiement'
-                ];
-            }
-
-            $token = $tokenResponse->json()['data'] ?? null;
-
-            if (!$token || !isset($token['token'])) {
-                Log::error('FedaPay Token: Invalid response format');
-                return [
-                    'success' => false,
-                    'message' => 'Token invalide'
-                ];
-            }
+            $error = $response->json();
+            Log::error('FedaPay createTransaction error', [
+                'status' => $response->status(),
+                'body'   => $error,
+            ]);
 
             return [
-                'success' => true,
-                'transaction_id' => $transaction['id'],
-                'token' => $token['token'],
-                'url' => $token['url'] ?? null
+                'success' => false,
+                'message' => $error['message'] ?? 'Erreur FedaPay inconnue.',
             ];
 
         } catch (\Exception $e) {
-            Log::error('FedaPay Transaction Error: ' . $e->getMessage());
-            
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de la création de la transaction: ' . $e->getMessage()
-            ];
+            Log::error('FedaPay Exception: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Erreur de connexion à FedaPay.'];
         }
     }
 
-    /**
-     * Vérifier le statut d'une transaction
-     */
-    public function getTransaction($transactionId)
+    // =========================================================================
+    //  RÉCUPÉRER UNE TRANSACTION
+    // =========================================================================
+
+    public function getTransaction(string|int $transactionId): array
     {
         try {
-            $response = Http::withBasicAuth($this->secretKey, '')
-                ->get("{$this->baseUrl}/v1/transactions/{$transactionId}");
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Content-Type'  => 'application/json',
+            ])->get("{$this->baseUrl}/transactions/{$transactionId}");
 
-            if ($response->failed()) {
-                Log::error('FedaPay Get Transaction Error: ' . $response->body());
-                return [
-                    'success' => false,
-                    'message' => 'Erreur lors de la récupération de la transaction'
-                ];
+            if ($response->successful()) {
+                $data        = $response->json();
+                $transaction = $data['v1/transaction'] ?? $data['transaction'] ?? null;
+
+                if ($transaction) {
+                    return ['success' => true, 'transaction' => (object) $transaction];
+                }
             }
 
-            $transaction = $response->json()['data'] ?? null;
+            return ['success' => false, 'message' => 'Transaction introuvable.'];
 
-            if (!$transaction) {
-                Log::error('FedaPay Get Transaction: Invalid response format');
-                return [
-                    'success' => false,
-                    'message' => 'Transaction non trouvée'
-                ];
-            }
-
-            return [
-                'success' => true,
-                'status' => $transaction['status'] ?? null,
-                'transaction' => $transaction
-            ];
         } catch (\Exception $e) {
-            Log::error('FedaPay Get Transaction Error: ' . $e->getMessage());
-            
-            return [
-                'success' => false,
-                'message' => $e->getMessage()
-            ];
+            Log::error('FedaPay getTransaction Exception: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
-    /**
-     * Vérifier la signature du webhook
-     */
-    public function verifyWebhookSignature($payload, $signature)
+    // =========================================================================
+    //  VÉRIFIER SIGNATURE WEBHOOK
+    // =========================================================================
+
+    public function verifyWebhookSignature(string $payload, ?string $signature): bool
     {
-        $secret = config('services.fedapay.webhook_secret');
-        $computedSignature = hash_hmac('sha256', $payload, $secret);
-        
-        return hash_equals($computedSignature, $signature);
+        if (!$signature) return false;
+
+        $secret   = config('services.fedapay.webhook_secret');
+        $computed = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+
+        return hash_equals($computed, $signature);
+    }
+
+    // =========================================================================
+    //  INFOS ENVIRONNEMENT (utile pour debug)
+    // =========================================================================
+
+    public function isSandbox(): bool
+    {
+        return $this->environment === 'sandbox';
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
     }
 }
