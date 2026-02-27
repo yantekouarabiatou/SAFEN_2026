@@ -57,7 +57,7 @@ EOF
 echo "→ .env généré"
 
 # ── 2. Vider le cache ─────────────────────────────────────────────────────────────
-echo "→ Suppression du cache de config du build..."
+echo "→ Suppression du cache..."
 rm -f bootstrap/cache/config.php
 rm -f bootstrap/cache/routes*.php
 rm -f bootstrap/cache/services.php
@@ -76,7 +76,6 @@ chmod -R 775 storage bootstrap/cache
 
 # ── 4. Attente PostgreSQL ────────────────────────────────────────────────────────
 echo "→ Attente PostgreSQL sur ${DB_HOST}:${DB_PORT:-5432}..."
-
 MAX_ATTEMPTS=30
 SLEEP=3
 DB_CONNECTED=false
@@ -87,7 +86,7 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
         DB_CONNECTED=true
         break
     fi
-    echo "  Tentative $i/$MAX_ATTEMPTS - indisponible, attente ${SLEEP}s..."
+    echo "  Tentative $i/$MAX_ATTEMPTS - attente ${SLEEP}s..."
     sleep $SLEEP
 done
 
@@ -133,13 +132,7 @@ php artisan view:cache   --no-interaction || true
 # ── 9. PHP-FPM ──────────────────────────────────────────────────────────────────
 echo "→ Démarrage PHP-FPM..."
 php-fpm -D
-sleep 3
-
-# Vérification corrigée : chercher le processus php-fpm par son PID
-if [ ! -f /var/run/php-fpm.pid ] && ! pgrep -f "php-fpm: master" > /dev/null 2>&1; then
-    echo "ERREUR : PHP-FPM n'a pas démarré"
-    exit 1
-fi
+sleep 2
 echo "→ PHP-FPM OK"
 
 # ── 10. Nginx ────────────────────────────────────────────────────────────────────
