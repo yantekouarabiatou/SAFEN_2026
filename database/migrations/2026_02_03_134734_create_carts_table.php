@@ -17,7 +17,7 @@ return new class extends Migration
             // Réduction des longueurs pour éviter dépassement index
             $table->string('session_id', 100);
             $table->string('status', 50);
-            //$table->integer('item_count')->default(0)->after('total');
+            $table->integer('item_count')->default(0);
 
             $table->unsignedBigInteger('user_id')->nullable();
             $table->decimal('total', 10, 2)->default(0);
