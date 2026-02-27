@@ -17,7 +17,7 @@ MISSING=""
 [ -z "${APP_KEY:-}"     ] && MISSING="$MISSING APP_KEY"
 
 if [ -n "$MISSING" ]; then
-    echo "ERREUR : Variables manquantes dans Render env vars :$MISSING"
+    echo "ERREUR : Variables manquantes :$MISSING"
     exit 1
 fi
 
@@ -45,16 +45,18 @@ DB_DATABASE=${DB_DATABASE}
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
 
-CACHE_DRIVER="${CACHE_DRIVER:-file}"
-SESSION_DRIVER="${SESSION_DRIVER:-file}"
-QUEUE_CONNECTION="${QUEUE_CONNECTION:-sync}"
+CACHE_STORE=${CACHE_STORE:-database}
+SESSION_DRIVER=${SESSION_DRIVER:-database}
+QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
 
-BROADCAST_DRIVER="${BROADCAST_DRIVER:-log}"
-FILESYSTEM_DISK="${FILESYSTEM_DISK:-local}"
+BROADCAST_CONNECTION=${BROADCAST_DRIVER:-log}
+FILESYSTEM_DISK=${FILESYSTEM_DISK:-local}
+
+GROQ_API_KEY=${GROQ_API_KEY:-}
 EOF
 echo "→ .env généré"
 
-# ── 2. Vider le cache de config du build ─────────────────────────────────────────
+# ── 2. Vider le cache ─────────────────────────────────────────────────────────────
 echo "→ Suppression du cache de config du build..."
 rm -f bootstrap/cache/config.php
 rm -f bootstrap/cache/routes*.php
@@ -72,7 +74,7 @@ mkdir -p storage/logs \
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
-# ── 4. Attente PostgreSQL via TCP ────────────────────────────────────────────────
+# ── 4. Attente PostgreSQL ────────────────────────────────────────────────────────
 echo "→ Attente PostgreSQL sur ${DB_HOST}:${DB_PORT:-5432}..."
 
 MAX_ATTEMPTS=30
@@ -90,7 +92,7 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
 done
 
 if [ "$DB_CONNECTED" = "false" ]; then
-    echo "ERREUR : Impossible d'atteindre PostgreSQL sur ${DB_HOST}:${DB_PORT:-5432}"
+    echo "ERREUR : Impossible d'atteindre PostgreSQL"
     exit 1
 fi
 
@@ -131,9 +133,10 @@ php artisan view:cache   --no-interaction || true
 # ── 9. PHP-FPM ──────────────────────────────────────────────────────────────────
 echo "→ Démarrage PHP-FPM..."
 php-fpm -D
-sleep 2
+sleep 3
 
-if ! pgrep php-fpm > /dev/null 2>&1; then
+# Vérification corrigée : chercher le processus php-fpm par son PID
+if [ ! -f /var/run/php-fpm.pid ] && ! pgrep -f "php-fpm: master" > /dev/null 2>&1; then
     echo "ERREUR : PHP-FPM n'a pas démarré"
     exit 1
 fi
