@@ -1,5 +1,5 @@
 FROM php:8.2-fpm
-# rebuild-2026-02-27-v3
+# rebuild-2026-02-27-v4
 
 # ── Dépendances système ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
@@ -30,20 +30,17 @@ RUN mkdir -p storage/logs \
 # ── .env BUILD ONLY ───────────────────────────────────────────────────────────────
 RUN printf 'APP_NAME=Laravel\nAPP_ENV=production\nAPP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nAPP_DEBUG=false\nAPP_URL=http://localhost\nDB_CONNECTION=pgsql\nDB_HOST=127.0.0.1\nDB_PORT=5432\nDB_DATABASE=laravel\nDB_USERNAME=laravel\nDB_PASSWORD=\nCACHE_STORE=array\nSESSION_DRIVER=array\nQUEUE_CONNECTION=sync\n' > .env
 
-# ── Désactiver temporairement le post-autoload-dump de Spatie ─────────────────────
-RUN php -r "
-\$json = json_decode(file_get_contents('composer.json'), true);
-unset(\$json['scripts']['post-autoload-dump']);
-file_put_contents('composer.json', json_encode(\$json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-"
+# ── Supprimer post-autoload-dump pour éviter connexion BDD au build ───────────────
+COPY scripts/remove_post_autoload.php /tmp/remove_post_autoload.php
+RUN php /tmp/remove_post_autoload.php
 
-# ── Installation des dépendances Composer (sans post-autoload-dump) ──────────────
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# ── Installation Composer sans scripts BDD ───────────────────────────────────────
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
-# ── Réactiver et lancer package:discover manuellement ────────────────────────────
+# ── Lancer package:discover manuellement (sans BDD) ──────────────────────────────
 RUN php artisan package:discover --ansi || true
 
-# ── Génération d'une clé temporaire pour le build ────────────────────────────────
+# ── Génération clé ────────────────────────────────────────────────────────────────
 RUN php artisan key:generate --force
 
 # ── Permissions ──────────────────────────────────────────────────────────────────
