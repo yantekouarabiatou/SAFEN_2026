@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'title' => 'Artisans & Services - TOTCHEMEGNON',
     'become_artisan' => 'Devenir artisan',
     'subtitle' => 'Découvrez les  traditionnels du Bénin',
     'search_placeholder' => 'Rechercher un artisan, un métier...',
