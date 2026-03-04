@@ -1,4 +1,5 @@
 FROM php:8.2-fpm
+# rebuild-2026-02-27-v4
 
 # ── Dépendances système ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
@@ -26,25 +27,20 @@ RUN mkdir -p storage/logs \
              storage/framework/cache/data \
              bootstrap/cache
 
-# ── .env minimal pour le build (sera écrasé au démarrage par les vars Render) ────
-RUN cp .env.example .env 2>/dev/null || cat <<'EOF' > .env
-APP_NAME=Laravel
-APP_ENV=production
-APP_KEY=
-APP_DEBUG=false
-APP_URL=http://localhost
-DB_CONNECTION=pgsql
-DB_HOST=localhost
-DB_PORT=5432
-DB_DATABASE=laravel
-DB_USERNAME=laravel
-DB_PASSWORD=
-EOF
+# ── .env BUILD ONLY ───────────────────────────────────────────────────────────────
+RUN printf 'APP_NAME=Laravel\nAPP_ENV=production\nAPP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\nAPP_DEBUG=false\nAPP_URL=http://localhost\nDB_CONNECTION=pgsql\nDB_HOST=127.0.0.1\nDB_PORT=5432\nDB_DATABASE=laravel\nDB_USERNAME=laravel\nDB_PASSWORD=\nCACHE_STORE=array\nSESSION_DRIVER=array\nQUEUE_CONNECTION=sync\n' > .env
 
-# ── Installation des dépendances Composer ────────────────────────────────────────
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# ── Supprimer post-autoload-dump pour éviter connexion BDD au build ───────────────
+COPY scripts/remove_post_autoload.php /tmp/remove_post_autoload.php
+RUN php /tmp/remove_post_autoload.php
 
-# ── Génération d'une clé temporaire pour le build ────────────────────────────────
+# ── Installation Composer sans scripts BDD ───────────────────────────────────────
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+
+# ── Lancer package:discover manuellement (sans BDD) ──────────────────────────────
+RUN php artisan package:discover --ansi || true
+
+# ── Génération clé ────────────────────────────────────────────────────────────────
 RUN php artisan key:generate --force
 
 # ── Permissions ──────────────────────────────────────────────────────────────────
@@ -53,7 +49,7 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage/framework/cache/data
 
-# ── Configuration PHP-FPM : écoute sur 127.0.0.1:9000 ───────────────────────────
+# ── Configuration PHP-FPM ─────────────────────────────────────────────────────────
 RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/www.conf \
     && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf || true
 

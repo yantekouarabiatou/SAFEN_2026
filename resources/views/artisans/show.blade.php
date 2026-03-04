@@ -363,17 +363,19 @@
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
                                                     @php
-    $user = $review->user;
-    $hasAvatar = !is_null($user->avatar);
-@endphp
+                                                        $user = $review->user;
+                                                        $hasAvatar = !is_null($user->avatar);
+                                                    @endphp
 
-@if($hasAvatar)
-    <img src="{{ $user->avatar_url }}" class="rounded-circle me-3" width="50" height="50">
-@else
-    <div class="rounded-circle d-flex align-items-center justify-content-center me-3 bg-benin-green text-white fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">
-        {{ getInitials($user->name) }}
-    </div>
-@endif
+                                                    @if($hasAvatar)
+                                                        <img src="{{ $user->avatar_url }}" class="rounded-circle me-3" width="50"
+                                                            height="50">
+                                                    @else
+                                                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 bg-benin-green text-white fw-bold"
+                                                            style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                                            {{ getInitials($user->name) }}
+                                                        </div>
+                                                    @endif
                                                     <div>
                                                         <h6 class="fw-bold mb-0">{{ $review->user->name }}</h6>
                                                         <div class="text-warning">
@@ -399,49 +401,51 @@
                                     @if(auth()->user()->id !== $artisan->user_id)
                                         <div class="card border-0 shadow-sm rounded-4">
                                             <div class="card-body">
-                                               <h5 class="fw-bold mb-4">Laisser un avis</h5>
-<form action="{{ route('reviews.store') }}" method="POST">
-    @csrf
-    <input type="hidden" name="reviewable_type" value="App\Models\Artisan">
-    <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
+                                                <h5 class="fw-bold mb-4">Laisser un avis</h5>
+                                                <form action="{{ route('reviews.store') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="reviewable_type" value="App\Models\Artisan">
+                                                    <input type="hidden" name="reviewable_id" value="{{ $artisan->id }}">
 
-    <div class="mb-3">
-        <label class="form-label">Note</label>
-        <div class="rating-input">
-            @for($i = 5; $i >= 1; $i--)
-                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" required>
-                <label for="star{{ $i }}"><i class="bi bi-star-fill"></i></label>
-            @endfor
-        </div>
-        @error('rating')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Note</label>
+                                                        <div class="rating-input">
+                                                            @for($i = 5; $i >= 1; $i--)
+                                                                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}"
+                                                                    required>
+                                                                <label for="star{{ $i }}"><i class="bi bi-star-fill"></i></label>
+                                                            @endfor
+                                                        </div>
+                                                        @error('rating')
+                                                            <div class="text-danger small">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
 
-    <div class="mb-3">
-        <label class="form-label">Commentaire</label>
-        <textarea name="comment" rows="4" class="form-control" required></textarea>
-        @error('comment')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Commentaire</label>
+                                                        <textarea name="comment" rows="4" class="form-control" required></textarea>
+                                                        @error('comment')
+                                                            <div class="text-danger small">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
 
-    {{-- Champ caché pour anonymous (si vous ne voulez pas de case à cocher) --}}
-    <input type="hidden" name="anonymous" value="0">
+                                                    {{-- Champ caché pour anonymous (si vous ne voulez pas de case à cocher) --}}
+                                                    <input type="hidden" name="anonymous" value="0">
 
-    {{-- Case à cocher pour accepter les conditions --}}
-    <div class="mb-3 form-check">
-        <input type="checkbox" name="terms" id="terms" class="form-check-input" value="1" required>
-        <label for="terms" class="form-check-label">
-            J'accepte les <a href="#" target="_blank">conditions d'utilisation</a> *
-        </label>
-        @error('terms')
-            <div class="text-danger small">{{ $message }}</div>
-        @enderror
-    </div>
+                                                    {{-- Case à cocher pour accepter les conditions --}}
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" name="terms" id="terms" class="form-check-input"
+                                                            value="1" required>
+                                                        <label for="terms" class="form-check-label">
+                                                            J'accepte les <a href="#" target="_blank">conditions d'utilisation</a> *
+                                                        </label>
+                                                        @error('terms')
+                                                            <div class="text-danger small">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
 
-    <button type="submit" class="btn btn-benin w-100">Envoyer</button>
-</form>
+                                                    <button type="submit" class="btn btn-benin w-100">Envoyer</button>
+                                                </form>
                                             </div>
                                         </div>
                                     @else
@@ -527,13 +531,36 @@
                     <!-- Localisation -->
                     <div class="tab-pane fade" id="location">
                         @if($artisan->latitude && $artisan->longitude)
-                            <div class="map-wrapper">
-                                <div id="map" style="height: 450px;"></div>
+                            <div class="card border-0 shadow-sm rounded-4 p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0">
+                                        <i class="bi bi-geo-alt-fill text-benin-green me-2"></i>
+                                        Localisation
+                                    </h5>
+                                    <button class="btn btn-sm btn-outline-success rounded-pill" onclick="getDirections()">
+                                        <i class="bi bi-signpost-2 me-1"></i> Itinéraire
+                                    </button>
+                                </div>
+
+                                <p class="text-muted mb-3">
+                                    <i class="bi bi-pin-map me-1"></i>
+                                    {{ $artisan->city }}
+                                    @if($artisan->neighborhood) • {{ $artisan->neighborhood }} @endif
+                                </p>
+
+                                {{-- Carte Leaflet --}}
+                                <div id="map" style="height: 420px; border-radius: 16px; z-index: 1;"></div>
+
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Carte fournie par <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a>
+                                </p>
                             </div>
                         @else
-                            <div class="text-center py-5">
+                            <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
                                 <i class="bi bi-geo-alt fs-1 text-muted mb-3 d-block"></i>
-                                <h5>Localisation non disponible</h5>
+                                <h5 class="text-muted">Localisation non disponible</h5>
+                                <p class="text-muted small">Cet artisan n'a pas encore renseigné sa position.</p>
                             </div>
                         @endif
                     </div>
@@ -636,44 +663,101 @@
     </div>
 @endsection
 
+
+
+{{-- ===== REMPLACEZ ENTIÈREMENT VOTRE @push('scripts') ===== --}}
 @push('scripts')
+
     @if($artisan->latitude && $artisan->longitude)
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMap"
-            async defer></script>
+        {{-- Leaflet CSS + JS (CDN gratuit) --}}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
         <script>
-            function initMap() {
-                const pos = { lat: {{ $artisan->latitude }}, lng: {{ $artisan->longitude }} };
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    center: pos,
-                    zoom: 15,
-                    styles: [
-                        { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }
-                    ]
+            window.ARTISAN_LAT = {{ $artisan->latitude }};
+            window.ARTISAN_LNG = {{ $artisan->longitude }};
+            window.ARTISAN_NAME = @json($artisan->user->name);
+            window.ARTISAN_CITY = @json($artisan->city . ($artisan->neighborhood ? ' • ' . $artisan->neighborhood : ''));
+            window.ARTISAN_CRAFT = @json($artisan->craft_label);
+
+            let mapInstance = null;
+
+            function initLeafletMap() {
+                if (mapInstance) {
+                    mapInstance.invalidateSize();
+                    return;
+                }
+
+                mapInstance = L.map('map').setView(
+                    [window.ARTISAN_LAT, window.ARTISAN_LNG],
+                    15
+                );
+
+                // Tuiles OpenStreetMap (gratuit)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    maxZoom: 19,
+                }).addTo(mapInstance);
+
+                // Icône personnalisée verte
+                const greenIcon = L.divIcon({
+                    html: `<div style="
+                        background: #009639;
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50% 50% 50% 0;
+                        transform: rotate(-45deg);
+                        border: 3px solid white;
+                        box-shadow: 0 4px 12px rgba(0,150,57,0.4);
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                    "></div>`,
+                    className: '',
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36],
+                    popupAnchor: [0, -36],
                 });
 
-                new google.maps.Marker({
-                    position: pos,
-                    map,
-                    title: "{{ $artisan->user->name }}",
-                    icon: {
-                        url: "{{ asset('images/markers/pin-green.png') }}",
-                        scaledSize: new google.maps.Size(48, 48)
-                    }
-                });
+                // Marqueur
+                const marker = L.marker(
+                    [window.ARTISAN_LAT, window.ARTISAN_LNG],
+                    { icon: greenIcon }
+                ).addTo(mapInstance);
+
+                // Popup info
+                marker.bindPopup(`
+                    <div style="min-width:180px; padding:4px;">
+                        <strong style="font-size:14px;">${window.ARTISAN_NAME}</strong><br>
+                        <span style="color:#009639; font-size:12px;">${window.ARTISAN_CRAFT}</span><br>
+                        <span style="color:#666; font-size:12px;">📍 ${window.ARTISAN_CITY}</span>
+                    </div>
+                `).openPopup();
             }
 
-            document.getElementById('location-tab')?.addEventListener('shown.bs.tab', () => {
-                setTimeout(initMap, 200);
+            // Initialiser la carte quand l'onglet Localisation devient visible
+            document.getElementById('location-tab')?.addEventListener('shown.bs.tab', function () {
+                setTimeout(initLeafletMap, 100);
             });
 
+            // Si l'onglet est déjà actif au chargement (URL avec #location)
+            if (window.location.hash === '#location') {
+                document.addEventListener('DOMContentLoaded', () => setTimeout(initLeafletMap, 300));
+            }
+
+            // Itinéraire via Google Maps (gratuit en lecture)
             function getDirections() {
+                const dest = `${window.ARTISAN_LAT},${window.ARTISAN_LNG}`;
                 if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        const dest = '{{ $artisan->latitude }},{{ $artisan->longitude }}';
-                        window.open(`https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${dest}`, '_blank');
-                    }, () => {
-                        window.open(`https://www.google.com/maps/dir//{{ $artisan->latitude }},{{ $artisan->longitude }}`, '_blank');
-                    });
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+                            window.open(`https://www.google.com/maps/dir/${origin}/${dest}`, '_blank');
+                        },
+                        () => window.open(`https://www.google.com/maps/dir//${dest}`, '_blank')
+                    );
+                } else {
+                    window.open(`https://www.google.com/maps?q=${dest}`, '_blank');
                 }
             }
         </script>
@@ -688,8 +772,18 @@
                     url: window.location.href
                 });
             } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Lien copié !');
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3';
+                    toast.setAttribute('role', 'alert');
+                    toast.innerHTML = `<div class="d-flex">
+                        <div class="toast-body"><i class="bi bi-check-circle me-2"></i>Lien copié !</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>`;
+                    document.body.appendChild(toast);
+                    new bootstrap.Toast(toast, { delay: 2000 }).show();
+                    setTimeout(() => toast.remove(), 3000);
+                });
             }
         }
     </script>

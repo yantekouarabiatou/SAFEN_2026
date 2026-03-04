@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'title' => 'Artisans & Services - TOTCHEMEGNON BENIN',
     'become_artisan' => 'Become an artisan',
     'subtitle' => 'Discover traditional artisans and services in Benin',
     'search_placeholder' => 'Search for an artisan, craft...',

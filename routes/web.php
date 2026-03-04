@@ -97,6 +97,7 @@ Route::prefix('vendors')->name('vendors.')->group(function () {
     Route::get('/{vendor}', [VendorController::class, 'show'])->name('show');
     Route::get('/{vendor}/dishes', [VendorController::class, 'dishes'])->name('dishes');
 });
+Route::get('/vendeurs/{vendor}', [VendorController::class, 'show'])->name('vendors.show');
 
 // ===== Recherche =====
 Route::get('/search', [SearchController::class, 'index'])->name('search');
@@ -130,7 +131,16 @@ Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(f
 
 // ===== Webhook FedaPay (public) =====
 Route::post('/fedapay/callback', [CheckoutController::class, 'fedapayCallback'])->name('fedapay.callback');
-
+Route::prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/',                            [CheckoutController::class, 'index'])->name('index');
+    Route::post('/process',                    [CheckoutController::class, 'process'])->name('process');
+    Route::post('/calculate-delivery',         [CheckoutController::class, 'calculateDelivery'])->name('calculate-delivery');
+    Route::get('/success/{order}',             [CheckoutController::class, 'success'])->name('success');
+    Route::get('/payment/{order}',             [CheckoutController::class, 'payment'])->name('payment');
+    Route::get('/cancel',                      [CheckoutController::class, 'cancel'])->name('cancel');
+    Route::get('/fedapay/callback',            [CheckoutController::class, 'fedapayCallback'])->name('fedapay.callback');
+    Route::post('/fedapay/webhook',            [CheckoutController::class, 'fedapayWebhook'])->name('fedapay.webhook');
+});
 /*
 |--------------------------------------------------------------------------
 | AUTHENTIFICATION (GUEST)
