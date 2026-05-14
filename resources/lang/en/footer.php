@@ -16,7 +16,7 @@ return [
     'privacy' => 'Privacy Policy',
     'terms' => 'Terms of Use',
     'legal' => 'Legal Notice',
-    'copyright' => 'All rights reserved © 2026 AFRI-HERITAGE Benin',
+    'copyright' => 'All rights reserved © 2026 TOTCHEMEGNON Benin',
     'newsletter' => 'Newsletter',
     'subscribe' => 'Subscribe',
     'email' => 'Email',

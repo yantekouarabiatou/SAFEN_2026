@@ -1,516 +1,573 @@
 {{--
     ============================================================
-    SIDEBAR UNIFIÉE — admin/partials/sidebar.blade.php
-    Gérée par les permissions Spatie
+    SIDEBAR — admin/partials/sidebar.blade.php
+    Fond blanc · couleurs Bénin · menus épurés
     ============================================================
 --}}
 @php
     $user = auth()->user();
     if (!$user) { return; }
 
-    // Vider le cache Spatie à chaque chargement (dev)
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-    $isAdmin     = $user->hasRole(['super-admin', 'admin']);
-    $isSuperAdmin= $user->hasRole('super-admin');
-    $isArtisan   = $user->hasRole('artisan');
-    $isVendor    = $user->hasRole('vendor');
-    $isClient    = $user->hasRole('client');
+    $isAdmin      = $user->hasRole(['super-admin', 'admin']);
+    $isSuperAdmin = $user->hasRole('super-admin');
+    $isArtisan    = $user->hasRole('artisan');
+    $isVendor     = $user->hasRole('vendor');
+    $isClient     = $user->hasRole('client');
 
-    // ── Badges ──────────────────────────────────────
-    // Artisans en attente d'approbation
+    // Badges
     $pendingArtisans = 0;
     if ($user->can('approuver artisans')) {
-        try { $pendingArtisans = \App\Models\Artisan::where('status', 'pending')->count(); }
-        catch (\Exception $e) {}
+        try { $pendingArtisans = \App\Models\Artisan::where('status', 'pending')->count(); } catch (\Exception $e) {}
     }
 
-    // Produits : liés aux artisans, on compte les produits des artisans non approuvés
-    // OU si la table products a une colonne status, on l'utilise directement
     $pendingProducts = 0;
     if ($user->can('approuver produits')) {
         try {
-            $productColumns = \Illuminate\Support\Facades\Schema::getColumnListing('products');
-            if (in_array('status', $productColumns)) {
-                $pendingProducts = \App\Models\Product::where('status', 'pending')->count();
-            } else {
-                // Fallback : produits des artisans en attente
-                $pendingArtisanIds = \App\Models\Artisan::where('status', 'pending')->pluck('id');
-                $pendingProducts = \App\Models\Product::whereIn('artisan_id', $pendingArtisanIds)->count();
-            }
+            $cols = \Illuminate\Support\Facades\Schema::getColumnListing('products');
+            $pendingProducts = in_array('status', $cols)
+                ? \App\Models\Product::where('status', 'pending')->count()
+                : \App\Models\Product::whereIn('artisan_id', \App\Models\Artisan::where('status','pending')->pluck('id'))->count();
         } catch (\Exception $e) {}
     }
 
-    // Commandes en attente
     $pendingOrders = 0;
     if ($user->can('gérer commandes')) {
-        try { $pendingOrders = \App\Models\Order::where('status', 'pending')->count(); }
-        catch (\Exception $e) {}
+        try { $pendingOrders = \App\Models\Order::where('status', 'pending')->count(); } catch (\Exception $e) {}
     }
-
-    // Devis en attente
-    $pendingQuotes = 0;
-    try {
-        if ($user->can('gérer devis')) {
-            $pendingQuotes = \App\Models\Quote::where('status', 'pending')->count();
-        } elseif ($isArtisan && $user->artisan) {
-            $pendingQuotes = \App\Models\Quote::where('artisan_id', $user->artisan->id)
-                ->where('status', 'pending')->count();
-        }
-    } catch (\Exception $e) {}
 
     $unreadMessages = 0;
     if ($isAdmin && $user->can('gérer messages')) {
         $unreadMessages = \App\Models\Contact::where('status', 'unread')->count();
-    } elseif (method_exists($user, 'unreadMessages')) {
-        $unreadMessages = $user->unreadMessages()->count();
     }
 
-    $favCount = ($isClient && method_exists($user, 'favorites'))
-        ? $user->favorites()->count() : 0;
-
-    // ── Route dashboard ──────────────────────────────
     $dashRoute = match(true) {
         $isAdmin   => route('admin.dashboard'),
         $isArtisan => route('dashboard.artisan'),
         $isVendor  => route('dashboard.vendor'),
-        $isClient  => route('client.dashboard'),
         default    => route('home'),
     };
 @endphp
 
 <div class="main-sidebar sidebar-style-2">
-    <style>
-        /* Align brand icon and text on a single line */
-        .sidebar-brand a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+<style>
+/* ═══════════════════════════════════════════════
+   SIDEBAR CLAIRE — TOTCHÉMÈGNON
+   Fond blanc, accents verts Bénin
+═══════════════════════════════════════════════ */
 
-        .sidebar-brand .brand-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1;
-        }
+/* Reset fond sombre si injecté par le layout */
+.main-sidebar,
+#sidebar-wrapper,
+aside#sidebar-wrapper {
+    background: #ffffff !important;
+    border-right: 1px solid #e8ecf0 !important;
+    box-shadow: 2px 0 16px rgba(0,0,0,.06) !important;
+}
 
-        .sidebar-brand .logo-name {
-            margin: 0;
-            padding: 0;
-            line-height: 1.05;
-        }
+/* Brand */
+.sidebar-brand {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e8ecf0 !important;
+    padding: 16px 18px !important;
+}
+.sidebar-brand a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    color: #1a1d23 !important;
+    text-decoration: none !important;
+}
 
-        .sidebar-brand small {
-            margin: 0;
-            padding: 0;
-            font-size: 11px;
-            color: #6c757d;
-        }
-    </style>
+/* Headers de section */
+.main-sidebar .sidebar-menu .menu-header {
+    font-size: .65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.2px !important;
+    text-transform: uppercase !important;
+    color: #b0b8c4 !important;
+    padding: 18px 20px 6px !important;
+    margin: 0 !important;
+}
 
-    <aside id="sidebar-wrapper">
+/* Items normaux */
+.main-sidebar .sidebar-menu > li > a {
+    color: #4b5563 !important;
+    font-size: .855rem !important;
+    font-weight: 500 !important;
+    padding: 10px 18px !important;
+    margin: 2px 10px !important;
+    border-radius: 9px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    transition: background .18s, color .18s !important;
+    background: transparent !important;
+}
+.main-sidebar .sidebar-menu > li > a:hover {
+    background: rgba(0,135,81,.08) !important;
+    color: #008751 !important;
+}
+.main-sidebar .sidebar-menu > li > a svg,
+.main-sidebar .sidebar-menu > li > a i[data-feather] {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    color: #9ca3af !important;
+    transition: color .18s !important;
+}
+.main-sidebar .sidebar-menu > li > a:hover svg,
+.main-sidebar .sidebar-menu > li > a:hover i[data-feather] {
+    color: #008751 !important;
+}
 
-        {{-- ── BRAND ─────────────────────────────────── --}}
-        <div class="sidebar-brand">
-            <a href="{{ $dashRoute }}">
-                <div class="d-flex align-items-center justify-content-center"
-                     style="width:45px;height:45px;background:#008751;border-radius:50%;">
-                    <i class="bi bi-flower1 text-white fs-4"></i>
+/* Item actif */
+.main-sidebar .sidebar-menu > li.active > a {
+    background: linear-gradient(135deg, #008751, #00a862) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(0,135,81,.28) !important;
+    font-weight: 600 !important;
+}
+.main-sidebar .sidebar-menu > li.active > a svg,
+.main-sidebar .sidebar-menu > li.active > a i[data-feather] {
+    color: rgba(255,255,255,.85) !important;
+}
+
+/* ── Dropdown sous-menu — override Bootstrap 5 ── */
+/* Bootstrap 5 force position:absolute → on remet static pour l'affichage inline */
+.main-sidebar .sidebar-menu li ul.dropdown-menu {
+    position: static !important;
+    float: none !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 4px 0 8px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    /* display géré par jQuery slideToggle */
+}
+/* Items sous-menu */
+.main-sidebar .sidebar-menu li ul.dropdown-menu li a {
+    height: auto !important;
+    padding: 8px 16px 8px 50px !important;
+    font-size: .82rem !important;
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+    border-radius: 7px !important;
+    margin: 1px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    transition: background .15s, color .15s !important;
+    position: relative !important;
+    background: transparent !important;
+    width: calc(100% - 20px) !important;
+}
+/* Puce décorative */
+.main-sidebar .sidebar-menu li ul.dropdown-menu li a::before {
+    content: '' !important;
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 50% !important;
+    background: #d1d5db !important;
+    flex-shrink: 0 !important;
+    transition: background .15s !important;
+    display: inline-block !important;
+}
+.main-sidebar .sidebar-menu li ul.dropdown-menu li a:hover {
+    background: rgba(0,135,81,.08) !important;
+    color: #008751 !important;
+}
+.main-sidebar .sidebar-menu li ul.dropdown-menu li a:hover::before {
+    background: #008751 !important;
+}
+/* Badge dans sous-menu */
+.main-sidebar .sidebar-menu li ul.dropdown-menu li a .badge {
+    margin-left: auto !important;
+    float: none !important;
+    padding: 2px 6px !important;
+}
+
+/* Badges */
+.main-sidebar .badge {
+    font-size: .66rem !important;
+    padding: 3px 7px !important;
+    border-radius: 10px !important;
+    margin-left: auto !important;
+    font-weight: 700 !important;
+}
+.main-sidebar .badge-warning { background: #FCD116 !important; color: #78350f !important; }
+.main-sidebar .badge-danger  { background: #E8112D !important; color: #fff !important; }
+
+/* Séparateur bas de sidebar */
+.sidebar-divider {
+    border: none !important;
+    border-top: 1px solid #e8ecf0 !important;
+    margin: 10px 16px !important;
+}
+
+/* Lien danger déconnexion */
+.nav-link-logout {
+    color: #E8112D !important;
+}
+.nav-link-logout i[data-feather] { color: #E8112D !important; }
+.nav-link-logout:hover { background: rgba(232,17,45,.08) !important; color: #c0000f !important; }
+</style>
+
+<aside id="sidebar-wrapper">
+
+    {{-- ── BRAND / LOGO ──────────────────────────── --}}
+    <div class="sidebar-brand">
+        <a href="{{ $dashRoute }}">
+            <svg width="40" height="40" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                <defs>
+                    <linearGradient id="sbG" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#00b86b"/>
+                        <stop offset="100%" stop-color="#005c38"/>
+                    </linearGradient>
+                </defs>
+                {{-- Cercle fond vert --}}
+                <circle cx="22" cy="22" r="21" fill="url(#sbG)"/>
+                {{-- Anneau or --}}
+                <circle cx="22" cy="22" r="21" fill="none" stroke="#FCD116" stroke-width="1.6"/>
+                {{-- Lettre T blanche --}}
+                <rect x="9" y="13" width="26" height="5" rx="2.5" fill="#fff"/>
+                <rect x="17.5" y="13" width="9" height="19" rx="2.5" fill="#fff"/>
+                {{-- Points décoratifs --}}
+                <circle cx="5.5" cy="22" r="2" fill="#FCD116"/>
+                <circle cx="38.5" cy="22" r="2" fill="#FCD116"/>
+                <circle cx="22" cy="5" r="1.7" fill="#E8112D"/>
+                {{-- Losange or haut --}}
+                <path d="M22 9 L24 12 L22 14.5 L20 12Z" fill="#FCD116" opacity=".75"/>
+            </svg>
+
+            <div style="overflow:hidden; line-height:1.1;">
+                <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:.9rem;
+                            letter-spacing:-.3px;color:#1a1d23;white-space:nowrap;">
+                    TOTCHÉMÈGNON
                 </div>
-                <div class="brand-text">
-                    <span class="logo-name">TOTCHEMEGNON</span>
-                    <small class="text-muted">
-                        @if($isSuperAdmin) Super Admin
-                        @elseif($isAdmin)  Administration
-                        @elseif($isArtisan) Espace Artisan
-                        @elseif($isVendor)  Espace Vendeur
-                        @else               Espace Client
-                        @endif
-                    </small>
+                <div style="font-size:.64rem;letter-spacing:.5px;text-transform:uppercase;
+                            color:#9ca3af;margin-top:2px;">
+                    @if($isSuperAdmin) Super Admin
+                    @elseif($isAdmin)  Administration
+                    @elseif($isArtisan) Espace Artisan
+                    @elseif($isVendor)  Espace Vendeur
+                    @else               Mon espace
+                    @endif
                 </div>
+            </div>
+        </a>
+    </div>
+
+    <ul class="sidebar-menu" style="padding-bottom:20px;">
+
+        {{-- ═══════════════════════════════════
+             PRINCIPAL
+        ═══════════════════════════════════ --}}
+        <li class="menu-header">Principal</li>
+
+        <li class="{{ request()->routeIs('admin.dashboard','dashboard.artisan','dashboard.vendor') ? 'active' : '' }}">
+            <a href="{{ $dashRoute }}" class="nav-link">
+                <i data-feather="home"></i>
+                <span>Tableau de bord</span>
             </a>
-        </div>
+        </li>
 
-        <ul class="sidebar-menu">
+        @if($user->can('voir analytics') || $user->can('voir analytics artisan'))
+        <li class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+            <a href="{{ route('admin.analytics') }}" class="nav-link">
+                <i data-feather="bar-chart-2"></i>
+                <span>Analytics</span>
+            </a>
+        </li>
+        @endif
 
-            {{-- ══════════════════════════════════════════
-                 TABLEAU DE BORD
-            ══════════════════════════════════════════ --}}
-            <li class="menu-header">Tableau de bord</li>
-            <li class="{{ request()->routeIs('admin.dashboard','dashboard.artisan','dashboard.vendor','client.dashboard') ? 'active' : '' }}">
-                <a href="{{ $dashRoute }}" class="nav-link">
-                    <i data-feather="monitor"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+        {{-- ═══════════════════════════════════
+             CATALOGUE (admin)
+        ═══════════════════════════════════ --}}
+        @if($isAdmin)
+        <li class="menu-header">Catalogue</li>
 
-            {{-- ══════════════════════════════════════════
-                 GESTION GLOBALE (admin)
-            ══════════════════════════════════════════ --}}
-            @if($user->can('gérer artisans') || $user->can('approuver artisans'))
-            <li class="menu-header">Gestion globale</li>
-
-                {{-- Artisans --}}
-                <li class="dropdown {{ request()->is('admin/artisans*') ? 'active' : '' }}">
-                    <a href="#" class="nav-link has-dropdown">
-                        <i data-feather="pen-tool"></i>
-                        <span>Artisans</span>
-                        @if($pendingArtisans > 0)
-                            <span class="badge badge-warning ml-auto">{{ $pendingArtisans }}</span>
-                        @endif
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('admin.artisans.index') }}">Tous les artisans</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.artisans.index', ['status' => 'pending']) }}">
-                            En attente @if($pendingArtisans > 0)<span class="badge badge-warning">{{ $pendingArtisans }}</span>@endif
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.artisans.index', ['status' => 'approved']) }}">Approuvés</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.artisans.index', ['status' => 'rejected']) }}">Rejetés</a></li>
-                        @if($user->can('créer artisans'))
-                        <li><a class="dropdown-item" href="{{ route('admin.artisans.create') }}">+ Ajouter</a></li>
-                        @endif
-                    </ul>
-                </li>
-            @endif
-
-            @if($user->can('gérer produits') || $user->can('approuver produits'))
-                {{-- Produits (admin) --}}
-                <li class="dropdown {{ request()->is('admin/products*') ? 'active' : '' }}">
-                    <a href="#" class="nav-link has-dropdown">
-                        <i data-feather="shopping-bag"></i>
-                        <span>Produits</span>
-                        @if($pendingProducts > 0)
-                            <span class="badge badge-warning ml-auto">{{ $pendingProducts }}</span>
-                        @endif
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('admin.products.index') }}">Tous les produits</a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.products.index', ['status' => 'pending']) }}">
-                            En attente @if($pendingProducts > 0)<span class="badge badge-warning">{{ $pendingProducts }}</span>@endif
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{ route('admin.products.index', ['status' => 'active']) }}">Actifs</a></li>
-                        @if($user->can('créer produits'))
-                        <li><a class="dropdown-item" href="{{ route('admin.products.create') }}">+ Ajouter</a></li>
-                        @endif
-                    </ul>
-                </li>
-            @endif
-
-            @if($user->can('gérer vendeurs'))
-                <li class="dropdown {{ request()->is('admin/vendors*') ? 'active' : '' }}">
-                    <a href="#" class="nav-link has-dropdown">
-                        <i data-feather="briefcase"></i><span>Vendeurs</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('admin.vendors.index') }}">Tous les vendeurs</a></li>
-                        @if($user->can('créer vendeurs'))
-                        <li><a class="dropdown-item" href="{{ route('admin.vendors.create') }}">+ Ajouter</a></li>
-                        @endif
-                    </ul>
-                </li>
-            @endif
-
-            @if($user->can('gérer plats') || $user->can('approuver plats'))
-                <li class="dropdown {{ request()->is('admin/dishes*') ? 'active' : '' }}">
-                    <a href="#" class="nav-link has-dropdown">
-                        <i data-feather="coffee"></i><span>Gastronomie</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('admin.dishes.index') }}">Tous les plats</a></li>
-                        @if($user->can('créer plats'))
-                        <li><a class="dropdown-item" href="{{ route('admin.dishes.create') }}">+ Ajouter</a></li>
-                        @endif
-                    </ul>
-                </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 GESTION UTILISATEURS (admin)
-            ══════════════════════════════════════════ --}}
-            @if($user->can('gérer utilisateurs'))
-            <li class="menu-header">Utilisateurs</li>
-            <li class="dropdown {{ request()->is('admin/users*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i data-feather="users"></i><span>Utilisateurs</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('admin.users.index') }}">Tous</a></li>
-                    <li><a class="dropdown-item" href="{{ route('admin.users.index', ['role' => 'artisan']) }}">Artisans</a></li>
-                    <li><a class="dropdown-item" href="{{ route('admin.users.index', ['role' => 'vendor']) }}">Vendeurs</a></li>
-                    <li><a class="dropdown-item" href="{{ route('admin.users.index', ['role' => 'client']) }}">Clients</a></li>
-                    @if($user->can('créer utilisateurs'))
-                    <li><a class="dropdown-item" href="{{ route('admin.users.create') }}">+ Ajouter</a></li>
-                    @endif
-                </ul>
-            </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 MES PRODUITS (artisan)
-            ══════════════════════════════════════════ --}}
-            @if($isArtisan && $user->can('voir produits'))
-            <li class="menu-header">Mes Produits</li>
-            <li class="dropdown {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i data-feather="shopping-bag"></i><span>Produits</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('admin.products.index') }}">Mes produits</a></li>
-                    @if($user->can('créer produits'))
-                    <li><a class="dropdown-item" href="{{ route('admin.products.create') }}">+ Ajouter</a></li>
-                    @endif
-                </ul>
-            </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 MES PLATS (vendor)
-            ══════════════════════════════════════════ --}}
-            @if($isVendor && $user->can('voir plats'))
-            <li class="menu-header">Mes Plats</li>
-            <li class="dropdown {{ request()->routeIs('vendor.dishes*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i data-feather="coffee"></i><span>Plats</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('vendor.dishes.index') }}">Mes plats</a></li>
-                    @if($user->can('créer plats'))
-                    <li><a class="dropdown-item" href="{{ route('vendor.dishes.create') }}">+ Ajouter</a></li>
-                    @endif
-                </ul>
-            </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 TRANSACTIONS
-            ══════════════════════════════════════════ --}}
-            @if($user->can('voir commandes') || $user->can('voir devis'))
-            <li class="menu-header">Transactions</li>
-
-                @if($user->can('voir commandes'))
-                    @if($isAdmin)
-                    <li class="dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
-                        <a href="#" class="nav-link has-dropdown">
-                            <i data-feather="shopping-cart"></i>
-                            <span>Commandes</span>
-                            @if($pendingOrders > 0)
-                                <span class="badge badge-danger ml-auto">{{ $pendingOrders }}</span>
-                            @endif
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index') }}">Toutes</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index', ['status' => 'pending']) }}">
-                                En attente @if($pendingOrders > 0)<span class="badge badge-danger">{{ $pendingOrders }}</span>@endif
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index', ['status' => 'shipped']) }}">Expédiées</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.orders.index', ['status' => 'cancelled']) }}">Annulées</a></li>
-                        </ul>
-                    </li>
-                    @elseif($isArtisan)
-                    <li class="{{ request()->routeIs('dashboard.artisan.orders') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard.artisan.orders') }}" class="nav-link">
-                            <i data-feather="shopping-cart"></i><span>Mes commandes</span>
-                        </a>
-                    </li>
-                    @elseif($isVendor)
-                    <li class="{{ request()->routeIs('dashboard.orders') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard.orders') }}" class="nav-link">
-                            <i data-feather="shopping-cart"></i><span>Mes commandes</span>
-                        </a>
-                    </li>
-                    @elseif($isClient)
-                    <li class="{{ request()->routeIs('client.orders.*') ? 'active' : '' }}">
-                        <a href="{{ route('client.orders.index') }}" class="nav-link">
-                            <i data-feather="shopping-bag"></i><span>Mes commandes</span>
-                        </a>
-                    </li>
-                    <li class="{{ request()->routeIs('client.orders.tracking') ? 'active' : '' }}">
-                        <a href="{{ route('client.orders.tracking') }}" class="nav-link">
-                            <i data-feather="map-pin"></i><span>Suivi de livraison</span>
-                        </a>
-                    </li>
-                    @endif
+        {{-- Artisans --}}
+        @if($user->can('gérer artisans') || $user->can('approuver artisans'))
+        <li class="dropdown {{ request()->is('admin/artisans*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="pen-tool"></i>
+                <span>Artisans</span>
+                @if($pendingArtisans > 0)
+                    <span class="badge badge-warning">{{ $pendingArtisans }}</span>
                 @endif
-
-                @if($user->can('voir devis') || $user->can('gérer devis'))
-                <li class="{{ request()->routeIs('quotes.*','client.quotes.*','quotes.*') ? 'active' : '' }}">
-                    <a href="{{ $isAdmin ? route('quotes.index') : ($isClient ? route('quotes.index') : route('quotes.index')) }}"
-                       class="nav-link">
-                        <i data-feather="file-text"></i>
-                        <span>Devis</span>
-                        @if($pendingQuotes > 0)
-                            <span class="badge badge-info ml-auto">{{ $pendingQuotes }}</span>
-                        @endif
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('client.quotes.create') }}" class="nav-link">
-                        <i data-feather="plus-circle"></i><span>Demander un devis</span>
-                    </a>
-                </li>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.artisans.index') }}">Tous les artisans</a></li>
+                @if($pendingArtisans > 0)
+                <li><a href="{{ route('admin.artisans.index', ['status' => 'pending']) }}">
+                    En attente <span class="badge badge-warning">{{ $pendingArtisans }}</span>
+                </a></li>
                 @endif
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 FAVORIS (client)
-            ══════════════════════════════════════════ --}}
-            @if($user->can('gérer favoris'))
-            <li class="menu-header">Favoris</li>
-            <li class="{{ request()->routeIs('client.favorites.*') ? 'active' : '' }}">
-                <a href="{{ route('client.favorites.index') }}" class="nav-link">
-                    <i data-feather="heart"></i>
-                    <span>Mes favoris</span>
-                    @if($favCount > 0)<span class="badge badge-danger ml-auto">{{ $favCount }}</span>@endif
-                </a>
-            </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 CULTURE
-            ══════════════════════════════════════════ --}}
-            @if($user->can('voir événements'))
-            <li class="menu-header">Culture</li>
-            <li class="dropdown {{ request()->is('admin/events*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i data-feather="calendar"></i><span>Événements</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('admin.events.index') }}">Tous les événements</a></li>
-                    @if($user->can('créer événements'))
-                    <li><a class="dropdown-item" href="{{ route('admin.events.create') }}">+ Créer</a></li>
-                    @endif
-                </ul>
-            </li>
-            @endif
-
-            {{-- ══════════════════════════════════════════
-                 CONTENU & COMMUNICATION
-            ══════════════════════════════════════════ --}}
-            @if($user->can('voir avis') || $user->can('voir messages') || $user->can('répondre messages'))
-            <li class="menu-header">Contenu & Communication</li>
-
-                @if($user->can('voir avis'))
-                <li class="{{ request()->routeIs('admin.reviews.*','dashboard.artisan.reviews') ? 'active' : '' }}">
-                    <a href="{{ $isAdmin ? route('admin.reviews.index') : '#' }}" class="nav-link">
-                        <i data-feather="star"></i><span>Avis & évaluations</span>
-                    </a>
-                </li>
+                <li><a href="{{ route('admin.artisans.index', ['status' => 'approved']) }}">Approuvés</a></li>
+                @if($user->can('créer artisans'))
+                <li><a href="{{ route('admin.artisans.create') }}">+ Ajouter un artisan</a></li>
                 @endif
+            </ul>
+        </li>
+        @endif
 
-                @if($user->can('voir messages') || $user->can('répondre messages'))
-                <li class="{{ request()->routeIs('admin.contacts.*','client.messages.*','dashboard.messages') ? 'active' : '' }}">
-                    <a href="{{ $isAdmin ? route('admin.messages.index') : ($isClient ? route('client.messages.index') : route('dashboard.messages')) }}"
-                       class="nav-link">
-                        <i data-feather="mail"></i>
-                        <span>Messagerie</span>
-                        @if($unreadMessages > 0)
-                            <span class="badge badge-warning ml-auto">{{ $unreadMessages }}</span>
-                        @endif
-                    </a>
-                </li>
+        {{-- Produits --}}
+        @if($user->can('gérer produits') || $user->can('approuver produits'))
+        <li class="dropdown {{ request()->is('admin/products*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="shopping-bag"></i>
+                <span>Produits</span>
+                @if($pendingProducts > 0)
+                    <span class="badge badge-warning">{{ $pendingProducts }}</span>
                 @endif
-
-                @if($isClient)
-                <li class="{{ request()->routeIs('client.contacts.create') ? 'active' : '' }}">
-                    <a href="{{ route('client.contacts.create') }}" class="nav-link">
-                        <i data-feather="headphones"></i><span>Contacter un artisan</span>
-                    </a>
-                </li>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.products.index') }}">Tous les produits</a></li>
+                @if($pendingProducts > 0)
+                <li><a href="{{ route('admin.products.index', ['status' => 'pending']) }}">
+                    En attente <span class="badge badge-warning">{{ $pendingProducts }}</span>
+                </a></li>
                 @endif
-            @endif
+                <li><a href="{{ route('admin.products.index', ['status' => 'active']) }}">Actifs</a></li>
+                @if($user->can('créer produits'))
+                <li><a href="{{ route('admin.products.create') }}">+ Ajouter un produit</a></li>
+                @endif
+            </ul>
+        </li>
+        @endif
 
-            {{-- ══════════════════════════════════════════
-                 ANALYTICS
-            ══════════════════════════════════════════ --}}
-            @if($user->can('voir analytics') || $user->can('voir analytics artisan') || $user->can('voir analytics vendeur'))
-            <li class="menu-header">Analytics</li>
-            <li class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
-                <a href="{{ route('admin.analytics') }}" class="nav-link">
-                    <i data-feather="bar-chart-2"></i><span>Rapports & statistiques</span>
-                </a>
-            </li>
-            @endif
+        {{-- Gastronomie --}}
+        @if($user->can('gérer plats') || $user->can('approuver plats'))
+        <li class="dropdown {{ request()->is('admin/dishes*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="coffee"></i>
+                <span>Gastronomie</span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.dishes.index') }}">Tous les plats</a></li>
+                @if($user->can('créer plats'))
+                <li><a href="{{ route('admin.dishes.create') }}">+ Ajouter un plat</a></li>
+                @endif
+            </ul>
+        </li>
+        @endif
 
-            {{-- ══════════════════════════════════════════
-                 PARAMÈTRES SYSTÈME (super-admin)
-            ══════════════════════════════════════════ --}}
-            @if($user->can('gérer paramètres généraux'))
-            <li class="menu-header">Paramètres système</li>
-            <li class="dropdown {{ request()->is('admin/settings*','admin/roles*') ? 'active' : '' }}">
-                <a href="#" class="nav-link has-dropdown">
-                    <i data-feather="settings"></i><span>Configuration</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'general']) }}">Général</a></li>
-                    @if($user->can('gérer paramètres paiement'))
-                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'payments']) }}">Paiements</a></li>
-                    @endif
-                    @if($user->can('gérer paramètres notifications'))
-                    <li><a class="dropdown-item" href="{{ route('admin.settings.index', ['section' => 'notifications']) }}">Notifications</a></li>
-                    @endif
-                    @if($user->can('gérer rôles et permissions'))
-                    <li><a class="dropdown-item" href="{{ route('admin.roles.index') }}">Rôles & permissions</a></li>
-                    @endif
-                </ul>
-            </li>
-            @endif
+        {{-- Événements culturels --}}
+        @if($user->can('voir événements'))
+        <li class="dropdown {{ request()->is('admin/events*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="calendar"></i>
+                <span>Événements</span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.events.index') }}">Tous les événements</a></li>
+                @if($user->can('créer événements'))
+                <li><a href="{{ route('admin.events.create') }}">+ Créer un événement</a></li>
+                @endif
+            </ul>
+        </li>
+        @endif
+        @endif {{-- fin $isAdmin --}}
 
-            {{-- ══════════════════════════════════════════
-                 MON COMPTE
-            ══════════════════════════════════════════ --}}
-            <li class="menu-header">Mon Compte</li>
+        {{-- ═══════════════════════════════════
+             MES PRODUITS (artisan)
+        ═══════════════════════════════════ --}}
+        @if($isArtisan && $user->can('voir produits'))
+        <li class="menu-header">Mes produits</li>
+        <li class="{{ request()->is('admin/products*') ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index') }}" class="nav-link">
+                <i data-feather="shopping-bag"></i>
+                <span>Mes produits</span>
+            </a>
+        </li>
+        @if($user->can('créer produits'))
+        <li class="{{ request()->routeIs('admin.products.create') ? 'active' : '' }}">
+            <a href="{{ route('admin.products.create') }}" class="nav-link">
+                <i data-feather="plus-circle"></i>
+                <span>Ajouter un produit</span>
+            </a>
+        </li>
+        @endif
+        @endif
 
-            @if($isArtisan && $user->artisan)
-            <li class="{{ request()->routeIs('artisans.edit') ? 'active' : '' }}">
-                <a href="{{ route('artisans.edit', $user->artisan) }}" class="nav-link">
-                    <i data-feather="user"></i><span>Mon profil artisan</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('artisans.show', $user->artisan) }}" class="nav-link" target="_blank">
-                    <i data-feather="external-link"></i><span>Voir profil public</span>
-                </a>
-            </li>
-            @endif
+        {{-- ═══════════════════════════════════
+             MES PLATS (vendor)
+        ═══════════════════════════════════ --}}
+        @if($isVendor && $user->can('voir plats'))
+        <li class="menu-header">Mes plats</li>
+        <li class="{{ request()->routeIs('vendor.dishes*') ? 'active' : '' }}">
+            <a href="{{ route('vendor.dishes.index') }}" class="nav-link">
+                <i data-feather="coffee"></i>
+                <span>Mes plats</span>
+            </a>
+        </li>
+        @if($user->can('créer plats'))
+        <li class="{{ request()->routeIs('vendor.dishes.create') ? 'active' : '' }}">
+            <a href="{{ route('vendor.dishes.create') }}" class="nav-link">
+                <i data-feather="plus-circle"></i>
+                <span>Ajouter un plat</span>
+            </a>
+        </li>
+        @endif
+        @endif
 
-            <li class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
-                <a href="{{ route('profile.edit') }}" class="nav-link">
-                    <i data-feather="settings"></i><span>Paramètres du compte</span>
-                </a>
-            </li>
+        {{-- ═══════════════════════════════════
+             UTILISATEURS (admin)
+        ═══════════════════════════════════ --}}
+        @if($isAdmin && $user->can('gérer utilisateurs'))
+        <li class="menu-header">Utilisateurs</li>
+        <li class="dropdown {{ request()->is('admin/users*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="users"></i>
+                <span>Utilisateurs</span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.users.index') }}">Tous</a></li>
+                <li><a href="{{ route('admin.users.index', ['role' => 'artisan']) }}">Artisans</a></li>
+                <li><a href="{{ route('admin.users.index', ['role' => 'vendor']) }}">Vendeurs</a></li>
+                <li><a href="{{ route('admin.users.index', ['role' => 'client']) }}">Clients</a></li>
+                @if($user->can('créer utilisateurs'))
+                <li><a href="{{ route('admin.users.create') }}">+ Ajouter</a></li>
+                @endif
+            </ul>
+        </li>
 
-            {{-- ══════════════════════════════════════════
-                 NAVIGATION
-            ══════════════════════════════════════════ --}}
-            <li class="menu-header">Navigation</li>
+        @if($user->can('gérer vendeurs'))
+        <li class="{{ request()->is('admin/vendors*') ? 'active' : '' }}">
+            <a href="{{ route('admin.vendors.index') }}" class="nav-link">
+                <i data-feather="briefcase"></i>
+                <span>Vendeurs</span>
+            </a>
+        </li>
+        @endif
+        @endif
 
-            @if($isClient)
-            <li>
-                <a href="{{ route('products.index') }}" class="nav-link">
-                    <i data-feather="shopping-cart"></i><span>Continuer mes achats</span>
-                </a>
-            </li>
-            @endif
+        {{-- ═══════════════════════════════════
+             COMMERCE
+        ═══════════════════════════════════ --}}
+        @if($user->can('voir commandes'))
+        <li class="menu-header">Commerce</li>
 
-            <li>
-                <a href="{{ route('home') }}" class="nav-link" {{ $isAdmin ? 'target="_blank"' : '' }}>
-                    <i data-feather="globe"></i>
-                    <span>{{ $isAdmin ? 'Voir le site public' : 'Retour au site' }}</span>
-                </a>
-            </li>
+        @if($isAdmin)
+        <li class="dropdown {{ request()->is('admin/orders*') ? 'active' : '' }}">
+            <a href="#" class="nav-link has-dropdown">
+                <i data-feather="shopping-cart"></i>
+                <span>Commandes</span>
+                @if($pendingOrders > 0)
+                    <span class="badge badge-danger">{{ $pendingOrders }}</span>
+                @endif
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ route('admin.orders.index') }}">Toutes les commandes</a></li>
+                @if($pendingOrders > 0)
+                <li><a href="{{ route('admin.orders.index', ['status' => 'pending']) }}">
+                    En attente <span class="badge badge-danger">{{ $pendingOrders }}</span>
+                </a></li>
+                @endif
+                <li><a href="{{ route('admin.orders.index', ['status' => 'processing']) }}">En traitement</a></li>
+                <li><a href="{{ route('admin.orders.index', ['status' => 'completed']) }}">Complétées</a></li>
+            </ul>
+        </li>
+        @elseif($isArtisan)
+        <li class="{{ request()->routeIs('dashboard.artisan.orders') ? 'active' : '' }}">
+            <a href="{{ route('dashboard.artisan.orders') }}" class="nav-link">
+                <i data-feather="shopping-cart"></i>
+                <span>Mes commandes</span>
+            </a>
+        </li>
+        @elseif($isVendor)
+        <li class="{{ request()->routeIs('dashboard.orders') ? 'active' : '' }}">
+            <a href="{{ route('dashboard.orders') }}" class="nav-link">
+                <i data-feather="shopping-cart"></i>
+                <span>Mes commandes</span>
+            </a>
+        </li>
+        @endif
+        @endif
 
-            <li>
-                <a href="{{ route('logout') }}" class="nav-link"
-                   onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
-                    <i data-feather="log-out"></i><span>Déconnexion</span>
-                </a>
-                <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" style="display:none;">
-                    @csrf
-                </form>
-            </li>
+        {{-- ═══════════════════════════════════
+             COMMUNICATION (admin)
+        ═══════════════════════════════════ --}}
+        @if($isAdmin && ($user->can('voir messages') || $user->can('voir avis')))
+        <li class="menu-header">Communication</li>
 
-        </ul>
-    </aside>
+        @if($user->can('voir messages') || $user->can('répondre messages'))
+        <li class="{{ request()->routeIs('admin.messages.*','admin.contacts.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.messages.index') }}" class="nav-link">
+                <i data-feather="mail"></i>
+                <span>Messagerie</span>
+                @if($unreadMessages > 0)
+                    <span class="badge badge-danger">{{ $unreadMessages }}</span>
+                @endif
+            </a>
+        </li>
+        @endif
+
+        @if($user->can('voir avis'))
+        <li class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.reviews.index') }}" class="nav-link">
+                <i data-feather="star"></i>
+                <span>Avis & évaluations</span>
+            </a>
+        </li>
+        @endif
+        @endif
+
+        {{-- ═══════════════════════════════════
+             PARAMÈTRES (admin)
+        ═══════════════════════════════════ --}}
+        @if($isAdmin && $user->can('gérer paramètres généraux'))
+        <li class="menu-header">Paramètres</li>
+        <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
+            <a href="{{ route('admin.settings.index', ['section' => 'general']) }}" class="nav-link">
+                <i data-feather="settings"></i>
+                <span>Configuration</span>
+            </a>
+        </li>
+        @endif
+
+        {{-- ═══════════════════════════════════
+             MON COMPTE (séparateur bas)
+        ═══════════════════════════════════ --}}
+        <hr class="sidebar-divider">
+
+        @if($isArtisan && isset($user->artisan) && $user->artisan)
+        <li class="{{ request()->routeIs('artisans.edit') ? 'active' : '' }}">
+            <a href="{{ route('artisans.edit', $user->artisan) }}" class="nav-link">
+                <i data-feather="user"></i>
+                <span>Mon profil artisan</span>
+            </a>
+        </li>
+        @endif
+
+        <li class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+            <a href="{{ route('profile.edit') }}" class="nav-link">
+                <i data-feather="user"></i>
+                <span>Mon compte</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ url('/') }}" class="nav-link" target="_blank">
+                <i data-feather="globe"></i>
+                <span>Voir le site public</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('logout') }}" class="nav-link nav-link-logout"
+               onclick="event.preventDefault(); document.getElementById('sb-logout').submit();">
+                <i data-feather="log-out"></i>
+                <span>Déconnexion</span>
+            </a>
+            <form id="sb-logout" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
+        </li>
+
+    </ul>
+</aside>
 </div>

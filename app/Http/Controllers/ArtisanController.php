@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Artisan;
 use App\Models\ArtisanPhoto;
+use App\Notifications\ArtisanApproved;
+use App\Notifications\ArtisanRejected;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 
 class ArtisanController extends Controller
 {
@@ -45,10 +47,10 @@ class ArtisanController extends Controller
             $radius = $request->input('radius', 50); // km, défaut 50
 
             $query->whereNotNull('latitude')
-                  ->whereNotNull('longitude')
-                  ->selectRaw("*, (6371 * acos(cos(radians($lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(latitude)))) AS distance")
-                  ->having('distance', '<', $radius)
-                  ->orderBy('distance');
+                ->whereNotNull('longitude')
+                ->selectRaw("*, (6371 * acos(cos(radians($lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(latitude)))) AS distance")
+                ->having('distance', '<', $radius)
+                ->orderBy('distance');
         } else {
             // Tri par défaut si pas de géoloc
             $query->orderBy('views', 'desc');
@@ -62,8 +64,8 @@ class ArtisanController extends Controller
     public function show(Artisan $artisan)
     {
         // Vérifier si l'artisan est approuvé OU si l'utilisateur est l'auteur/admin
-        if (!$artisan->isApproved()) {
-            if (!Auth::check() || (Auth::id() !== $artisan->user_id && !Auth::user()->isAdmin())) {
+        if (! $artisan->isApproved()) {
+            if (! Auth::check() || (Auth::id() !== $artisan->user_id && ! Auth::user()->isAdmin())) {
                 abort(404, 'Cet artisan n\'est pas encore approuvé ou n\'existe pas.');
             }
         }
@@ -78,7 +80,7 @@ class ArtisanController extends Controller
             'user',
             'photos',
             'products.images',
-            'reviews.user'
+            'reviews.user',
         ]);
 
         // Récupère des artisans similaires
@@ -157,7 +159,7 @@ class ArtisanController extends Controller
             ];
 
             // Mettre à jour l'email de l'utilisateur si fourni
-            if (!empty($validated['email'])) {
+            if (! empty($validated['email'])) {
                 Auth::user()->update(['email' => $validated['email']]);
             }
 
@@ -169,7 +171,7 @@ class ArtisanController extends Controller
                 foreach ($request->file('photos') as $index => $photo) {
                     if ($photo->isValid()) {
                         // Générer un nom de fichier unique
-                        $fileName = time() . '_' . uniqid() . '_' . $index . '.' . $photo->getClientOriginalExtension();
+                        $fileName = time().'_'.uniqid().'_'.$index.'.'.$photo->getClientOriginalExtension();
 
                         // Stocker l'image
                         $path = $photo->storeAs('artisans', $fileName, 'public');
@@ -190,12 +192,14 @@ class ArtisanController extends Controller
                 ->with('success', 'Votre profil a été soumis avec succès ! Il sera examiné par notre équipe et vous serez notifié une fois approuvé.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation error in ArtisanController@store: ' . json_encode($e->errors()));
+            Log::error('Validation error in ArtisanController@store: '.json_encode($e->errors()));
+
             return back()->withInput()->withErrors($e->errors());
 
         } catch (\Exception $e) {
-            Log::error('Erreur création artisan: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
-            return back()->withInput()->with('error', 'Une erreur est survenue lors de la création du profil. Veuillez réessayer. Erreur: ' . $e->getMessage());
+            Log::error('Erreur création artisan: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
+
+            return back()->withInput()->with('error', 'Une erreur est survenue lors de la création du profil. Veuillez réessayer. Erreur: '.$e->getMessage());
         }
     }
 
@@ -321,8 +325,10 @@ class ArtisanController extends Controller
             'approved_by' => Auth::id(),
         ]);
 
-        // Optionnel : envoyer une notification à l'artisan
-        // $artisan->user->notify(new ArtisanApproved($artisan));
+        try {
+            $artisan->user->notify(new ArtisanApproved($artisan));
+        } catch (\Exception) {
+        }
 
         return back()->with('success', 'Artisan approuvé avec succès.');
     }
@@ -341,6 +347,11 @@ class ArtisanController extends Controller
             'rejected_at' => now(),
         ]);
 
+        try {
+            $artisan->user->notify(new ArtisanRejected($artisan));
+        } catch (\Exception) {
+        }
+
         return back()->with('success', 'Artisan rejeté avec succès.');
     }
 
@@ -349,7 +360,7 @@ class ArtisanController extends Controller
      */
     private function parseExperienceYears($experienceRange)
     {
-        if (!$experienceRange) {
+        if (! $experienceRange) {
             return null;
         }
 
@@ -370,7 +381,7 @@ class ArtisanController extends Controller
     public function edit(Artisan $artisan)
     {
         // Vérifier que l'utilisateur a le droit de modifier ce profil
-        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+        if (auth()->id() !== $artisan->user_id && ! auth()->user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
         }
 
@@ -380,7 +391,7 @@ class ArtisanController extends Controller
     public function update(Request $request, Artisan $artisan)
     {
         // Vérifier que l'utilisateur a le droit de modifier ce profil
-        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+        if (auth()->id() !== $artisan->user_id && ! auth()->user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à modifier ce profil.');
         }
 
@@ -423,7 +434,7 @@ class ArtisanController extends Controller
     public function destroy(Artisan $artisan)
     {
         // Vérifier que l'utilisateur a le droit de supprimer ce profil
-        if (auth()->id() !== $artisan->user_id && !auth()->user()->isAdmin()) {
+        if (auth()->id() !== $artisan->user_id && ! auth()->user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à supprimer ce profil.');
         }
 

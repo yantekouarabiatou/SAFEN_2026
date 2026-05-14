@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Review;
-use App\Models\Product;
 use App\Models\Artisan;
+use App\Models\Product;
+use App\Models\Review;
 use App\Models\Vendor;
+use App\Notifications\NewReviewNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,11 +40,11 @@ class FrontReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|min:10|max:2000',
             'anonymous' => 'nullable|boolean',
-            'terms' => 'required|accepted'
+            'terms' => 'required|accepted',
         ]);
 
         // Vérifier si l'utilisateur est connecté
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')
                 ->with('error', 'Veuillez vous connecter pour laisser un avis.')
                 ->withInput();
@@ -60,7 +61,7 @@ class FrontReviewController extends Controller
         }
 
         // Créer l'avis
-        $review = new Review();
+        $review = new Review;
         $review->user_id = Auth::id();
         $review->reviewable_type = $validated['reviewable_type'];
         $review->reviewable_id = $validated['reviewable_id'];
@@ -77,7 +78,17 @@ class FrontReviewController extends Controller
 
         $review->save();
 
-        // Rediriger avec un message de succès
+        // Notifier le propriétaire si c'est un artisan
+        if ($review->reviewable_type === 'App\Models\Artisan') {
+            $artisan = Artisan::find($review->reviewable_id);
+            if ($artisan?->user) {
+                try {
+                    $artisan->user->notify(new NewReviewNotification($review));
+                } catch (\Exception) {
+                }
+            }
+        }
+
         return redirect()->back()->with('success', 'Merci ! Votre avis a été soumis et sera publié après modération.');
     }
 
@@ -90,7 +101,7 @@ class FrontReviewController extends Controller
         $id = $request->get('id');
 
         if ($type && $id) {
-            $model = 'App\\Models\\' . ucfirst($type);
+            $model = 'App\\Models\\'.ucfirst($type);
             $reviews = Review::with('user')
                 ->where('reviewable_type', $model)
                 ->where('reviewable_id', $id)
@@ -111,7 +122,7 @@ class FrontReviewController extends Controller
      */
     public function show(Review $review)
     {
-        if ($review->status !== 'approved' && Auth::id() !== $review->user_id && !Auth::user()?->isAdmin()) {
+        if ($review->status !== 'approved' && Auth::id() !== $review->user_id && ! Auth::user()?->isAdmin()) {
             abort(404);
         }
 
@@ -149,7 +160,7 @@ class FrontReviewController extends Controller
     public function destroy(Review $review)
     {
         // Vérifier que l'utilisateur est le propriétaire ou un admin
-        if (Auth::id() !== $review->user_id && !Auth::user()?->isAdmin()) {
+        if (Auth::id() !== $review->user_id && ! Auth::user()?->isAdmin()) {
             abort(403);
         }
 

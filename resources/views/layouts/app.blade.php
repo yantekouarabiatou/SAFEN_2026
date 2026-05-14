@@ -11,7 +11,8 @@
     <title>@yield('title', 'TOTCHEMEGNON Bénin')</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('products/vodoun.jpg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- ① Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -312,11 +313,6 @@
     <!-- ④ Alpine.js (defer pour ne pas bloquer) -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- ⑤ Scripts locaux -->
-    <script src="{{ asset('admin-assets/js/app.min.js') }}"></script>
-    <script src="{{ asset('admin-assets/js/scripts.js') }}"></script>
-    <script src="{{ asset('admin-assets/js/custom.js') }}"></script>
-
     <!-- ⑥ Script gastronomie (global car utilisé sur plusieurs pages) -->
     <script>
     class GastronomieManager {
@@ -455,8 +451,8 @@
             const datalist = document.createElement('datalist');
             datalist.id = 'dish-suggestions';
             suggestions.forEach(s => { const o = document.createElement('option'); o.value = s; datalist.appendChild(o); });
-            input.setAttribute('list', 'dish-suggestions');
-            input.parentElement.appendChild(datalist);
+            searchInput.setAttribute('list', 'dish-suggestions');
+            searchInput.parentElement.appendChild(datalist);
         }
         setupKeyboardNavigation() {
             document.addEventListener('keydown', (e) => {
@@ -499,8 +495,75 @@
     }
     </script>
 
-    <!-- ⑦ Scripts des vues enfants -->
+    <!-- ⑦ Mise à jour dynamique du badge panier -->
+    <script>
+    function updateCartBadge(count) {
+        const badge = document.querySelector('.cart-badge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = '';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    </script>
+
+    <!-- ⑧ Scripts des vues enfants -->
     @stack('scripts')
+
+    @auth
+    <!-- ⑨ Polling notifications (toutes les 30s) -->
+    <script>
+    (function () {
+        const CSRF = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        function updateBellCount() {
+            fetch('/notifications/unread-count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.ok ? r.json() : null)
+                .then(function (d) {
+                    if (!d) return;
+                    const badge = document.getElementById('notif-bell-badge');
+                    if (badge) {
+                        badge.textContent = d.count > 9 ? '9+' : d.count;
+                        badge.style.display = d.count > 0 ? '' : 'none';
+                    }
+                })
+                .catch(() => {});
+        }
+
+        /* Marquer une notification comme lue + naviguer */
+        window.notifClick = function (id, url) {
+            fetch('/notifications/' + id + '/read', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
+            }).finally(function () {
+                updateBellCount();
+                if (url && url !== '#') window.location.href = url;
+            });
+        };
+
+        /* Tout marquer comme lu */
+        window.notifMarkAllRead = function () {
+            fetch('/notifications/mark-all-read', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
+            }).then(function () {
+                document.querySelectorAll('.notif-drop-unread').forEach(function (el) {
+                    el.classList.remove('notif-drop-unread');
+                    el.style.background = '';
+                    const dot = el.querySelector('div[style*="background:#008751;border-radius:50%"]');
+                    if (dot) dot.remove();
+                });
+                updateBellCount();
+            });
+        };
+
+        /* Polling toutes les 30s */
+        setInterval(updateBellCount, 30000);
+    })();
+    </script>
+    @endauth
 </body>
 
 </html>

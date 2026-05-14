@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Contact Form - AFRI-HERITAGE Benin',
+    'title' => 'Contact Form - TOTCHEMEGNON Benin',
     'subject' => 'Subject',
     'name' => 'Name',
     'email' => 'Email',

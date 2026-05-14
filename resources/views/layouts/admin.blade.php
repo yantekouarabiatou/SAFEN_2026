@@ -9,7 +9,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('products/vodoun.jpg')}}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
@@ -53,7 +54,54 @@
             --benin-red: #E8112D;
             --benin-dark: #006d40;
             --navbar-height: 70px;
+            --sidebar-bg: #1a1d23;
+            --sidebar-width: 260px;
         }
+
+        /* === Layout global === */
+        body { background: #f0f2f8 !important; }
+
+        /* === Navbar === */
+        .navbar-bg { background: #ffffff !important; }
+        .main-navbar {
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(0,0,0,.07) !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,.06) !important;
+        }
+
+        /* === Contenu principal === */
+        .main-content { background: #f0f2f8 !important; }
+        .section { padding: 28px 24px !important; }
+
+        /* === Cards harmonisation === */
+        .card {
+            border-radius: 14px !important;
+            border: 1px solid rgba(0,0,0,.07) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,.07) !important;
+        }
+        .card-header {
+            background: #fff !important;
+            border-bottom: 1px solid rgba(0,0,0,.07) !important;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 18px 22px !important;
+            font-weight: 700 !important;
+        }
+        .card-header h4 {
+            font-family: 'Montserrat', sans-serif !important;
+            font-size: .95rem !important;
+            font-weight: 700 !important;
+            color: #1a1d23 !important;
+            margin: 0 !important;
+        }
+
+        /* === Footer === */
+        .main-footer {
+            background: #fff !important;
+            border-top: 1px solid rgba(0,0,0,.07) !important;
+            font-size: .8rem !important;
+            color: #9ca3af !important;
+        }
+        .main-footer a { color: var(--benin-green) !important; font-weight: 600 !important; text-decoration: none !important; }
 
         /* === Couleurs Bénin === */
         .bg-benin-green {
@@ -268,16 +316,20 @@
         }
 
         /* Dropdown menu amélioré */
-        .dropdown-menu {
+        /* Dropdown navbar uniquement — pas la sidebar */
+        .main-navbar .dropdown-menu,
+        .navbar .dropdown-menu {
             border: none;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
             border-radius: 12px;
             padding: 8px;
             margin-top: 8px !important;
             min-width: 260px;
+            position: absolute;
         }
 
-        .dropdown-menu.dropdown-menu-right {
+        .main-navbar .dropdown-menu.dropdown-menu-right,
+        .navbar .dropdown-menu.dropdown-menu-right {
             right: 0;
             left: auto;
         }
@@ -605,7 +657,7 @@
                             <div class="d-none d-lg-inline-block">
                                 <strong>{{ $user->prenom ?? '' }} {{ $user->nom ?? 'Utilisateur' }}</strong>
                                 <small class="d-block text-muted">
-                                    {{ ucfirst($user->roles->first()->name ?? 'Membre') }}
+                                    {{ ucfirst($user->roles->first()?->name ?? 'Membre') }}
                                 </small>
                             </div>
                         </a>
@@ -642,16 +694,8 @@
                 </ul>
             </nav>
 
-            <!-- Sidebar conditionnelle -->
-            @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin'))
-                @include('admin.partials.sidebar')
-            @elseif(auth()->user()->hasRole('artisan'))
-                @include('admin.partials.sidebar-artisan')
-            @elseif(auth()->user()->hasRole('vendor'))
-                @include('admin.partials.sidebar-vendor')
-            @else
-                @include('admin.partials.sidebar')
-            @endif
+            <!-- Sidebar (unique, gère tous les rôles en interne) -->
+            @include('admin.partials.sidebar')
 
             <!-- Main Content -->
             <div class="main-content">

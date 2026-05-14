@@ -3,24 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artisan;
-use App\Models\Product;
 use App\Models\Dish;
-use App\Models\Product as ModelsProduct;
+use App\Models\Product;
 use App\Models\Review;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
     public function index()
     {
-         // Statistiques
+        // Statistiques
         $stats = [
             'artisans' => Artisan::count(),
             'products' => Product::count(),
             'dishes' => Dish::count(),
-            'regions' => Product::distinct('ethnic_origin')->count()
+            'regions' => Product::distinct('ethnic_origin')->count(),
         ];
         $featuredProducts = Product::with(['artisan.user', 'primaryImage'])
             ->where('featured', true)
@@ -38,7 +35,7 @@ class HomeController extends Controller
         // Récupérer les témoignages dynamiques
         $testimonials = $this->getTestimonials();
 
-        return view('home', compact('featuredProducts', 'featuredArtisans', 'testimonials','stats'));
+        return view('home', compact('featuredProducts', 'featuredArtisans', 'testimonials', 'stats'));
     }
 
     /**
@@ -66,7 +63,6 @@ class HomeController extends Controller
     /**
      * Génère des témoignages fallback
      */
-
     private function getFallbackTestimonials($realTestimonials)
     {
         // Si on a déjà des vrais témoignages, on les retourne
@@ -79,7 +75,7 @@ class HomeController extends Controller
             [
                 'id' => 1,
                 'rating' => 5,
-                'comment' => "Grâce à AFRI-HERITAGE, j'ai triplé ma clientèle ! Les touristes me trouvent facilement et je peux maintenant vendre mes plats traditionnels à l'international. Merci !",
+                'comment' => "Grâce à TOTCHEMEGNON, j'ai triplé ma clientèle ! Les touristes me trouvent facilement et je peux maintenant vendre mes plats traditionnels à l'international. Merci !",
                 'created_at' => now()->subDays(30),
 
                 'user' => [
@@ -117,7 +113,7 @@ class HomeController extends Controller
             [
                 'id' => 3,
                 'rating' => 5,
-                'comment' => "En tant que Béninoise de la diaspora, cette plateforme me permet de rester connectée à mes racines. Livraison impeccable !",
+                'comment' => 'En tant que Béninoise de la diaspora, cette plateforme me permet de rester connectée à mes racines. Livraison impeccable !',
                 'created_at' => now()->subDays(20),
 
                 'user' => [
@@ -156,16 +152,16 @@ class HomeController extends Controller
         // Transformer chaque entrée en objet Review
         return $fallbackTestimonials->map(function ($item) {
 
-            $review = new Review();
+            $review = new Review;
 
             // Champs simples
-            $review->id         = $item['id'];
-            $review->rating     = $item['rating'];
-            $review->comment    = $item['comment'];
+            $review->id = $item['id'];
+            $review->rating = $item['rating'];
+            $review->comment = $item['comment'];
             $review->created_at = $item['created_at'];
 
             // Champs spéciaux en objets
-            $review->user       = (object) $item['user'];
+            $review->user = (object) $item['user'];
             $review->reviewable = (object) $item['reviewable'];
 
             // Flag fallback
@@ -174,8 +170,6 @@ class HomeController extends Controller
             return $review;
         });
     }
-
-
 
     /**
      * Récupère les derniers avis pour un artisan spécifique
@@ -224,10 +218,10 @@ class HomeController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Veuillez vous connecter pour laisser un avis.'
+                'message' => 'Veuillez vous connecter pour laisser un avis.',
             ], 401);
         }
 
@@ -247,7 +241,7 @@ class HomeController extends Controller
         if ($existingReview) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous avez déjà laissé un avis sur cet élément.'
+                'message' => 'Vous avez déjà laissé un avis sur cet élément.',
             ], 400);
         }
 

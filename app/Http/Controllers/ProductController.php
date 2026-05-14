@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\Artisan;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -74,8 +74,8 @@ class ProductController extends Controller
         $products = $query->paginate(16)->withQueryString();
 
         // Données pour les filtres
-        $categories     = Product::select('category')->distinct()->pluck('category');
-        $ethnicOrigins  = Product::select('ethnic_origin')->distinct()->pluck('ethnic_origin');
+        $categories = Product::select('category')->distinct()->pluck('category');
+        $ethnicOrigins = Product::select('ethnic_origin')->distinct()->pluck('ethnic_origin');
 
         // Villes des artisans approuvés (uniquement ceux qui ont des produits)
         $cities = Product::whereHas('artisan', function ($q) {
@@ -87,7 +87,8 @@ class ProductController extends Controller
             ->filter()
             ->unique()
             ->values();
-       //dd($products->first()); // ou mieux : dd($products->first()->images);
+
+        // dd($products->first()); // ou mieux : dd($products->first()->images);
         return view('products.index', compact(
             'products',
             'categories',
@@ -118,13 +119,32 @@ class ProductController extends Controller
         return view('products.show', compact('product', 'similarProducts', 'sameArtisanProducts'));
     }
 
+    public function create(): \Illuminate\View\View
+    {
+        $categories = [
+            'masque' => 'Masque',
+            'sculpture' => 'Sculpture',
+            'tissu' => 'Tissu',
+            'bijou' => 'Bijou',
+            'instrument' => 'Instrument',
+            'decoration' => 'Décoration',
+            'peinture' => 'Peinture',
+            'vannerie' => 'Vannerie',
+            'poterie' => 'Poterie',
+            'cuisine' => 'Ustensile de cuisine',
+            'autre' => 'Autre',
+        ];
+
+        return view('products.create', compact('categories'));
+    }
+
     public function store(Request $request)
     {
         // LOG DE DÉBOGAGE SIMPLE
         \Log::info('========== METHODE STORE APPELEE ==========');
-        \Log::info('URL: ' . $request->fullUrl());
-        \Log::info('METHOD: ' . $request->method());
-        \Log::info('USER: ' . (auth()->check() ? auth()->user()->email : 'NON CONNECTE'));
+        \Log::info('URL: '.$request->fullUrl());
+        \Log::info('METHOD: '.$request->method());
+        \Log::info('USER: '.(auth()->check() ? auth()->user()->email : 'NON CONNECTE'));
 
         // Rediriger vers une page de test pour voir si on arrive ici
         return redirect()->route('dashboard')->with('info', 'Méthode store atteinte !');
@@ -133,18 +153,18 @@ class ProductController extends Controller
             'user_id' => auth()->id(),
             'method' => $request->method(),
             'url' => $request->url(),
-            'data' => $request->except('_token')
+            'data' => $request->except('_token'),
         ]);
 
         // Vérification de l'authentification
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
         // Récupérer l'artisan de l'utilisateur connecté
         $artisan = auth()->user()->artisan;
 
-        if (!$artisan) {
+        if (! $artisan) {
             return redirect()->back()
                 ->with('error', 'Vous devez avoir un profil artisan pour ajouter des produits.')
                 ->withInput();
@@ -165,7 +185,7 @@ class ProductController extends Controller
             'customizable' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
             'images' => 'required|array|max:5',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         try {
@@ -173,7 +193,7 @@ class ProductController extends Controller
             $productData = [
                 'artisan_id' => $artisan->id,
                 'name' => $validated['name'],
-                'slug' => Str::slug($validated['name']) . '-' . uniqid(),
+                'slug' => Str::slug($validated['name']).'-'.uniqid(),
                 'description' => $validated['description'],
                 'category' => $validated['category'] ?? null,
                 'material' => $validated['material'] ?? null,
@@ -193,28 +213,28 @@ class ProductController extends Controller
             // Traitement des images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
-                    $path = $image->store('products/' . $product->id, 'public');
+                    $path = $image->store('products/'.$product->id, 'public');
 
                     // Si vous avez une table product_images
                     $product->images()->create([
                         'image_path' => $path,
                         'is_primary' => $index === 0,
-                        'order' => $index
+                        'order' => $index,
                     ]);
                 }
             }
 
-        // Générer la description culturelle avec IA (asynchrone)
-        // if (empty($validated['description_cultural'])) {
-        //     dispatch(new \App\Jobs\GenerateCulturalDescription($product));
-        // }
+            // Générer la description culturelle avec IA (asynchrone)
+            // if (empty($validated['description_cultural'])) {
+            //     dispatch(new \App\Jobs\GenerateCulturalDescription($product));
+            // }
 
             return redirect()->route('products.show', $product)
                 ->with('success', 'Produit ajouté avec succès !');
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'ajout du produit', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()

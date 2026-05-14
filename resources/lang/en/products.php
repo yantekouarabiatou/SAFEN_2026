@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Arts & Crafts - AFRI-HERITAGE Benin',
+    'title' => 'Arts & Crafts - TOTCHEMEGNON Benin',
     'subtitle' => 'Discover artisan-made products',
     'featured_products' => 'Featured Products',
     'all_products' => 'All Products',

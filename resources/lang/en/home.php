@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Kúu - AFRI-HERITAGE Benin',
+    'title' => 'Kúu - TOTCHEMEGNON Benin',
     'welcome' => 'Welcome to us',
     'welcome_subtitle' => 'Discover artisans, crafts, and products from Benin',
     'hero_cta' => 'Start exploring',
@@ -12,18 +12,18 @@ return [
     'featured_gastronomy' => 'Featured Gastronomy',
     'explore_gastronomy' => 'Explore all dishes',
     'about_us' => 'About Us',
-    'about_desc' => 'AFRI-HERITAGE is a cultural marketplace for Benin artisans and products powered by AI',
+    'about_desc' => 'TOTCHEMEGNON is a cultural marketplace for Benin artisans and products powered by AI',
     'contact_us' => 'Contact Us',
-    'footer_text' => 'All rights © 2026 AFRI-HERITAGE Benin',
+    'footer_text' => 'All rights © 2026 TOTCHEMEGNON Benin',
     // lang/fr/messages.php
-'gastronomy'  => 'Gastronomie',
-'marketplace' => 'Arts & Artisanat',
-'culture'     => 'Culture',
-'artisans'    => 'Artisans & services',
+    'gastronomy' => 'Gastronomie',
+    'marketplace' => 'Arts & Artisanat',
+    'culture' => 'Culture',
+    'artisans' => 'Artisans & services',
 
-// lang/fon/messages.php
-'gastronomy'  => 'Dìnù',
-'marketplace' => 'Arts & Àìkpó',
-'culture'     => 'Àìlú',
-'artisans'    => 'Àsòkú & sèwè',
+    // lang/fon/messages.php
+    'gastronomy' => 'Dìnù',
+    'marketplace' => 'Arts & Àìkpó',
+    'culture' => 'Àìlú',
+    'artisans' => 'Àsòkú & sèwè',
 ];

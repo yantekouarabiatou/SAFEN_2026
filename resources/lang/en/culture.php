@@ -2,7 +2,7 @@
 
 return [
     // Page title
-    'title' => 'Culture & Heritage - AFRI-HERITAGE Benin',
+    'title' => 'Culture & Heritage - TOTCHEMEGNON Benin',
     'subtitle' => 'Discover Benin culture and heritage',
     'featured_culture' => 'Featured Culture',
     'all_culture' => 'All Culture',

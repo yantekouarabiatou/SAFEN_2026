@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Gastronomy - AFRI-HERITAGE Benin',
+    'title' => 'Gastronomy - TOTCHEMEGNON Benin',
     'subtitle' => 'Discover authentic Benin dishes',
     'featured_dishes' => 'Featured Dishes',
     'all_dishes' => 'All Dishes',

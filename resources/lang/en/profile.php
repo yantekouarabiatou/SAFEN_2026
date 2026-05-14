@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Profile - AFRI-HERITAGE Benin',
+    'title' => 'Profile - TOTCHEMEGNON Benin',
     'edit_profile' => 'Edit Profile',
     'dashboard' => 'Dashboard',
     'my_orders' => 'My Orders',

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Arts & Artisanat - AFRI-HERITAGE')
+@section('title', 'Arts & Artisanat - TOTCHEMEGNON')
 
 @push('styles')
     <style>
@@ -915,6 +915,7 @@
                     // Succès
                     if (result.data.success) {
                         showToast("✅ Produit ajouté au panier avec succès !");
+                        if (result.data.cart_count !== undefined) updateCartBadge(result.data.cart_count);
                     } else {
                         throw new Error(result.data.message || 'Erreur inconnue.');
                     }
@@ -1009,17 +1010,6 @@
                     }
                 });
             }, observerOptions);
-
-            var map = L.map('map').setView([9.3077, 2.3158], 7); // Centre sur le Bénin
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(map);
-
-            // Exemple marqueur artisan
-            L.marker([6.3703, 2.3912]) // Coordonnées Cotonou
-                .addTo(map)
-                .bindPopup("Artisan à Cotonou");
 
             document.querySelectorAll('.product-card').forEach(card => {
                 observer.observe(card);

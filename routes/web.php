@@ -163,8 +163,23 @@ Route::middleware('auth')->group(function () {
     // ===== Déconnexion =====
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
+    // ===== Dashboard artisan =====
+    Route::get('/dashboard/artisan', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.artisan');
+    Route::get('/dashboard/artisan/orders',    [App\Http\Controllers\DashboardController::class, 'artisanOrders'])->name('dashboard.artisan.orders');
+    Route::get('/dashboard/artisan/products',  [App\Http\Controllers\DashboardController::class, 'artisanProducts'])->name('dashboard.artisan.products');
+    Route::get('/dashboard/artisan/reviews',   [App\Http\Controllers\DashboardController::class, 'artisanReviews'])->name('dashboard.artisan.reviews');
+    Route::get('/dashboard/artisan/analytics', [App\Http\Controllers\DashboardController::class, 'artisanAnalytics'])->name('dashboard.artisan.analytics');
+
     // ===== Notifications =====
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::prefix('notifications')->name('notifications.')->controller(NotificationController::class)->group(function () {
+        Route::get('/',                     'index')->name('index');
+        Route::get('/unread-count',         'unreadCount')->name('unread-count');
+        Route::get('/recent',               'recent')->name('recent');
+        Route::post('/mark-all-read',       'markAllRead')->name('mark-all-read');
+        Route::post('/clear-all',           'destroyAll')->name('clear-all');
+        Route::post('/{notification}/read', 'markAsRead')->name('mark-read');
+        Route::delete('/{notification}',    'destroy')->name('destroy');
+    });
 
     // ===== Profil =====
     Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
@@ -239,7 +254,7 @@ Route::get('messages-conversations', [App\Http\Controllers\Admin\MessageControll
 
     // ===== GESTION DES RESSOURCES (création, édition, suppression) =====
     Route::resource('artisans', ArtisanController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
-    Route::resource('products', ProductController::class)->only(['store', 'edit', 'update', 'destroy']);
+    Route::resource('products', ProductController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
 
     // ===== Routes Admin spéciales (approbation, vérification) =====
     Route::middleware('role_or_permission:admin|super-admin')->group(function () {

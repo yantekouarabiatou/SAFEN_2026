@@ -91,7 +91,7 @@
                         <i class="bi bi-send-fill"></i>
                     </button>
                 </div>
-                <p class="powered-by">Propulsé par <strong>Anansi AI</strong> · AFRI-HERITAGE</p>
+                <p class="powered-by">Propulsé par <strong>Anansi AI</strong> · TOTCHEMEGNON</p>
             </div>
 
         </div>

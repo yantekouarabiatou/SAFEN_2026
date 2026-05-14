@@ -325,71 +325,6 @@
 </style>
 @endpush
 
-@push('styles')
-<style>
-    .testimonial-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-radius: 15px;
-        padding: 1.5rem;
-        height: 100%;
-        transition: all 0.3s ease;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .testimonial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0, 150, 57, 0.1);
-        border-color: var(--benin-green);
-    }
-
-    .rating-stars {
-        color: #FFD700;
-        font-size: 1.1rem;
-    }
-
-    .testimonial-carousel {
-        position: relative;
-        padding: 0 40px;
-    }
-
-    .testimonial-carousel .swiper-button-next,
-    .testimonial-carousel .swiper-button-prev {
-        color: var(--benin-green);
-        background: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .testimonial-carousel .swiper-button-next:after,
-    .testimonial-carousel .swiper-button-prev:after {
-        font-size: 1.2rem;
-    }
-
-    .testimonial-carousel .swiper-pagination-bullet {
-        background: #dee2e6;
-        opacity: 1;
-    }
-
-    .testimonial-carousel .swiper-pagination-bullet-active {
-        background: var(--benin-green);
-    }
-
-    @media (max-width: 768px) {
-        .testimonial-carousel {
-            padding: 0 20px;
-        }
-
-        .testimonial-carousel .swiper-button-next,
-        .testimonial-carousel .swiper-button-prev {
-            display: none;
-        }
-    }
-</style>
-@endpush
-
 @section('content')
 <!-- Hero Section avec Slider -->
 <section class="hero-section">
@@ -742,14 +677,18 @@
                             </div>
 
                             <div class="d-flex gap-2">
+                                @if($artisan->whatsapp)
                                 <a href="https://wa.me/{{ $artisan->whatsapp }}" target="_blank"
                                    class="btn btn-success flex-fill rounded-pill">
                                     <i class="bi bi-whatsapp"></i>
                                 </a>
-                                <a href="tel:{{ $artisan->phone }}"
+                                @endif
+                                @if($artisan->phone ?? ($artisan->user->phone ?? null))
+                                <a href="tel:{{ $artisan->phone ?? $artisan->user->phone }}"
                                    class="btn btn-outline-benin-green flex-fill rounded-pill">
                                     <i class="bi bi-telephone"></i>
                                 </a>
+                                @endif
                                 <a href="{{ route('artisans.show', $artisan) }}"
                                    class="btn btn-benin-green flex-fill rounded-pill">
                                     {{ __('messages.profil') }}

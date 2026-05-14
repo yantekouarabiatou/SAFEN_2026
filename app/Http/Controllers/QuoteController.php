@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Artisan;
 use App\Models\Quote;
+use App\Notifications\NewQuoteRequestNotification;
 use Illuminate\Http\Request;
 
 class QuoteController extends Controller
@@ -41,20 +42,33 @@ class QuoteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'artisan_id'   => 'required|exists:artisans,id',
-            'product_id'   => 'nullable|exists:products,id',
-            'subject'      => 'required|string|max:255',
-            'description'  => 'required|string',
-            'budget'       => 'nullable|numeric|min:0',
+            'artisan_id' => 'required|exists:artisans,id',
+            'product_id' => 'nullable|exists:products,id',
+            'subject' => 'nullable|string|max:255',
+            'description' => 'required|string',
+            'budget' => 'nullable|numeric|min:0',
             'desired_date' => 'nullable|date',
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending';
+        $validated['subject'] = $validated['subject'] ?? 'Demande de devis';
 
-        Quote::create($validated);
+        $quote = Quote::create($validated);
 
-        return redirect()->route('client.quotes.index')
+        $artisan = Artisan::find($validated['artisan_id']);
+        if ($artisan?->user) {
+            try {
+                $artisan->user->notify(new NewQuoteRequestNotification($quote));
+            } catch (\Exception) {
+            }
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Demande envoyée avec succès.']);
+        }
+
+        return redirect()->back()
             ->with('success', 'Votre demande de devis a été envoyée avec succès.');
     }
 
@@ -106,10 +120,10 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validate([
-            'artisan_id'   => 'required|exists:artisans,id',
-            'subject'      => 'required|string|max:255',
-            'description'  => 'required|string',
-            'budget'       => 'nullable|numeric|min:0',
+            'artisan_id' => 'required|exists:artisans,id',
+            'subject' => 'required|string|max:255',
+            'description' => 'required|string',
+            'budget' => 'nullable|numeric|min:0',
             'desired_date' => 'nullable|date',
         ]);
 
@@ -140,25 +154,24 @@ class QuoteController extends Controller
             ->with('success', 'Devis supprimé.');
     }
 
-
     /**
      * Répondre à une demande de devis.
      */
     public function respond(Request $request, Quote $quote)
     {
         $request->validate([
-            'amount'       => 'nullable|numeric|min:0',
+            'amount' => 'nullable|numeric|min:0',
             'delivery_time' => 'nullable|string|max:255',
-            'response'     => 'nullable|string',
-            'valid_until'  => 'nullable|date',
+            'response' => 'nullable|string',
+            'valid_until' => 'nullable|date',
         ]);
 
         $quote->update([
             'quoted_amount' => $request->amount,
             'delivery_time' => $request->delivery_time,
-            'response'      => $request->response,
-            'valid_until'   => $request->valid_until,
-            'status'        => 'sent', // ou conservez le statut existant
+            'response' => $request->response,
+            'valid_until' => $request->valid_until,
+            'status' => 'sent', // ou conservez le statut existant
         ]);
 
         // Vous pouvez ajouter ici une notification au client

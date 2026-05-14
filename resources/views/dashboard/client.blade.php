@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Tableau de bord - AFRI-HERITAGE')
+@section('title', 'Tableau de bord - TOTCHEMEGNON')
 
 @push('styles')
 <style>

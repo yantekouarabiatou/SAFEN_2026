@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00b86b"/>
+      <stop offset="100%" stop-color="#005c38"/>
+    </linearGradient>
+  </defs>
+  <!-- Fond cercle vert -->
+  <circle cx="32" cy="32" r="31" fill="url(#g)"/>
+  <!-- Anneau or -->
+  <circle cx="32" cy="32" r="31" fill="none" stroke="#FCD116" stroke-width="2.5"/>
+  <!-- Lettre T blanche -->
+  <rect x="12" y="18" width="40" height="8" rx="4" fill="#fff"/>
+  <rect x="25" y="18" width="14" height="30" rx="4" fill="#fff"/>
+  <!-- Points décoratifs -->
+  <circle cx="6" cy="32" r="3" fill="#FCD116"/>
+  <circle cx="58" cy="32" r="3" fill="#FCD116"/>
+  <circle cx="32" cy="6" r="2.5" fill="#E8112D"/>
+  <!-- Losange or haut -->
+  <path d="M32 11 L35 16 L32 20 L29 16Z" fill="#FCD116" opacity=".8"/>
+</svg>
