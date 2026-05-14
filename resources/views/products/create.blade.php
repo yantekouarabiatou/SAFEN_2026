@@ -52,6 +52,65 @@
 
                                 <div class="form-group">
                                     <label for="description">Description <span class="text-danger">*</span></label>
+
+                                    {{-- Bouton Anansi --}}
+                                    <div class="anansi-generate-bar">
+                                        <span class="anansi-hint">🕷️ Laisse Anansi rédiger la description à ta place</span>
+                                        <button type="button" class="anansi-trigger-btn" id="anansiTrigger">
+                                            Générer avec Anansi
+                                        </button>
+                                    </div>
+
+                                    {{-- Panneau Anansi inline --}}
+                                    <div id="anansiPanel" class="anansi-inline-panel" style="display:none;">
+                                        <div class="anansi-inline-header">
+                                            <span>🕷️ <strong>Anansi</strong> — Décris ton produit</span>
+                                            <button type="button" onclick="closeAnansiPanel()" class="anansi-close-inline">✕</button>
+                                        </div>
+                                        <div class="anansi-inline-body">
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <input type="text" id="ai_name" class="anansi-field" placeholder="Nom du produit">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" id="ai_category" class="anansi-field" placeholder="Catégorie (masque, tissu, bijou...)">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" id="ai_materials" class="anansi-field" placeholder="Matériaux (bois, bronze, perles...)">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" id="ai_origin" class="anansi-field" placeholder="Origine ethnique (Fon, Yoruba, Bariba...)">
+                                                </div>
+                                                <div class="col-12">
+                                                    <select id="ai_language" class="anansi-field">
+                                                        <option value="fr">🇫🇷 Description en français</option>
+                                                        <option value="en">🇬🇧 Description en anglais</option>
+                                                        <option value="fon">🇧🇯 Français + mots Fon</option>
+                                                        <option value="yoruba">🌍 Français + mots Yoruba</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="anansiGenerateBtn" onclick="generateWithAnansi()" class="anansi-generate-submit">
+                                                <span id="aiBtnText">🕷️ Tisser la description</span>
+                                            </button>
+                                            <div id="anansiResult" class="anansi-result" style="display:none;">
+                                                <div class="anansi-result-text" id="anansiResultText"></div>
+                                                <div class="d-flex gap-2 mt-2">
+                                                    <button type="button" onclick="useAnansiText()" class="anansi-use-btn">
+                                                        ✅ Utiliser cette description
+                                                    </button>
+                                                    <button type="button" onclick="generateWithAnansi()" class="anansi-retry-btn">
+                                                        🔄 Regénérer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div id="anansiLoader" style="display:none;text-align:center;padding:16px;">
+                                                <div style="font-size:28px;animation:spin 2s linear infinite;display:inline-block;">🕷️</div>
+                                                <p style="font-size:.8rem;color:#6b7280;margin-top:6px;">Anansi tisse ta description...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <textarea class="form-control @error('description') is-invalid @enderror"
                                         id="description" name="description" rows="5"
                                         placeholder="Décrivez votre produit en détail..." required>{{ old('description') }}</textarea>
@@ -234,6 +293,220 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+/* Barre Anansi au-dessus du textarea */
+.anansi-generate-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border: 1.5px solid #bbf7d0;
+    border-radius: 10px 10px 0 0;
+    padding: 7px 12px;
+    margin-bottom: 0;
+}
+.anansi-hint {
+    font-size: .8rem;
+    color: #166534;
+    font-weight: 500;
+}
+.anansi-trigger-btn {
+    background: linear-gradient(135deg, #005c38, #008751);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+}
+.anansi-trigger-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,135,81,.35);
+}
+
+/* Panneau inline Anansi */
+.anansi-inline-panel {
+    border: 1.5px solid #bbf7d0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: white;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+.anansi-inline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #005c38, #008751);
+    color: white;
+    font-size: .85rem;
+}
+.anansi-close-inline {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.7);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    line-height: 1;
+}
+.anansi-close-inline:hover { color: white; }
+.anansi-inline-body {
+    padding: 14px;
+}
+.anansi-field {
+    width: 100%;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: .82rem;
+    color: #1f2937;
+    outline: none;
+    transition: border-color .2s;
+    background: #f9fafb;
+}
+.anansi-field:focus {
+    border-color: #008751;
+    box-shadow: 0 0 0 3px rgba(0,135,81,.1);
+    background: white;
+}
+.anansi-generate-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #005c38, #008751);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all .2s;
+}
+.anansi-generate-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(0,135,81,.4);
+}
+.anansi-result {
+    margin-top: 12px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 12px;
+}
+.anansi-result-text {
+    font-size: .84rem;
+    line-height: 1.65;
+    color: #1f2937;
+    white-space: pre-wrap;
+}
+.anansi-use-btn {
+    background: #008751;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s;
+}
+.anansi-use-btn:hover { background: #005c38; }
+.anansi-retry-btn {
+    background: white;
+    color: #008751;
+    border: 1.5px solid #008751;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+}
+.anansi-retry-btn:hover { background: #f0fdf4; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.getElementById('anansiTrigger').addEventListener('click', function() {
+    const panel = document.getElementById('anansiPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+
+    // Pré-remplir depuis les champs du formulaire
+    if (panel.style.display === 'block') {
+        const nameVal = document.getElementById('name')?.value;
+        const matVal  = document.getElementById('material')?.value;
+        const catEl   = document.getElementById('category');
+        const catVal  = catEl?.options[catEl?.selectedIndex]?.text;
+
+        if (nameVal) document.getElementById('ai_name').value = nameVal;
+        if (matVal)  document.getElementById('ai_materials').value = matVal;
+        if (catVal && catVal !== '-- Sélectionner --') document.getElementById('ai_category').value = catVal;
+    }
+});
+
+function closeAnansiPanel() {
+    document.getElementById('anansiPanel').style.display = 'none';
+}
+
+async function generateWithAnansi() {
+    const btn     = document.getElementById('anansiGenerateBtn');
+    const loader  = document.getElementById('anansiLoader');
+    const result  = document.getElementById('anansiResult');
+    const resultText = document.getElementById('anansiResultText');
+
+    btn.style.display    = 'none';
+    loader.style.display = 'block';
+    result.style.display = 'none';
+
+    const payload = {
+        type:          'product',
+        name:          document.getElementById('ai_name').value,
+        category:      document.getElementById('ai_category').value,
+        materials:     document.getElementById('ai_materials').value,
+        ethnic_origin: document.getElementById('ai_origin').value,
+        language:      document.getElementById('ai_language').value,
+    };
+
+    try {
+        const response = await fetch('{{ route("anansi.generate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        resultText.textContent = data.text || 'Désolé, impossible de générer.';
+        result.style.display = 'block';
+    } catch(e) {
+        resultText.textContent = 'Erreur de connexion. Réessaie dans un instant.';
+        result.style.display = 'block';
+    } finally {
+        btn.style.display    = 'block';
+        loader.style.display = 'none';
+    }
+}
+
+function useAnansiText() {
+    const text = document.getElementById('anansiResultText').textContent;
+    document.getElementById('description').value = text;
+    closeAnansiPanel();
+    document.getElementById('description').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+@endpush
 
 @push('scripts')
 <script>

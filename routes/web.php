@@ -111,10 +111,11 @@ Route::get('/vendors/nearby', [LocationController::class, 'locateVendors'])->nam
 Route::get('/map', [LocationController::class, 'map'])->name('map');
 Route::get('/geolocate', [LocationController::class, 'geolocate'])->name('geolocate');
 
-// ===== Chatbot =====
+// ===== Chatbot / Anansi =====
 Route::post('/chatbot/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
 Route::delete('/chatbot/clear', [ChatbotController::class, 'clear'])->name('chatbot.clear');
+Route::post('/anansi/generate', [ChatbotController::class, 'generate'])->name('anansi.generate');
 
 // ===== Panier (accès public) =====
 Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(function () {
